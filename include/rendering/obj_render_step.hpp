@@ -5,6 +5,7 @@
 
 #include "render_step.hpp"
 #include "../gl/shader_program.hpp"
+#include "../gl/attribute_buffer.hpp"
 #include "../math/vector.hpp"
 
 #include <chrono>
@@ -26,19 +27,28 @@ namespace yavsg
         
         struct render_group
         {
-            bool has_color_map; // TODO: std::optional< GLuint >
+            // TODO: std::optional< GLuint >
+            bool has_color_map;
             GLuint color_map;
-            // GLuint normal_map;
-            // GLuint specular_map;
-            // GLuint mask_map;
             
-            std::vector< vertex_type > vertices;
+            bool has_normal_map;
+            GLuint normal_map;
+            
+            bool has_specular_map;
+            GLuint specular_map;
+            
+            bool has_mask_map;
+            GLuint mask_map;
+            
+            std::vector< GLuint > temp_index_storage;
+            gl::index_buffer* vertex_indices;
         };
         
         std::chrono::high_resolution_clock::time_point start_time;
         std::chrono::high_resolution_clock::time_point previous_time;
         std::vector< render_group > render_groups;
-        program_type* scene_program;
+        program_type::attribute_buffer_type* vertices;
+        program_type scene_program;
         GLfloat obj_max_x = 0.0f;
         GLfloat obj_min_x = 0.0f;
         GLfloat obj_max_y = 0.0f;

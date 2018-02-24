@@ -4,7 +4,9 @@
 
 
 #include "_gl_base.hpp"
+#include "buffer_types.hpp"
 #include "error.hpp"
+#include "attribute_buffer.hpp"
 #include "../math/matrix.hpp"
 #include "../math/vector.hpp"
 
@@ -12,39 +14,10 @@
 #include <exception>
 
 
-namespace yavsg { namespace gl // Attribute traits /////////////////////////////
+namespace yavsg { namespace gl // Shader program ///////////////////////////////
 {
-    template< typename T > struct attribute_traits {};
-    
-    template<> struct attribute_traits< GLfloat >
-    {
-        static const GLint  components_per_element = 1;
-        static const GLenum component_type         = GL_FLOAT;
-    };
-    
-    template<> struct attribute_traits< GLint >
-    {
-        static const GLint  components_per_element = 1;
-        static const GLenum component_type         = GL_INT;
-    };
-    
-    // TODO: more basic types, see
-    //      https://www.khronos.org/opengl/wiki/OpenGL_Type
-    //      http://docs.gl/gl3/glVertexAttribPointer
-    
-    template< typename T, unsigned int D >
-    struct attribute_traits< yavsg::vector< T, D > >
-    {
-        static const GLint components_per_element
-            = attribute_traits< T >::components_per_element * D;
-        static const GLenum component_type
-            = attribute_traits< T >::component_type;
-    };
-} }
-
-
-namespace yavsg { namespace gl // Helpers to make templating simpler ///////////
-{
+    // Helper function to allow partial specialization of
+    // shader_program<>::set_uniform<>()
     template< typename T > void set_current_program_uniform(
         GLuint uniform_location,
         const T& uniform_value,
@@ -52,58 +25,40 @@ namespace yavsg { namespace gl // Helpers to make templating simpler ///////////
         GLuint& gl_program_id               // Passed along for error handling
     );
     
-    // A recent version of Clang apparently has a bug dealing with template
-    // specializations, so disable this check; see
-    // https://github.com/ryanrhymes/eigen/issues/2
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Winvalid-partial-specialization"
-    
-    template<
-        unsigned int Nth,
-        typename OfAttributesFirst,
-        typename... OfAttributes
-    > struct offset_of
-    {
-        static const size_t bytes = (
-            sizeof( OfAttributesFirst )
-            + offset_of< Nth - 1, OfAttributes... >::bytes
-        );
-    };
-    
-    template< typename... OfAttributes >
-    struct offset_of< 0, OfAttributes... >
-    {
-        static const size_t bytes = 0;
-    };
-    
-    #pragma clang diagnostic pop
-} }
-
-
-namespace yavsg { namespace gl // Shader program ///////////////////////////////
-{
+    // TODO: template< typename Buffer, unsigned int Targets > class shader_program
     template< typename... Attributes > class shader_program
     {
     public:
-        using tuple_type = std::tuple< Attributes... >;
+        using attribute_buffer_type = attribute_buffer< Attributes... >;
+        using            tuple_type =       std::tuple< Attributes... >;
         
     protected:
         GLuint gl_program_id;
-        GLuint gl_array_buffer_id;
         GLuint gl_vao_id;
         
+        // OpenGL commands wrapped with error-checking
+        void use_program();
+        void bind_vao();
+        
     public:
-        shader_program(
-            const std::vector< GLuint >& shaders,
-            tuple_type* attribute_elements,
-            size_t element_count
-        );
+        shader_program( const std::vector< GLuint >& shaders );
         ~shader_program();
         
-        void use();
-        void set_data(
-            tuple_type* attribute_elements,
-            size_t element_count
+        void run( const attribute_buffer_type& buffer );
+        void run(
+            const attribute_buffer_type& buffer,
+            std::size_t start,
+            std::size_t count
+        );
+        void run(
+            const attribute_buffer_type& buffer,
+            const index_buffer& indices
+        );
+        void run(
+            const attribute_buffer_type& buffer,
+            const index_buffer& indices,
+            std::size_t start,
+            std::size_t count
         );
         
         bool has_attribute( const std::string& name                  );
@@ -112,8 +67,8 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
         bool has_uniform  ( const std::string& name, GLint& location );
         
         // Return true if the variable exists & could be linked, false if it
-        // does not exist, and throws `yavsg::gl::summary_error` if the
-        // variable exists but could not be linked.
+        // does not exist, and throws `yavsg::gl::summary_error` if the variable
+        // exists but could not be linked.
         template< unsigned int Nth > bool link_attribute(
             const std::string& attribute_name
         );
@@ -128,10 +83,32 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
 namespace yavsg { namespace gl // Shader program implementations ///////////////
 {
     template< typename... Attributes >
+    void shader_program< Attributes... >::use_program()
+    {
+        glUseProgram( gl_program_id );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't use program "
+            + std::to_string( gl_program_id )
+            + " for yavsg::gl::shader_program::use_program()"
+        );
+    }
+    
+    template< typename... Attributes >
+    void shader_program< Attributes... >::bind_vao()
+    {
+        glBindVertexArray( gl_vao_id );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't bind vertex array "
+            + std::to_string( gl_vao_id )
+            + " for program "
+            + std::to_string( gl_program_id )
+            + " for yavsg::gl::shader_program::bind_vao()"
+        );
+    }
+    
+    template< typename... Attributes >
     shader_program< Attributes... >::shader_program(
-        const std::vector< GLuint >& shaders,
-        tuple_type* attribute_elements,
-        size_t element_count
+        const std::vector< GLuint >& shaders
     )
     {
         glGenVertexArrays( 1, &gl_vao_id );
@@ -154,7 +131,7 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
                 "couldn't attach shader "
                 + std::to_string( shader_id )
                 + " to program "
-                + std::to_string( shader_id )
+                + std::to_string( gl_program_id )
                 + " for yavsg::gl::shader_program"
             );
         }
@@ -166,14 +143,6 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             + " for yavsg::gl::shader_program"
         );
         
-        use();
-        
-        glGenBuffers( 1, &gl_array_buffer_id );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't generate buffers for yavsg::gl::shader_program"
-        );
-        set_data( attribute_elements, element_count );
-        
         // TODO: Find a way to specify this and multi-target re:
         // Note: use glDrawBuffers when rendering to multiple buffers,
         // because only the first output will be enabled by default.
@@ -183,55 +152,109 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
     template< typename... Attributes >
     shader_program< Attributes... >::~shader_program()
     {
-        glDeleteBuffers( 1, &gl_array_buffer_id );
         glDeleteProgram( gl_program_id );
         glDeleteVertexArrays( 1, &gl_vao_id );
     }
     
     template< typename... Attributes >
-    void shader_program< Attributes... >::use()
+    void shader_program< Attributes... >::run(
+        const attribute_buffer_type& buffer
+    )
     {
-        glUseProgram( gl_program_id );
+        run( buffer, 0, buffer.size() );
+    }
+    
+    template< typename... Attributes >
+    void shader_program< Attributes... >::run(
+        const attribute_buffer_type& buffer,
+        std::size_t start,
+        std::size_t count
+    )
+    {
+        use_program();
+        bind_vao();
+        
+        glBindBuffer( GL_ARRAY_BUFFER, buffer.gl_id );
         YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't use program "
-            + std::to_string( gl_program_id )
-            + " for yavsg::gl::shader_program::use()"
-        );
-        glBindVertexArray( gl_vao_id );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't bind vertex array "
-            + std::to_string( gl_vao_id )
+            "couldn't bind vertex array buffer "
+            + std::to_string( buffer.gl_id )
             + " for program "
             + std::to_string( gl_program_id )
-            + " for yavsg::gl::shader_program::use()"
+            + " for yavsg::gl::shader_program::run()"
+        );
+        
+        if( count + start > buffer.size() )
+            count = buffer.size() - start;
+        
+        glDrawArrays(
+            GL_TRIANGLES, // TODO: other primitive types
+            start,
+            count
+        );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't draw triangles from vertex array buffer "
+            + std::to_string( buffer.gl_id )
+            + " for program "
+            + std::to_string( gl_program_id )
+            + " for yavsg::gl::shader_program::run()"
         );
     }
     
     template< typename... Attributes >
-    void shader_program< Attributes... >::set_data(
-        tuple_type* attribute_elements,
-        size_t element_count
+    void shader_program< Attributes... >::run(
+        const attribute_buffer_type& buffer,
+        const index_buffer& indices
     )
     {
-        use();
-        glBindBuffer( GL_ARRAY_BUFFER, gl_array_buffer_id );
+        run( buffer, indices, 0, indices.size() );
+    }
+    
+    template< typename... Attributes >
+    void shader_program< Attributes... >::run(
+        const attribute_buffer_type& buffer,
+        const index_buffer& indices,
+        std::size_t start,
+        std::size_t count
+    )
+    {
+        use_program();
+        bind_vao();
+        
+        glBindBuffer( GL_ARRAY_BUFFER, buffer.gl_id );
         YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't bind buffer "
-            + std::to_string( gl_array_buffer_id )
-            + " for yavsg::gl::shader_program::set_data()"
+            "couldn't bind vertex array buffer "
+            + std::to_string( buffer.gl_id )
+            + " for program "
+            + std::to_string( gl_program_id )
+            + " for yavsg::gl::shader_program::run()"
         );
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            element_count * sizeof( tuple_type ),
-            ( void* )attribute_elements,
-            GL_STATIC_DRAW // TODO: GL_DYNAMIC_DRAW, GL_STREAM_DRAW
+        
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indices.gl_id );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't bind element array buffer "
+            + std::to_string( indices.gl_id )
+            + " for program "
+            + std::to_string( gl_program_id )
+            + " for yavsg::gl::shader_program::run()"
+        );
+        
+        if( count + start > indices.size() )
+            count = indices.size() - start;
+        
+        glDrawElements(
+            GL_TRIANGLES, // TODO: other primitive types
+            count,
+            GL_UNSIGNED_INT,
+            ( void* )( start * sizeof( GLuint ) )
         );
         YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't upload "
-            + std::to_string( element_count )
-            + " buffer elements at "
-            + std::to_string( ( unsigned long )attribute_elements )
-            + " for yavsg::gl::shader_program::set_data()"
+            "couldn't draw triangles from vertex array buffer "
+            + std::to_string( buffer.gl_id )
+            + " with element array buffer "
+            + std::to_string( indices.gl_id )
+            + " for program "
+            + std::to_string( gl_program_id )
+            + " for yavsg::gl::shader_program::run()"
         );
     }
     
@@ -305,11 +328,11 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         const std::string& attribute_name
     )
     {
-        use();
-        
         GLint attribute_location;
         if( !has_attribute( attribute_name, attribute_location ) )
             return false;
+        
+        bind_vao();
         
         glEnableVertexAttribArray( attribute_location );
         YAVSG_GL_THROW_FOR_ERRORS(
@@ -322,7 +345,7 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         
         using attribute_type = typename std::tuple_element< Nth, tuple_type >::type;
         // using attribute_type = typename tuple_type::type< Nth >;
-        size_t offset_of_attribute = offset_of<
+        std::size_t offset_of_attribute = offset_of<
             Nth,
             Attributes...
         >::bytes;
@@ -352,10 +375,10 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         const T& uniform_value
     )
     {
-        use();
         GLint uniform_location;
         if( !has_uniform( uniform_name, uniform_location ) )
             return false;
+        use_program();
         set_current_program_uniform< T >(
             uniform_location,
             uniform_value,

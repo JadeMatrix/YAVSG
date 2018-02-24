@@ -5,8 +5,9 @@
 
 #include "render_step.hpp"
 #include "../gl/shader_program.hpp"
-#include "../math/vector.hpp"
 #include "../gl/framebuffer.hpp"
+#include "../gl/attribute_buffer.hpp"
+#include "../math/vector.hpp"
 
 #include <chrono>
 #include <string>
@@ -22,13 +23,14 @@ namespace gl_tut
             yavsg::vector< GLfloat, 2 >
         >;
         
-        program_type* postprocess_program;
-        GLuint triangle_ebo;
+        program_type                        postprocess_program;
+        program_type::attribute_buffer_type vertices;
+        yavsg::gl::index_buffer             indices;
         
         postprocess_render_step(
             const std::string& fragment_shader_filename
         );
-        ~postprocess_render_step();
+        // ~postprocess_render_step();
         virtual void run( yavsg::gl::framebuffer& source );
     };
 }

@@ -9,6 +9,8 @@
 
 namespace yavsg { namespace gl
 {
+    // TODO: template< unsigned int N > class framebuffer
+    //      where N = number of render targets between 1 and OpenGL's max
     class framebuffer
     {
     public:

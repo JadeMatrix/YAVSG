@@ -7,6 +7,38 @@
 
 #include <exception>
 
+// DEBUG:
+#include <iostream>
+
+
+namespace
+{
+    bool format_has_alpha( Uint32 format )
+    {
+        switch( format )
+        {
+        case SDL_PIXELFORMAT_ARGB4444:
+        case SDL_PIXELFORMAT_RGBA4444:
+        case SDL_PIXELFORMAT_ABGR4444:
+        case SDL_PIXELFORMAT_BGRA4444:
+        case SDL_PIXELFORMAT_ARGB1555:
+        case SDL_PIXELFORMAT_RGBA5551:
+        case SDL_PIXELFORMAT_ABGR1555:
+        case SDL_PIXELFORMAT_BGRA5551:
+        // case SDL_PIXELFORMAT_RGBX8888:
+        // case SDL_PIXELFORMAT_BGRX8888:
+        case SDL_PIXELFORMAT_ARGB8888:
+        case SDL_PIXELFORMAT_RGBA8888:
+        case SDL_PIXELFORMAT_ABGR8888:
+        case SDL_PIXELFORMAT_BGRA8888:
+        case SDL_PIXELFORMAT_ARGB2101010:
+            return true;
+        default:
+            return false;
+        }
+    }
+}
+
 
 namespace yavsg { namespace gl
 {
@@ -22,6 +54,7 @@ namespace yavsg { namespace gl
                 + "\": "
                 + IMG_GetError()
             );
+        // // DEBUG:
         // else
         //     std::cout
         //         << "loaded texture \""
@@ -32,13 +65,46 @@ namespace yavsg { namespace gl
         //         << sdl_surface -> h
         //         << " bpp="
         //         << ( int )( sdl_surface -> format -> BytesPerPixel )
+        //         << " fmt="
+        //         << SDL_GetPixelFormatName( sdl_surface -> format -> format )
         //         << std::endl
         //     ;
         
-        GLenum texture_mode = (
-            sdl_surface -> format -> BytesPerPixel == 4 ?
-            GL_RGBA : GL_RGB
-        );
+        GLenum texture_mode;
+        
+        if( sdl_surface -> format -> format == SDL_PIXELFORMAT_RGBA8888 )
+            texture_mode = GL_RGBA;
+        else if( sdl_surface -> format -> format == SDL_PIXELFORMAT_RGB888 )
+            texture_mode = GL_RGB;
+        else
+        {
+            // Convert pixels
+            
+            SDL_Surface* new_surface;
+            SDL_PixelFormat* new_format;
+            
+            if( format_has_alpha( sdl_surface -> format -> format ) )
+            {
+                new_format = SDL_AllocFormat( SDL_PIXELFORMAT_RGBA32 );
+                texture_mode = GL_RGBA;
+            }
+            else
+            {
+                new_format = SDL_AllocFormat( SDL_PIXELFORMAT_RGB24 );\
+                texture_mode = GL_RGB;
+            }
+            
+            new_surface = SDL_ConvertSurface(
+                sdl_surface,
+                new_format,
+                0x00
+            );
+            
+            SDL_FreeFormat( new_format );
+            SDL_FreeSurface( sdl_surface );
+            sdl_surface = new_surface;
+        }
+        
         glTexImage2D(   // Loads starting at 0,0 as bottom left
             GL_TEXTURE_2D,
             0,                      // LoD, 0 = base

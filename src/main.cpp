@@ -4,17 +4,15 @@
 
 #include "../include/gl/_gl_base.hpp" // For GLEW initialization, if any
 
-#include "../include/gl/texture.hpp"
+#include "../include/gl/error.hpp"
 #include "../include/gl/framebuffer.hpp"
 #include "../include/gl/shader.hpp"
 #include "../include/sdl/sdl_utils.hpp"
-#include "../include/math/transforms.hpp"
-#include "../include/math/common_transforms.hpp"
 #include "../include/rendering/render_step.hpp"
 #include "../include/rendering/obj_render_step.hpp"
 
 #include "../include/rendering/gl_tut.hpp"
-#include "../include/rendering/gl_tut_scene_render_step.hpp"
+// #include "../include/rendering/gl_tut_scene_render_step.hpp"
 #include "../include/rendering/gl_tut_postprocess_render_step.hpp"
 
 #include <exception>
@@ -43,10 +41,7 @@ int main( int argc, char* argv[] )
     #ifndef __APPLE__
         glewExperimental = GL_TRUE;
         if( glewInit() != GLEW_OK )
-        {
-            std::cerr << "failed to initialize GLEW" << std::endl;
-            return -1;
-        }
+            throw std::runtime_error( "failed to initialize GLEW" );
     #endif
         
         std::vector< yavsg::scene_render_step* > scene_steps = {
@@ -67,7 +62,10 @@ int main( int argc, char* argv[] )
             // ),
             // new gl_tut::postprocess_render_step(
             //     "../src/shaders/postprocess/circular_gradient.frag"
-            // )
+            // ),
+            new gl_tut::postprocess_render_step(
+                "../src/shaders/postprocess/depth.frag"
+            )
         };
         
         yavsg::gl::framebuffer buffer_A(
@@ -133,6 +131,58 @@ int main( int argc, char* argv[] )
         
         return 0;
     }
+    catch( const yavsg::gl::summary_error& e )
+    {
+        std::cerr
+            << "program exiting due to OpenGL error: "
+            << e.what()
+            << "; codes:"
+            << std::endl
+        ;
+        if( e.error_codes.size() )
+        {
+            for( auto code : e.error_codes )
+            {
+                std::cerr << "  ";
+                switch( code )
+                {
+                case GL_INVALID_ENUM:
+                    std::cerr << "GL_INVALID_ENUM";
+                    break;
+                case GL_INVALID_VALUE:
+                    std::cerr << "GL_INVALID_VALUE";
+                    break;
+                case GL_INVALID_OPERATION:
+                    std::cerr << "GL_INVALID_OPERATION";
+                    break;
+                case GL_STACK_OVERFLOW:
+                    std::cerr << "GL_STACK_OVERFLOW";
+                    break;
+                case GL_STACK_UNDERFLOW:
+                    std::cerr << "GL_STACK_UNDERFLOW";
+                    break;
+                case GL_OUT_OF_MEMORY:
+                    std::cerr << "GL_OUT_OF_MEMORY";
+                    break;
+                case GL_INVALID_FRAMEBUFFER_OPERATION:
+                    std::cerr << "GL_INVALID_FRAMEBUFFER_OPERATION";
+                    break;
+                case 0x0507: // GL_CONTEXT_LOST available in 4.5+
+                    std::cerr << "GL_CONTEXT_LOST";
+                    break;
+                case GL_TABLE_TOO_LARGE:
+                    std::cerr << "GL_TABLE_TOO_LARGE";
+                    break;
+                default:
+                    std::cerr << std::to_string( ( unsigned int )code );
+                    break;
+                }
+                std::cerr << std::endl;
+            }
+        }
+        else
+            std::cerr << "  (none)" << std::endl;
+    }
     catch( const std::exception& e )
     {
         std::cerr
@@ -140,6 +190,7 @@ int main( int argc, char* argv[] )
             << e.what()
             << std::endl
         ;
-        return -1;
     }
+    
+    return -1;
 }

@@ -70,30 +70,35 @@ namespace yavsg { namespace gl
                     + " for yavsg::gl::framebuffer"
                 );
                 
+                glFramebufferTexture2D(
+                    GL_FRAMEBUFFER,
+                    GL_COLOR_ATTACHMENT0,   // Which attachment
+                    GL_TEXTURE_2D,
+                    color_buffer,
+                    0                       // Mipmap level (not useful)
+                );
+                YAVSG_GL_THROW_FOR_ERRORS(
+                    "couldn't attach texture "
+                    + std::to_string( color_buffer )
+                    + " to framebuffer "
+                    + std::to_string( id )
+                    + " for yavsg::gl::framebuffer"
+                );
+                
+                // TEXTURE:
+                glGenTextures( 1, &depth_stencil_buffer );
+                // glGenRenderbuffers( 1, &depth_stencil_buffer );
+                YAVSG_GL_THROW_FOR_ERRORS(
+                    "couldn't generate depth & stencil buffer for framebuffer "
+                    + std::to_string( id )
+                    + " for yavsg::gl::framebuffer"
+                );
+                
                 try
                 {
-                    glFramebufferTexture2D(
-                        GL_FRAMEBUFFER,
-                        GL_COLOR_ATTACHMENT0,   // Which attachment
-                        GL_TEXTURE_2D,
-                        color_buffer,
-                        0                       // Mipmap level (not useful)
-                    );
-                    YAVSG_GL_THROW_FOR_ERRORS(
-                        "couldn't attach texture "
-                        + std::to_string( color_buffer )
-                        + " to framebuffer "
-                        + std::to_string( id )
-                        + " for yavsg::gl::framebuffer"
-                    );
-                    
-                    glGenRenderbuffers( 1, &depth_stencil_buffer );
-                    YAVSG_GL_THROW_FOR_ERRORS(
-                        "couldn't generate depth & stencil buffer for framebuffer "
-                        + std::to_string( id )
-                        + " for yavsg::gl::framebuffer"
-                    );
-                    glBindRenderbuffer( GL_RENDERBUFFER, depth_stencil_buffer );
+                    // TEXTURE:
+                    glBindTexture( GL_TEXTURE_2D, depth_stencil_buffer );
+                    // glBindRenderbuffer( GL_RENDERBUFFER, depth_stencil_buffer );
                     YAVSG_GL_THROW_FOR_ERRORS(
                         "couldn't bind depth & stencil buffer "
                         + std::to_string( depth_stencil_buffer )
@@ -102,11 +107,22 @@ namespace yavsg { namespace gl
                         + " for yavsg::gl::framebuffer"
                     );
                     
-                    glRenderbufferStorage(
-                        GL_RENDERBUFFER,
-                        GL_DEPTH24_STENCIL8,
-                        width, height
+                    // TEXTURE:
+                    glTexImage2D(
+                        GL_TEXTURE_2D,
+                        0,
+                        GL_DEPTH_COMPONENT24,
+                        width, height,
+                        0,
+                        GL_DEPTH_COMPONENT,
+                        GL_FLOAT,
+                        nullptr
                     );
+                    // glRenderbufferStorage(
+                    //     GL_RENDERBUFFER,
+                    //     GL_DEPTH24_STENCIL8,
+                    //     width, height
+                    // );
                     YAVSG_GL_THROW_FOR_ERRORS(
                         "couldn't allocate "
                         + std::to_string( width )
@@ -119,12 +135,20 @@ namespace yavsg { namespace gl
                         + " for yavsg::gl::framebuffer"
                     );
                     
-                    glFramebufferRenderbuffer(
+                    // TEXTURE:
+                    glFramebufferTexture2D(
                         GL_FRAMEBUFFER,
-                        GL_DEPTH_STENCIL_ATTACHMENT,
-                        GL_RENDERBUFFER,
-                        depth_stencil_buffer
+                        GL_DEPTH_ATTACHMENT,   // Which attachment
+                        GL_TEXTURE_2D,
+                        depth_stencil_buffer,
+                        0                       // Mipmap level (not useful)
                     );
+                    // glFramebufferRenderbuffer(
+                    //     GL_FRAMEBUFFER,
+                    //     GL_DEPTH_STENCIL_ATTACHMENT,
+                    //     GL_RENDERBUFFER,
+                    //     depth_stencil_buffer
+                    // );
                     YAVSG_GL_THROW_FOR_ERRORS(
                         "couldn't attach depth & stencil buffer "
                         + std::to_string( depth_stencil_buffer )
@@ -143,7 +167,9 @@ namespace yavsg { namespace gl
                 }
                 catch( ... )
                 {
-                    glDeleteRenderbuffers( 1, &depth_stencil_buffer );
+                    // TEXTURE:
+                    glDeleteTextures( 1, &depth_stencil_buffer );
+                    // glDeleteRenderbuffers( 1, &depth_stencil_buffer );
                     throw;
                 }
             }
@@ -164,7 +190,9 @@ namespace yavsg { namespace gl
     {
         glDeleteFramebuffers( 1, &id );
         glDeleteTextures( 1, &color_buffer );
-        glDeleteRenderbuffers( 1, &depth_stencil_buffer );
+        // TEXTURE:
+        glDeleteTextures( 1, &depth_stencil_buffer );
+        // glDeleteRenderbuffers( 1, &depth_stencil_buffer );
     }
     
     void framebuffer::bind()
