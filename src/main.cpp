@@ -63,9 +63,9 @@ int main( int argc, char* argv[] )
             // new gl_tut::postprocess_render_step(
             //     "../src/shaders/postprocess/circular_gradient.frag"
             // ),
-            new gl_tut::postprocess_render_step(
-                "../src/shaders/postprocess/depth.frag"
-            )
+            // new gl_tut::postprocess_render_step(
+            //     "../src/shaders/postprocess/depth.frag"
+            // )
         };
         
         yavsg::gl::framebuffer buffer_A(
