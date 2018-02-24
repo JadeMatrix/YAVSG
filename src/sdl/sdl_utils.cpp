@@ -1,4 +1,4 @@
-#include "sdl_utils.hpp"
+#include "../../include/sdl/sdl_utils.hpp"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -7,7 +7,7 @@
 #include <exception>
 
 
-namespace gl // SDL_manager ////////////////////////////////////////////////////
+namespace yavsg // SDL_manager /////////////////////////////////////////////////
 {
     SDL_manager::SDL_manager()
     {
@@ -51,7 +51,7 @@ namespace gl // SDL_manager ////////////////////////////////////////////////////
 }
 
 
-namespace gl // SDL_window_manager /////////////////////////////////////////////
+namespace yavsg // SDL_window_manager //////////////////////////////////////////
 {
     SDL_window_manager::SDL_window_manager(
         const std::string& title,

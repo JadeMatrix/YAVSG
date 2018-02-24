@@ -1,10 +1,10 @@
 #pragma once
-#ifndef GL_SDL_UTILS_HPP
-#define GL_SDL_UTILS_HPP
+#ifndef YAVSG_SDL_UTILS_HPP
+#define YAVSG_SDL_UTILS_HPP
 
 
 // Must be included before SDL2/SDL_opengl.h for OpenGL versioning
-#include "gl_utils.hpp"
+#include "../gl/_gl_base.hpp"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -12,7 +12,7 @@
 #include <string>
 
 
-namespace gl
+namespace yavsg
 {
     class SDL_manager
     {

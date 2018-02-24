@@ -1,37 +1,61 @@
-CMAKE_MINIMUM_REQUIRED( VERSION 3.6 )
+CMAKE_MINIMUM_REQUIRED( VERSION 3.2 )
 
 # DEBUG:
 SET( CMAKE_BUILD_TYPE Debug )
-SET( CMAKE_C_COMPILER   /usr/local/Cellar/llvm/5.0.1/bin/clang   )
-SET( CMAKE_CXX_COMPILER /usr/local/Cellar/llvm/5.0.1/bin/clang++ )
 
-SET( CMAKE_CXX_STANDARD          #[[11]] 17 )
+SET( CMAKE_CXX_STANDARD          14 )
 SET( CMAKE_CXX_STANDARD_REQUIRED ON )
 
 
 PROJECT( "YetAnotherVoxelSpessGame" )
 
-SET(    ORG_NAME      "JadeMatrix"            )
-SET( AUTHOR_NAME      "Joseph Durel"          )
-SET( BUNDLE_NAME      "Yet Another Voxel Spess Game"       )
-SET( BUNDLE_VER_NUM   "0.0"                   )
-SET( BUNDLE_VER_NAME  "alpha"                 )
-SET( BUNDLE_COPYRIGHT "© 2018 ${AUTHOR_NAME}" )
+SET(    ORG_NAME      "JadeMatrix"                   )
+SET( AUTHOR_NAME      "Joseph Durel"                 )
+SET( BUNDLE_NAME      "Yet Another Voxel Spess Game" )
+SET( BUNDLE_VER_NUM   "0.0"                          )
+SET( BUNDLE_VER_NAME  "alpha"                        )
+SET( BUNDLE_COPYRIGHT "© 2018 ${AUTHOR_NAME}"        )
 
 
-FIND_LIBRARY(    SDL_LIBRARY sdl2 )
-FIND_LIBRARY( OPENGL_LIBRARY gl   )
-FIND_LIBRARY(   GLEW_LIBRARY glew )
+# FIND_LIBRARY(    SDL_LIBRARY sdl2 )
+# FIND_LIBRARY( OPENGL_LIBRARY gl   )
+# FIND_LIBRARY(   GLEW_LIBRARY glew )
+# FIND_LIBRARY(   GLEW_LIBRARY glm  )
+FIND_PACKAGE( SDL2 REQUIRED )
+# FIND_PACKAGE( SDL2_image REQUIRED )
+FIND_PACKAGE( glew REQUIRED )
+FIND_PACKAGE( tinyobjloader REQUIRED )
+
+FIND_LIBRARY( SDL2_IMAGE_LIBRARY SDL2_image )
+
+INCLUDE_DIRECTORIES(
+    ${SDL2_INCLUDE_DIR}
+    # ${SDL2_IMAGE_INCLUDE_DIR}
+    # ${SDL2_TTF_INCLUDE_DIR}
+    ${GLEW_INCLUDE_DIRS}
+)
+
 # # DEBUG:
-# MESSAGE( ${SDL_LIBRARY} )
+# MESSAGE( ${SDL2_INCLUDE_DIRS} )
+# MESSAGE( ${SDL2_LIBRARIES} )
 # MESSAGE( ${OPENGL_LIBRARY} )
 # MESSAGE( ${GLEW_LIBRARY} )
 
 
 
 ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
+    # src/gl/main.cpp
+    # src/gl/sdl_utils.cpp
+    # src/gl/gl_utils.cpp
+    # src/gl/render_steps.cpp
     src/main.cpp
-    src/real.cpp
+    src/sdl/sdl_utils.cpp
+    src/gl/framebuffer.cpp
+    src/gl/texture.cpp
+    src/gl/shader.cpp
+    src/rendering/gl_tut_scene_render_step.cpp
+    src/rendering/gl_tut_postprocess_render_step.cpp
+    src/rendering/obj_render_step.cpp
 )
 SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_INFO_PLIST           "Info.plist.in"
@@ -45,63 +69,21 @@ SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_COPYRIGHT            "${BUNDLE_COPYRIGHT}"
 )
 
-# clang++ -std=c++11 -L/Users/JadeMatrix/Developer/SDL/make -lSDL2 -I/Users/JadeMatrix/Developer/SDL/make/include -I/Users/JadeMatrix/Developer/SDL/include ../src/main.cpp -o main
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME}
-    ${SDL_LIBRARY}
-    ${OPENGL_LIBRARY}
-    ${GLEW_LIBRARY}
-    "-L/usr/local/Cellar/llvm/5.0.1/lib"
+    ${SDL2_LIBRARIES}
+    ${SDL2_IMAGE_LIBRARY}
+    # ${SDL2_TTF_LIBRARIES}
+    ${GLEW_LIBRARIES}
+    ${TINYOBJLOADER_LIBRARIES}
+    "-framework OpenGL"
 )
 
-
-# ADD_EXECUTABLE( test_play_song
-#     "${CMAKE_CURRENT_SOURCE_DIR}/Source/test_play_song.m"
-#     "${CMAKE_CURRENT_SOURCE_DIR}/Source/Yet Another Voxel Spess GameCoreAudio.mm"
-#     "${CMAKE_CURRENT_SOURCE_DIR}/Source/Yet Another Voxel Spess GameErrors.mm"
-# )
-# TARGET_LINK_LIBRARIES( test_play_song
-#     "-framework Cocoa"
-#     "-framework AudioToolbox"
-#     "-framework CoreServices"
-#     "-framework Security"
-# )
-
-
-# FIND_PROGRAM(
-#     INKSCAPE_PROGRAM
-#     inkscape
-#     PATHS $ENV{HOME}/Applications/Inkscape.app/Contents/Resources/bin /Applications/Inkscape.app/Contents/Resources/bin
-#     # CMake wants to prefer Inkscape.app/Contents/MacOS/Inkscape, which won't
-#     # work on OS X -- need to use Inkscape.app/Contents/Resources/bin/inkscape
-#     NO_DEFAULT_PATH
-# )
-# FIND_PROGRAM(
-#     ICONUTIL_PROGRAM
-#     iconutil
-# )
-
-
-# ADD_CUSTOM_COMMAND(
-#     OUTPUT "Resources/${BUNDLE_NAME}.icns"
-#     COMMAND ${CMAKE_COMMAND} -E make_directory "Resources/${BUNDLE_NAME}.iconset/"
-#     COMMAND ${INKSCAPE_PROGRAM} --without-gui --export-png="${CMAKE_CURRENT_BINARY_DIR}/Resources/${BUNDLE_NAME}.iconset/icon_16x16@1x.png" --export-dpi 96 --export-area=512:480:528:496 "${CMAKE_CURRENT_SOURCE_DIR}/Resources/${BUNDLE_NAME}.svg"
-#     COMMAND ${INKSCAPE_PROGRAM} --without-gui --export-png="${CMAKE_CURRENT_BINARY_DIR}/Resources/${BUNDLE_NAME}.iconset/icon_16x16@2x.png" --export-dpi 192 --export-area=512:480:528:496 "${CMAKE_CURRENT_SOURCE_DIR}/Resources/${BUNDLE_NAME}.svg"
-#     COMMAND ${INKSCAPE_PROGRAM} --without-gui --export-png="${CMAKE_CURRENT_BINARY_DIR}/Resources/${BUNDLE_NAME}.iconset/icon_32x32@1x.png" --export-dpi 96 --export-area=512:448:544:480 "${CMAKE_CURRENT_SOURCE_DIR}/Resources/${BUNDLE_NAME}.svg"
-#     COMMAND ${INKSCAPE_PROGRAM} --without-gui --export-png="${CMAKE_CURRENT_BINARY_DIR}/Resources/${BUNDLE_NAME}.iconset/icon_32x32@2x.png" --export-dpi 192 --export-area=512:448:544:480 "${CMAKE_CURRENT_SOURCE_DIR}/Resources/${BUNDLE_NAME}.svg"
-#     COMMAND ${INKSCAPE_PROGRAM} --without-gui --export-png="${CMAKE_CURRENT_BINARY_DIR}/Resources/${BUNDLE_NAME}.iconset/icon_128x128@1x.png" --export-dpi 96 --export-area=512:256:640:384 "${CMAKE_CURRENT_SOURCE_DIR}/Resources/${BUNDLE_NAME}.svg"
-#     COMMAND ${INKSCAPE_PROGRAM} --without-gui --export-png="${CMAKE_CURRENT_BINARY_DIR}/Resources/${BUNDLE_NAME}.iconset/icon_128x128@2x.png" --export-dpi 192 --export-area=512:256:640:384 "${CMAKE_CURRENT_SOURCE_DIR}/Resources/${BUNDLE_NAME}.svg"
-#     COMMAND ${INKSCAPE_PROGRAM} --without-gui --export-png="${CMAKE_CURRENT_BINARY_DIR}/Resources/${BUNDLE_NAME}.iconset/icon_256x256@1x.png" --export-dpi 96 --export-area=512:0:768:256 "${CMAKE_CURRENT_SOURCE_DIR}/Resources/${BUNDLE_NAME}.svg"
-#     COMMAND ${INKSCAPE_PROGRAM} --without-gui --export-png="${CMAKE_CURRENT_BINARY_DIR}/Resources/${BUNDLE_NAME}.iconset/icon_256x256@2x.png" --export-dpi 192 --export-area=512:0:768:256 "${CMAKE_CURRENT_SOURCE_DIR}/Resources/${BUNDLE_NAME}.svg"
-#     COMMAND ${INKSCAPE_PROGRAM} --without-gui --export-png="${CMAKE_CURRENT_BINARY_DIR}/Resources/${BUNDLE_NAME}.iconset/icon_512x512@1x.png" --export-dpi 96 --export-area=0:0:512:512 "${CMAKE_CURRENT_SOURCE_DIR}/Resources/${BUNDLE_NAME}.svg"
-#     COMMAND ${INKSCAPE_PROGRAM} --without-gui --export-png="${CMAKE_CURRENT_BINARY_DIR}/Resources/${BUNDLE_NAME}.iconset/icon_512x512@2x.png" --export-dpi 192 --export-area=0:0:512:512 "${CMAKE_CURRENT_SOURCE_DIR}/Resources/${BUNDLE_NAME}.svg"
-#     COMMAND ${ICONUTIL_PROGRAM} -c icns -o "${CMAKE_CURRENT_BINARY_DIR}/Resources/${BUNDLE_NAME}.icns" "${CMAKE_CURRENT_BINARY_DIR}/Resources/${BUNDLE_NAME}.iconset"
-#     DEPENDS "Resources/Yet Another Voxel Spess Game.svg"
-# )
-
-# SET_SOURCE_FILES_PROPERTIES(
-#     "Resources/${BUNDLE_NAME}.icns"
-#     PROPERTIES
-#     MACOSX_PACKAGE_LOCATION "Resources"
+# clang++ -std=c++11 -L/Users/JadeMatrix/Developer/SDL/make -lSDL2 -I/Users/JadeMatrix/Developer/SDL/make/include -I/Users/JadeMatrix/Developer/SDL/include ../src/main.cpp -o main
+# TARGET_LINK_LIBRARIES( ${PROJECT_NAME}
+#     ${SDL_LIBRARY}
+#     ${OPENGL_LIBRARY}
+#     ${GLEW_LIBRARY}
+#     "-L/usr/local/Cellar/llvm/5.0.1/lib"
 # )
 
 

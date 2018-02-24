@@ -65,6 +65,7 @@ void main()
     color_out *= vec4( color, 1.0 );
     color_out *= vec4( tint,  1.0 );
     
+    
     // // Depth buffer:
     // color_out = vec4(
     //     gl_FragCoord.z /* / gl_FragCoord.w */,
