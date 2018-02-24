@@ -59,10 +59,10 @@ namespace yavsg
         // for( int i = 0; i < obj_materials.size(); ++i )
         {
             render_groups.push_back( {
-                false, 0,
-                false, 0,
-                false, 0,
-                false, 0,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
                 {},
                 nullptr
             } );
@@ -70,58 +70,66 @@ namespace yavsg
             
             if( material.diffuse_texname.size() )
             {
-                group.has_color_map = true;
-                glGenTextures( 1, &group.color_map );
-                glBindTexture( GL_TEXTURE_2D, group.color_map );
                 std::string texture_filename =
                     obj_mtl_directory + material.diffuse_texname;
                 
-                // DEBUG:
-                std::cout << "loading texture " << texture_filename << std::endl;
+                group.color_map = new gl::texture( gl::texture::from_file(
+                    texture_filename
+                ) );
                 
-                yavsg::gl::load_bound_texture( texture_filename );
+                group.color_map -> filtering( {
+                    gl::texture::filter_settings::magnify_mode::LINEAR,
+                    gl::texture::filter_settings::minify_mode::LINEAR,
+                    gl::texture::filter_settings::mipmap_type::LINEAR,
+                } );
             }
             
             if( material.bump_texname.size() )
             {
-                group.has_normal_map = true;
-                glGenTextures( 1, &group.normal_map );
-                glBindTexture( GL_TEXTURE_2D, group.normal_map );
                 std::string texture_filename =
                     obj_mtl_directory + material.bump_texname;
                 
-                // DEBUG:
-                std::cout << "loading texture " << texture_filename << std::endl;
+                group.normal_map = new gl::texture( gl::texture::from_file(
+                    texture_filename
+                ) );
                 
-                yavsg::gl::load_bound_texture( texture_filename );
+                group.normal_map -> filtering( {
+                    gl::texture::filter_settings::magnify_mode::LINEAR,
+                    gl::texture::filter_settings::minify_mode::LINEAR,
+                    gl::texture::filter_settings::mipmap_type::LINEAR,
+                } );
             }
             
             if( material.specular_texname.size() )
             {
-                group.has_specular_map = true;
-                glGenTextures( 1, &group.specular_map );
-                glBindTexture( GL_TEXTURE_2D, group.specular_map );
                 std::string texture_filename =
                     obj_mtl_directory + material.specular_texname;
                 
-                // DEBUG:
-                std::cout << "loading texture " << texture_filename << std::endl;
+                group.specular_map = new gl::texture( gl::texture::from_file(
+                    texture_filename
+                ) );
                 
-                yavsg::gl::load_bound_texture( texture_filename );
+                group.specular_map -> filtering( {
+                    gl::texture::filter_settings::magnify_mode::LINEAR,
+                    gl::texture::filter_settings::minify_mode::LINEAR,
+                    gl::texture::filter_settings::mipmap_type::LINEAR,
+                } );
             }
             
             if( material.alpha_texname.size() )
             {
-                group.has_mask_map = true;
-                glGenTextures( 1, &group.mask_map );
-                glBindTexture( GL_TEXTURE_2D, group.mask_map );
                 std::string texture_filename =
                     obj_mtl_directory + material.alpha_texname;
                 
-                // DEBUG:
-                std::cout << "loading texture " << texture_filename << std::endl;
+                group.mask_map = new gl::texture( gl::texture::from_file(
+                    texture_filename
+                ) );
                 
-                yavsg::gl::load_bound_texture( texture_filename );
+                group.mask_map -> filtering( {
+                    gl::texture::filter_settings::magnify_mode::LINEAR,
+                    gl::texture::filter_settings::minify_mode::LINEAR,
+                    gl::texture::filter_settings::mipmap_type::LINEAR,
+                } );
             }
         }
         
@@ -280,14 +288,14 @@ namespace yavsg
     {
         for( auto group : render_groups )
         {
-            if( group.has_color_map )
-                glDeleteTextures( 1, &group.color_map );
-            if( group.has_normal_map )
-                glDeleteTextures( 1, &group.normal_map );
-            if( group.has_specular_map )
-                glDeleteTextures( 1, &group.specular_map );
-            if( group.has_mask_map )
-                glDeleteTextures( 1, &group.mask_map );
+            if( group.color_map )
+                delete group.color_map;
+            if( group.normal_map )
+                delete group.normal_map;
+            if( group.specular_map )
+                delete group.specular_map;
+            if( group.mask_map )
+                delete group.mask_map;
             delete group.vertex_indices;
         }
         delete vertices;
@@ -360,9 +368,12 @@ namespace yavsg
         for( auto& group : render_groups )
         {
             glActiveTexture( GL_TEXTURE0 );
-            if( group.has_color_map )
+            if( group.color_map )
             {
-                glBindTexture( GL_TEXTURE_2D, group.color_map );
+                glBindTexture(
+                    GL_TEXTURE_2D,
+                    group.color_map -> gl_texture_id()
+                );
                 scene_program.set_uniform< GLint >( "color_map", 0 );
                 scene_program.set_uniform< GLuint >( "has_color_map", 1 );
             }
@@ -373,9 +384,12 @@ namespace yavsg
             }
             
             glActiveTexture( GL_TEXTURE1 );
-            if( group.has_normal_map )
+            if( group.normal_map )
             {
-                glBindTexture( GL_TEXTURE_2D, group.normal_map );
+                glBindTexture(
+                    GL_TEXTURE_2D,
+                    group.normal_map -> gl_texture_id()
+                );
                 scene_program.set_uniform< GLint >( "normal_map", 1 );
                 scene_program.set_uniform< GLuint >( "has_normal_map", 1 );
             }
@@ -386,9 +400,12 @@ namespace yavsg
             }
             
             glActiveTexture( GL_TEXTURE2 );
-            if( group.has_specular_map )
+            if( group.specular_map )
             {
-                glBindTexture( GL_TEXTURE_2D, group.specular_map );
+                glBindTexture(
+                    GL_TEXTURE_2D,
+                    group.specular_map -> gl_texture_id()
+                );
                 scene_program.set_uniform< GLint >( "specular_map", 2 );
                 scene_program.set_uniform< GLuint >( "has_specular_map", 1 );
             }
@@ -399,9 +416,12 @@ namespace yavsg
             }
             
             glActiveTexture( GL_TEXTURE3 );
-            if( group.has_mask_map )
+            if( group.mask_map )
             {
-                glBindTexture( GL_TEXTURE_2D, group.mask_map );
+                glBindTexture(
+                    GL_TEXTURE_2D,
+                    group.mask_map -> gl_texture_id()
+                );
                 scene_program.set_uniform< GLint >( "mask_map", 3 );
                 scene_program.set_uniform< GLuint >( "has_mask_map", 1 );
             }

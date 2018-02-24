@@ -6,6 +6,7 @@
 #include "render_step.hpp"
 #include "../gl/shader_program.hpp"
 #include "../gl/attribute_buffer.hpp"
+#include "../gl/texture.hpp"
 #include "../math/vector.hpp"
 
 #include <chrono>
@@ -27,18 +28,11 @@ namespace yavsg
         
         struct render_group
         {
-            // TODO: std::optional< GLuint >
-            bool has_color_map;
-            GLuint color_map;
-            
-            bool has_normal_map;
-            GLuint normal_map;
-            
-            bool has_specular_map;
-            GLuint specular_map;
-            
-            bool has_mask_map;
-            GLuint mask_map;
+            // TODO: std::optional< gl::texture >
+            gl::texture* color_map;
+            gl::texture* normal_map;
+            gl::texture* specular_map;
+            gl::texture* mask_map;
             
             std::vector< GLuint > temp_index_storage;
             gl::index_buffer* vertex_indices;
