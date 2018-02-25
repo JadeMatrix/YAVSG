@@ -498,6 +498,11 @@ namespace yavsg { namespace gl // Uniform-set specializations //////////////////
         GLuint,
         glUniform1ui( uniform_location, uniform_value )
     )
+    // There is no glUniform1b, so just use glUniform1ui()
+    SHADER_PROGRAM_DEFINE_BASIC_UNIFORM_SPECIALIZATION(
+        GLboolean,
+        glUniform1ui( uniform_location, uniform_value )
+    )
     
     #undef SHADER_PROGRAM_DEFINE_BASIC_UNIFORM_SPECIALIZATION
     

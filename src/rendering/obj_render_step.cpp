@@ -372,48 +372,72 @@ namespace yavsg
             {
                 group.color_map -> bind_as< 0 >();
                 scene_program.set_uniform< GLint >( "color_map", 0 );
-                scene_program.set_uniform< GLuint >( "has_color_map", 1 );
+                scene_program.set_uniform< GLboolean >(
+                    "has_color_map",
+                    GL_TRUE
+                );
             }
             else
             {
                 gl::unbind_texture< 0 >();
-                scene_program.set_uniform< GLuint >( "has_color_map", 0 );
+                scene_program.set_uniform< GLboolean >(
+                    "has_color_map",
+                    GL_FALSE
+                );
             }
             
             if( group.normal_map )
             {
                 group.normal_map -> bind_as< 1 >();
                 scene_program.set_uniform< GLint >( "normal_map", 1 );
-                scene_program.set_uniform< GLuint >( "has_normal_map", 1 );
+                scene_program.set_uniform< GLboolean >(
+                    "has_normal_map",
+                    GL_TRUE
+                );
             }
             else
             {
                 gl::unbind_texture< 1 >();
-                scene_program.set_uniform< GLuint >( "has_normal_map", 0 );
+                scene_program.set_uniform< GLboolean >(
+                    "has_normal_map",
+                    GL_FALSE
+                );
             }
             
             if( group.specular_map )
             {
                 group.specular_map -> bind_as< 2 >();
                 scene_program.set_uniform< GLint >( "specular_map", 2 );
-                scene_program.set_uniform< GLuint >( "has_specular_map", 1 );
+                scene_program.set_uniform< GLboolean >(
+                    "has_specular_map",
+                    GL_TRUE
+                );
             }
             else
             {
                 gl::unbind_texture< 2 >();
-                scene_program.set_uniform< GLuint >( "has_specular_map", 0 );
+                scene_program.set_uniform< GLboolean >(
+                    "has_specular_map",
+                    GL_FALSE
+                );
             }
             
             if( group.mask_map )
             {
                 group.mask_map -> bind_as< 3 >();
                 scene_program.set_uniform< GLint >( "mask_map", 3 );
-                scene_program.set_uniform< GLuint >( "has_mask_map", 1 );
+                scene_program.set_uniform< GLboolean >(
+                    "has_mask_map",
+                    GL_TRUE
+                );
             }
             else
             {
                 gl::unbind_texture< 3 >();
-                scene_program.set_uniform< GLuint >( "has_mask_map", 0 );
+                scene_program.set_uniform< GLboolean >(
+                    "has_mask_map",
+                    GL_FALSE
+                );
             }
             
             scene_program.run(
