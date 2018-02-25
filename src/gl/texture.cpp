@@ -443,7 +443,7 @@ namespace yavsg { namespace gl // Texture static method implementations ////////
         
     // }
     
-    texture texture::create_empty()
+    texture texture::make_empty()
     {
         return texture();
     }

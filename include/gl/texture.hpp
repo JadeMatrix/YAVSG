@@ -54,7 +54,7 @@ namespace yavsg { namespace gl
         );
         // For use by stuff like framebuffers that need to control texture
         // allocation
-        static texture create_empty();
+        static texture make_empty();
         
         ~texture();
         
