@@ -4,9 +4,12 @@
 
 
 #include "_gl_base.hpp"
+#include "error.hpp"
 #include "../sdl/sdl_utils.hpp"
 
 #include <string>
+#include <type_traits>  // std::enable_if
+#include <utility>      // std::size_t
 
 
 namespace yavsg { namespace gl
@@ -61,9 +64,59 @@ namespace yavsg { namespace gl
         // TODO: wrap settings
         void filtering( const filter_settings& );
         
+        template<
+            std::size_t ActiveTexture,
+            typename std::enable_if<
+                ( ActiveTexture < GL_MAX_TEXTURE_UNITS ),
+                int
+            >::type = 0
+        > void bind_as()
+        {
+            glActiveTexture( GL_TEXTURE0 + ActiveTexture );
+            YAVSG_GL_THROW_FOR_ERRORS(
+                "couldn't activate GL_TEXTURE"
+                + std::to_string( ActiveTexture )
+                + " to bind texture "
+                + std::to_string( gl_id )
+                + " for yavsg::gl::texture::bind_as<>()"
+            );
+            
+            glBindTexture( GL_TEXTURE_2D, gl_id );
+            YAVSG_GL_THROW_FOR_ERRORS(
+                "couldn't bind texture "
+                + std::to_string( gl_id )
+                + " as GL_TEXTURE"
+                + std::to_string( ActiveTexture )
+                + " for yavsg::gl::texture::bind_as<>()"
+            );
+        }
+        
         // TODO: Determine if there's a more opaque way to access this
-        GLuint gl_texture_id() const;
+        GLuint gl_texture_id();
     };
+    
+    template<
+        std::size_t ActiveTexture,
+        typename std::enable_if<
+            ( ActiveTexture < GL_MAX_TEXTURE_UNITS ),
+            int
+        >::type = 0
+    > void unbind_texture()
+    {
+        glActiveTexture( GL_TEXTURE0 + ActiveTexture );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't activate GL_TEXTURE"
+            + std::to_string( ActiveTexture )
+            + " to bind default texture for yavsg::gl::unbind_texture<>()"
+        );
+        
+        glBindTexture( GL_TEXTURE_2D, 0 );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't bind default texture as GL_TEXTURE"
+            + std::to_string( ActiveTexture )
+            + " for yavsg::gl::unbind_texture<>()"
+        );
+    }
 } }
 
 

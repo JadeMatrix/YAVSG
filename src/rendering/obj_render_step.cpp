@@ -368,67 +368,51 @@ namespace yavsg
         
         for( auto& group : render_groups )
         {
-            glActiveTexture( GL_TEXTURE0 );
             if( group.color_map )
             {
-                glBindTexture(
-                    GL_TEXTURE_2D,
-                    group.color_map -> gl_texture_id()
-                );
+                group.color_map -> bind_as< 0 >();
                 scene_program.set_uniform< GLint >( "color_map", 0 );
                 scene_program.set_uniform< GLuint >( "has_color_map", 1 );
             }
             else
             {
-                glBindTexture( GL_TEXTURE_2D, 0 );
+                gl::unbind_texture< 0 >();
                 scene_program.set_uniform< GLuint >( "has_color_map", 0 );
             }
             
-            glActiveTexture( GL_TEXTURE1 );
             if( group.normal_map )
             {
-                glBindTexture(
-                    GL_TEXTURE_2D,
-                    group.normal_map -> gl_texture_id()
-                );
+                group.normal_map -> bind_as< 1 >();
                 scene_program.set_uniform< GLint >( "normal_map", 1 );
                 scene_program.set_uniform< GLuint >( "has_normal_map", 1 );
             }
             else
             {
-                glBindTexture( GL_TEXTURE_2D, 0 );
+                gl::unbind_texture< 1 >();
                 scene_program.set_uniform< GLuint >( "has_normal_map", 0 );
             }
             
-            glActiveTexture( GL_TEXTURE2 );
             if( group.specular_map )
             {
-                glBindTexture(
-                    GL_TEXTURE_2D,
-                    group.specular_map -> gl_texture_id()
-                );
+                group.specular_map -> bind_as< 2 >();
                 scene_program.set_uniform< GLint >( "specular_map", 2 );
                 scene_program.set_uniform< GLuint >( "has_specular_map", 1 );
             }
             else
             {
-                glBindTexture( GL_TEXTURE_2D, 0 );
+                gl::unbind_texture< 2 >();
                 scene_program.set_uniform< GLuint >( "has_specular_map", 0 );
             }
             
-            glActiveTexture( GL_TEXTURE3 );
             if( group.mask_map )
             {
-                glBindTexture(
-                    GL_TEXTURE_2D,
-                    group.mask_map -> gl_texture_id()
-                );
+                group.mask_map -> bind_as< 3 >();
                 scene_program.set_uniform< GLint >( "mask_map", 3 );
                 scene_program.set_uniform< GLuint >( "has_mask_map", 1 );
             }
             else
             {
-                glBindTexture( GL_TEXTURE_2D, 0 );
+                gl::unbind_texture< 3 >();
                 scene_program.set_uniform< GLuint >( "has_mask_map", 0 );
             }
             

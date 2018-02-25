@@ -392,7 +392,7 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
         }
     }
     
-    GLuint texture::gl_texture_id() const
+    GLuint texture::gl_texture_id()
     {
         return gl_id;
     }

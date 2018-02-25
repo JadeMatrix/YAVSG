@@ -47,13 +47,11 @@ namespace gl_tut // gl_tut_postprocess_render_step implementations /////////////
         
         glDisable( GL_DEPTH_TEST );
         
-        glActiveTexture( GL_TEXTURE0 );
-        glBindTexture( GL_TEXTURE_2D, source.color_buffer< 0 >().gl_texture_id() );
+        source.color_buffer< 0 >().bind_as< 0 >();
         postprocess_program.set_uniform( "framebuffer", 0 );
         
         // Depth buffer
-        glActiveTexture( GL_TEXTURE1 );
-        glBindTexture( GL_TEXTURE_2D, source.depth_stencil_buffer().gl_texture_id() );
+        source.depth_stencil_buffer().bind_as< 1 >();
         postprocess_program.set_uniform( "framebuffer_depth_stencil", 1 );
         
         postprocess_program.set_uniform(
