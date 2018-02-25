@@ -18,20 +18,25 @@ namespace gl_tut
     class postprocess_render_step : public yavsg::postprocess_render_step< 1 >
     {
     public:
-        using program_type = yavsg::gl::shader_program<
+        using attribute_buffer_type = yavsg::gl::attribute_buffer<
             yavsg::vector< GLfloat, 2 >,
             yavsg::vector< GLfloat, 2 >
         >;
+        using framebuffer_type = yavsg::gl::framebuffer< 1 >;
+        using program_type = yavsg::gl::shader_program<
+            attribute_buffer_type,
+            framebuffer_type
+        >;
         
-        program_type                        postprocess_program;
-        program_type::attribute_buffer_type vertices;
-        yavsg::gl::index_buffer             indices;
+        program_type            postprocess_program;
+        attribute_buffer_type   vertices;
+        yavsg::gl::index_buffer indices;
         
         postprocess_render_step(
             const std::string& fragment_shader_filename
         );
         // ~postprocess_render_step();
-        virtual void run( yavsg::gl::framebuffer< 1 >& source );
+        virtual void run( framebuffer_type& source );
     };
 }
 

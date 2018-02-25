@@ -4,7 +4,6 @@
 
 
 #include "_gl_base.hpp"
-#include "buffer_types.hpp"
 #include "error.hpp"
 #include "attribute_buffer.hpp"
 #include "../math/matrix.hpp"
@@ -26,11 +25,12 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
     );
     
     // TODO: template< typename Buffer, unsigned int Targets > class shader_program
-    template< typename... Attributes > class shader_program
+    template< class AttributeBuffer, class Framebuffer > class shader_program
     {
     public:
-        using attribute_buffer_type = attribute_buffer< Attributes... >;
-        using            tuple_type =       std::tuple< Attributes... >;
+        using attribute_buffer_type = AttributeBuffer;
+        using            tuple_type = typename attribute_buffer_type::tuple_type;
+        using      framebuffer_type = Framebuffer;
         
     protected:
         GLuint gl_program_id;
@@ -69,7 +69,7 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
         // Return true if the variable exists & could be linked, false if it
         // does not exist, and throws `yavsg::gl::summary_error` if the variable
         // exists but could not be linked.
-        template< unsigned int Nth > bool link_attribute(
+        template< std::size_t Nth > bool link_attribute(
             const std::string& attribute_name
         );
         template< typename T > bool set_uniform(
@@ -80,10 +80,41 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
 } }
 
 
+namespace yavsg { namespace gl // Attribute traits /////////////////////////////
+{
+    template< typename T > struct attribute_traits {};
+    
+    template<> struct attribute_traits< GLfloat >
+    {
+        static const GLint  components_per_element = 1;
+        static const GLenum component_type         = GL_FLOAT;
+    };
+    
+    template<> struct attribute_traits< GLint >
+    {
+        static const GLint  components_per_element = 1;
+        static const GLenum component_type         = GL_INT;
+    };
+    
+    // TODO: more basic types, see
+    //      https://www.khronos.org/opengl/wiki/OpenGL_Type
+    //      http://docs.gl/gl3/glVertexAttribPointer
+    
+    template< typename T, unsigned int D >
+    struct attribute_traits< vector< T, D > >
+    {
+        static const GLint components_per_element
+            = attribute_traits< T >::components_per_element * D;
+        static const GLenum component_type
+            = attribute_traits< T >::component_type;
+    };
+} }
+
+
 namespace yavsg { namespace gl // Shader program implementations ///////////////
 {
-    template< typename... Attributes >
-    void shader_program< Attributes... >::use_program()
+    template< class AttributeBuffer, class Framebuffer >
+    void shader_program< AttributeBuffer, Framebuffer >::use_program()
     {
         glUseProgram( gl_program_id );
         YAVSG_GL_THROW_FOR_ERRORS(
@@ -93,8 +124,8 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         );
     }
     
-    template< typename... Attributes >
-    void shader_program< Attributes... >::bind_vao()
+    template< class AttributeBuffer, class Framebuffer >
+    void shader_program< AttributeBuffer, Framebuffer >::bind_vao()
     {
         glBindVertexArray( gl_vao_id );
         YAVSG_GL_THROW_FOR_ERRORS(
@@ -106,8 +137,8 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         );
     }
     
-    template< typename... Attributes >
-    shader_program< Attributes... >::shader_program(
+    template< class AttributeBuffer, class Framebuffer >
+    shader_program< AttributeBuffer, Framebuffer >::shader_program(
         const std::vector< GLuint >& shaders
     )
     {
@@ -149,23 +180,23 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         glBindFragDataLocation( gl_program_id, 0, "color_out" );
     }
     
-    template< typename... Attributes >
-    shader_program< Attributes... >::~shader_program()
+    template< class AttributeBuffer, class Framebuffer >
+    shader_program< AttributeBuffer, Framebuffer >::~shader_program()
     {
         glDeleteProgram( gl_program_id );
         glDeleteVertexArrays( 1, &gl_vao_id );
     }
     
-    template< typename... Attributes >
-    void shader_program< Attributes... >::run(
+    template< class AttributeBuffer, class Framebuffer >
+    void shader_program< AttributeBuffer, Framebuffer >::run(
         const attribute_buffer_type& buffer
     )
     {
         run( buffer, 0, buffer.size() );
     }
     
-    template< typename... Attributes >
-    void shader_program< Attributes... >::run(
+    template< class AttributeBuffer, class Framebuffer >
+    void shader_program< AttributeBuffer, Framebuffer >::run(
         const attribute_buffer_type& buffer,
         std::size_t start,
         std::size_t count
@@ -174,10 +205,15 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         use_program();
         bind_vao();
         
-        glBindBuffer( GL_ARRAY_BUFFER, buffer.gl_id );
+        // Const cast as the OpenGL object ID from this is only used in a const-
+        // like way
+        attribute_buffer_type& buffer_ref =
+            const_cast< attribute_buffer_type& >(  buffer );
+        
+        glBindBuffer( GL_ARRAY_BUFFER, buffer_ref.gl_buffer_id() );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't bind vertex array buffer "
-            + std::to_string( buffer.gl_id )
+            + std::to_string( buffer_ref.gl_buffer_id() )
             + " for program "
             + std::to_string( gl_program_id )
             + " for yavsg::gl::shader_program::run()"
@@ -193,15 +229,15 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't draw triangles from vertex array buffer "
-            + std::to_string( buffer.gl_id )
+            + std::to_string( buffer_ref.gl_buffer_id() )
             + " for program "
             + std::to_string( gl_program_id )
             + " for yavsg::gl::shader_program::run()"
         );
     }
     
-    template< typename... Attributes >
-    void shader_program< Attributes... >::run(
+    template< class AttributeBuffer, class Framebuffer >
+    void shader_program< AttributeBuffer, Framebuffer >::run(
         const attribute_buffer_type& buffer,
         const index_buffer& indices
     )
@@ -209,8 +245,8 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         run( buffer, indices, 0, indices.size() );
     }
     
-    template< typename... Attributes >
-    void shader_program< Attributes... >::run(
+    template< class AttributeBuffer, class Framebuffer >
+    void shader_program< AttributeBuffer, Framebuffer >::run(
         const attribute_buffer_type& buffer,
         const index_buffer& indices,
         std::size_t start,
@@ -220,19 +256,24 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         use_program();
         bind_vao();
         
-        glBindBuffer( GL_ARRAY_BUFFER, buffer.gl_id );
+        // Const cast as the OpenGL object IDs from these are only used in a
+        // const-like way
+        attribute_buffer_type&  buffer_ref = const_cast< attribute_buffer_type& >(  buffer );
+        index_buffer         & indices_ref = const_cast< index_buffer         & >( indices );
+        
+        glBindBuffer( GL_ARRAY_BUFFER, buffer_ref.gl_buffer_id() );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't bind vertex array buffer "
-            + std::to_string( buffer.gl_id )
+            + std::to_string( buffer_ref.gl_buffer_id() )
             + " for program "
             + std::to_string( gl_program_id )
             + " for yavsg::gl::shader_program::run()"
         );
         
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indices.gl_id );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indices_ref.gl_buffer_id() );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't bind element array buffer "
-            + std::to_string( indices.gl_id )
+            + std::to_string( indices_ref.gl_buffer_id() )
             + " for program "
             + std::to_string( gl_program_id )
             + " for yavsg::gl::shader_program::run()"
@@ -249,17 +290,17 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't draw triangles from vertex array buffer "
-            + std::to_string( buffer.gl_id )
+            + std::to_string( buffer_ref.gl_buffer_id() )
             + " with element array buffer "
-            + std::to_string( indices.gl_id )
+            + std::to_string( indices_ref.gl_buffer_id() )
             + " for program "
             + std::to_string( gl_program_id )
             + " for yavsg::gl::shader_program::run()"
         );
     }
     
-    template< typename... Attributes >
-    bool shader_program< Attributes... >::has_attribute(
+    template< class AttributeBuffer, class Framebuffer >
+    bool shader_program< AttributeBuffer, Framebuffer >::has_attribute(
         const std::string& name
     )
     {
@@ -267,8 +308,8 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         return has_attribute( name, location );
     }
     
-    template< typename... Attributes >
-    bool shader_program< Attributes... >::has_attribute(
+    template< class AttributeBuffer, class Framebuffer >
+    bool shader_program< AttributeBuffer, Framebuffer >::has_attribute(
         const std::string& name,
         GLint& location
     )
@@ -290,8 +331,8 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         }
     }
     
-    template< typename... Attributes >
-    bool shader_program< Attributes... >::has_uniform(
+    template< class AttributeBuffer, class Framebuffer >
+    bool shader_program< AttributeBuffer, Framebuffer >::has_uniform(
         const std::string& name
     )
     {
@@ -299,8 +340,8 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         return has_uniform( name, location );
     }
     
-    template< typename... Attributes >
-    bool shader_program< Attributes... >::has_uniform(
+    template< class AttributeBuffer, class Framebuffer >
+    bool shader_program< AttributeBuffer, Framebuffer >::has_uniform(
         const std::string& name,
         GLint& location
     )
@@ -322,9 +363,9 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         }
     }
     
-    template< typename... Attributes >
-    template< unsigned int Nth >
-    bool shader_program< Attributes... >::link_attribute(
+    template< class AttributeBuffer, class Framebuffer >
+    template< std::size_t Nth >
+    bool shader_program< AttributeBuffer, Framebuffer >::link_attribute(
         const std::string& attribute_name
     )
     {
@@ -344,11 +385,14 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         );
         
         using attribute_type = typename std::tuple_element< Nth, tuple_type >::type;
-        // using attribute_type = typename tuple_type::type< Nth >;
-        std::size_t offset_of_attribute = offset_of<
-            Nth,
-            Attributes...
-        >::bytes;
+        
+        // I've tried everything I can think of, this seems to be the only way
+        // to """safely""" get the byte offset of a tuple member.
+        const tuple_type& fake_tuple = *( tuple_type* )0x01;
+        auto offset_of_attribute = (
+              ( char* )&std::get< Nth >( fake_tuple )
+            - ( char* )&fake_tuple
+        );
         
         glVertexAttribPointer(
             attribute_location,
@@ -368,9 +412,9 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         return true;
     }
     
-    template< typename... Attributes >
+    template< class AttributeBuffer, class Framebuffer >
     template< typename T >
-    bool shader_program< Attributes... >::set_uniform(
+    bool shader_program< AttributeBuffer, Framebuffer >::set_uniform(
         const std::string& uniform_name,
         const T& uniform_value
     )

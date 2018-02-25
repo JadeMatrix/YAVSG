@@ -3,9 +3,6 @@
 #define YAVSG_GL_ATTRIBUTE_BUFFER_HPP
 
 
-#include "buffer_types.hpp"
-#include "shader_program.hpp"
-
 #include <tuple>
 #include <vector>
 #include <array>
@@ -15,15 +12,14 @@ namespace yavsg { namespace gl
 {
     template< typename... Attributes > class attribute_buffer
     {
-        friend class shader_program< Attributes... >;
+        // friend class shader_program< Attributes... >;
         
     protected:
         GLuint gl_id;
         std::size_t vertex_count;
         
     public:
-        using          tuple_type =     std::tuple< Attributes... >;
-        using shader_program_type = shader_program< Attributes... >;
+        using tuple_type = std::tuple< Attributes... >;
         
         attribute_buffer( const std::vector< tuple_type >& vertices );
         // template< std::size_t N > attribute_buffer(
@@ -38,11 +34,13 @@ namespace yavsg { namespace gl
         // );
         
         std::size_t size() const;
+        // TODO: Determine if there's a more opaque way to access this
+        GLuint gl_buffer_id();
     };
     
     class index_buffer
     {
-        template< typename... Attributes > friend class shader_program;
+        // template< typename... Attributes > friend class shader_program;
         
     protected:
         GLuint gl_id;
@@ -56,6 +54,8 @@ namespace yavsg { namespace gl
         void upload_data( const std::vector< GLuint >& indices );
         
         std::size_t size() const;
+        // TODO: Determine if there's a more opaque way to access this
+        GLuint gl_buffer_id();
     };
 } }
 
@@ -116,6 +116,12 @@ namespace yavsg { namespace gl // Vertex buffer implementation /////////////////
     {
         return vertex_count;
     }
+    
+    template< typename... Attributes >
+    GLuint attribute_buffer< Attributes... >::gl_buffer_id()
+    {
+        return gl_id;
+    }
 } }
 
 
@@ -167,6 +173,11 @@ namespace yavsg { namespace gl // Index buffer implementation //////////////////
     inline std::size_t index_buffer::size() const
     {
         return index_count;
+    }
+    
+    inline GLuint index_buffer::gl_buffer_id()
+    {
+        return gl_id;
     }
 } }
 

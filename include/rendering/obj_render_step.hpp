@@ -19,12 +19,17 @@ namespace yavsg
     class obj_render_step : public scene_render_step
     {
     public:
-        using program_type = yavsg::gl::shader_program<
+        using attribute_buffer_type = yavsg::gl::attribute_buffer<
             yavsg::vector< GLfloat, 3 >,    // position
             yavsg::vector< GLfloat, 3 >,    // color
             yavsg::vector< GLfloat, 2 >     // texture
         >;
-        using vertex_type = program_type::tuple_type;
+        using framebuffer_type = yavsg::gl::framebuffer< 1 >;
+        using program_type = yavsg::gl::shader_program<
+            attribute_buffer_type,
+            framebuffer_type
+        >;
+        using vertex_type = attribute_buffer_type::tuple_type;
         
         struct render_group
         {
