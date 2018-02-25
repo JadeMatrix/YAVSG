@@ -15,7 +15,7 @@
 
 namespace gl_tut
 {
-    class postprocess_render_step : public yavsg::postprocess_render_step
+    class postprocess_render_step : public yavsg::postprocess_render_step< 1 >
     {
     public:
         using program_type = yavsg::gl::shader_program<
@@ -31,7 +31,7 @@ namespace gl_tut
             const std::string& fragment_shader_filename
         );
         // ~postprocess_render_step();
-        virtual void run( yavsg::gl::framebuffer& source );
+        virtual void run( yavsg::gl::framebuffer< 1 >& source );
     };
 }
 

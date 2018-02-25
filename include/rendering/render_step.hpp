@@ -5,6 +5,8 @@
 
 #include "../gl/framebuffer.hpp"
 
+#include <utility>  // std::size_t
+
 
 namespace yavsg
 {
@@ -15,11 +17,11 @@ namespace yavsg
         virtual void run() = 0;
     };
     
-    class postprocess_render_step
+    template< std::size_t ColorTargets > class postprocess_render_step
     {
     public:
         virtual ~postprocess_render_step() {};
-        virtual void run( gl::framebuffer& source ) = 0;
+        virtual void run( gl::framebuffer< ColorTargets >& source ) = 0;
     };
 }
 

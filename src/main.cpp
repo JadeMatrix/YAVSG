@@ -53,7 +53,7 @@ int main( int argc, char* argv[] )
                 // "../local/cube/"
             )
         };
-        std::vector< yavsg::postprocess_render_step* > postprocess_steps = {
+        std::vector< yavsg::postprocess_render_step< 1 >* > postprocess_steps = {
             // new gl_tut::postprocess_render_step(
             //     "../src/shaders/postprocess/sobel.frag"
             // ),
@@ -63,22 +63,22 @@ int main( int argc, char* argv[] )
             // new gl_tut::postprocess_render_step(
             //     "../src/shaders/postprocess/circular_gradient.frag"
             // ),
-            // new gl_tut::postprocess_render_step(
-            //     "../src/shaders/postprocess/depth.frag"
-            // )
+            new gl_tut::postprocess_render_step(
+                "../src/shaders/postprocess/depth.frag"
+            )
         };
         
-        yavsg::gl::framebuffer buffer_A(
+        yavsg::gl::framebuffer< 1 > buffer_A(
             gl_tut::window_width,
             gl_tut::window_height
         );
-        yavsg::gl::framebuffer buffer_B(
+        yavsg::gl::framebuffer< 1 > buffer_B(
             gl_tut::window_width,
             gl_tut::window_height
         );
         
-        yavsg::gl::framebuffer* source_buffer = &buffer_A;
-        yavsg::gl::framebuffer* target_buffer = &buffer_B;
+        yavsg::gl::framebuffer< 1 >* source_buffer = &buffer_A;
+        yavsg::gl::framebuffer< 1 >* target_buffer = &buffer_B;
         
         SDL_Event window_event;
         while( true )

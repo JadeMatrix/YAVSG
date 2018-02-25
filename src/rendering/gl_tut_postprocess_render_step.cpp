@@ -34,7 +34,7 @@ namespace gl_tut // gl_tut_postprocess_render_step implementations /////////////
         postprocess_program.link_attribute< 1 >( "texture_coord_in" );
     }
     
-    void postprocess_render_step::run( yavsg::gl::framebuffer& source )
+    void postprocess_render_step::run( yavsg::gl::framebuffer< 1 >& source )
     {
         // TODO: error handling
         
@@ -47,12 +47,12 @@ namespace gl_tut // gl_tut_postprocess_render_step implementations /////////////
         glDisable( GL_DEPTH_TEST );
         
         glActiveTexture( GL_TEXTURE0 );
-        glBindTexture( GL_TEXTURE_2D, source.color_buffer );
+        glBindTexture( GL_TEXTURE_2D, source.color_buffer< 0 >().gl_texture_id() );
         postprocess_program.set_uniform( "framebuffer", 0 );
         
         // Depth buffer
         glActiveTexture( GL_TEXTURE1 );
-        glBindTexture( GL_TEXTURE_2D, source.depth_stencil_buffer );
+        glBindTexture( GL_TEXTURE_2D, source.depth_stencil_buffer().gl_texture_id() );
         postprocess_program.set_uniform( "framebuffer_depth_stencil", 1 );
         
         postprocess_program.set_uniform(
