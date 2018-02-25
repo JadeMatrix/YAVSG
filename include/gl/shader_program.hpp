@@ -11,6 +11,7 @@
 
 #include <tuple>
 #include <exception>
+#include <type_traits>  // std::enable_if
 
 
 namespace yavsg { namespace gl // Shader program ///////////////////////////////
@@ -75,6 +76,18 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
         template< typename T > bool set_uniform(
             const std::string& uniform_name,
             const T& uniform_value
+        );
+        
+        // Note: use glDrawBuffers when rendering to multiple buffers, because
+        // only the first output will be enabled by default.
+        template<
+            std::size_t Nth,
+            typename std::enable_if<
+                ( Nth < framebuffer_type::num_color_targets ),
+                int
+            >::type = 0
+        > void bind_target(
+            const std::string& target_name
         );
     };
 } }
@@ -173,11 +186,6 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             + std::to_string( gl_program_id )
             + " for yavsg::gl::shader_program"
         );
-        
-        // TODO: Find a way to specify this and multi-target re:
-        // Note: use glDrawBuffers when rendering to multiple buffers,
-        // because only the first output will be enabled by default.
-        glBindFragDataLocation( gl_program_id, 0, "color_out" );
     }
     
     template< class AttributeBuffer, class Framebuffer >
@@ -430,6 +438,28 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             gl_program_id
         );
         return true;
+    }
+    
+    template< class AttributeBuffer, class Framebuffer >
+    template<
+        std::size_t Nth,
+        typename std::enable_if<
+            ( Nth < Framebuffer::num_color_targets ),
+            int
+        >::type
+    >
+    void shader_program< AttributeBuffer, Framebuffer >::bind_target(
+        const std::string& target_name
+    )
+    {
+        glBindFragDataLocation( gl_program_id, Nth, target_name.c_str() );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't bind fragment target \""
+            + target_name
+            + "\" of program "
+            + std::to_string( gl_program_id )
+            + " for yavsg::gl::shader_program::bind_target()"
+        );
     }
 } }
 

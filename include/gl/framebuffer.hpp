@@ -37,6 +37,8 @@ namespace yavsg { namespace gl
         void check_finalized();
         
     public:
+        static const std::size_t num_color_targets = ColorTargets;
+        
         framebuffer(
             std::size_t width,
             std::size_t height
@@ -45,8 +47,7 @@ namespace yavsg { namespace gl
         
         void bind();
         
-        texture&   depth_stencil_buffer();
-        // texture& stencil_buffer();
+        texture& depth_stencil_buffer();
         template< std::size_t N > texture& color_buffer();
     };
     

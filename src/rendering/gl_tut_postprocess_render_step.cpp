@@ -32,6 +32,7 @@ namespace gl_tut // gl_tut_postprocess_render_step implementations /////////////
     {
         postprocess_program.link_attribute< 0 >( "position"         );
         postprocess_program.link_attribute< 1 >( "texture_coord_in" );
+        postprocess_program.bind_target< 0 >( "color_out" );
     }
     
     void postprocess_render_step::run( yavsg::gl::framebuffer< 1 >& source )

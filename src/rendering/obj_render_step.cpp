@@ -282,6 +282,7 @@ namespace yavsg
         scene_program.link_attribute< 0 >( "position"         );
         scene_program.link_attribute< 1 >( "color_in"         );
         scene_program.link_attribute< 2 >( "texture_coord_in" );
+        scene_program.bind_target< 0 >( "color_out" );
     }
     
     obj_render_step::~obj_render_step()
