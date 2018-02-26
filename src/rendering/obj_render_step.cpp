@@ -168,6 +168,11 @@ namespace yavsg
                     auto vy = obj_attributes.vertices[ 3 * index.vertex_index + 1 ];
                     auto vz = obj_attributes.vertices[ 3 * index.vertex_index + 2 ];
                     
+                    auto nx = obj_attributes.normals[ 3 * index.normal_index + 0 ];
+                    auto ny = obj_attributes.normals[ 3 * index.normal_index + 1 ];
+                    auto nz = obj_attributes.normals[ 3 * index.normal_index + 2 ];
+                    
+                    // Colors use index.vertex_index
                     auto cr = obj_attributes.colors[ 3 * index.vertex_index + 0 ];
                     auto cb = obj_attributes.colors[ 3 * index.vertex_index + 1 ];
                     auto cg = obj_attributes.colors[ 3 * index.vertex_index + 2 ];
@@ -177,8 +182,8 @@ namespace yavsg
                     
                     // TODO: Normalize to vertices so each attribute combo is stored once
                     vertex_storage.push_back( {
-                        // { vx, vy, vz },
-                        { vx, vz, vy },
+                        { vx, vz, vy }, // { vx, vy, vz },
+                        { nx, nz, ny },
                         { cr, cb, cg },
                         { tu, tv }
                     } );
@@ -280,8 +285,9 @@ namespace yavsg
         ;
         
         scene_program.link_attribute< 0 >( "position"         );
-        scene_program.link_attribute< 1 >( "color_in"         );
-        scene_program.link_attribute< 2 >( "texture_coord_in" );
+        scene_program.link_attribute< 1 >( "normal_in"        );
+        scene_program.link_attribute< 2 >( "color_in"         );
+        scene_program.link_attribute< 3 >( "texture_coord_in" );
         scene_program.bind_target< 0 >( "color_out" );
     }
     

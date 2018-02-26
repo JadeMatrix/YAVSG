@@ -21,6 +21,7 @@ namespace yavsg
     public:
         using attribute_buffer_type = yavsg::gl::attribute_buffer<
             yavsg::vector< GLfloat, 3 >,    // position
+            yavsg::vector< GLfloat, 3 >,    // normal
             yavsg::vector< GLfloat, 3 >,    // color
             yavsg::vector< GLfloat, 2 >     // texture
         >;
