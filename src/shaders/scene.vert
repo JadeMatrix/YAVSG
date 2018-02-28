@@ -1,64 +1,57 @@
 #version 150 core
 
+// Input ///////////////////////////////////////////////////////////////////////
 
-in vec3 position;
-in vec3 color_in;
-in vec2 texture_coord_in;
+in vec3 vertex_in_position; // position XYZ
+in vec3 vertex_in_normal;   // normal   XYZ
+in vec3 vertex_in_tangent;  // tangent  XYZ
+in vec3 vertex_in_color;    // color    RGB
+in vec2 vertex_in_texture;  // texture  UV
 
-out vec3 color;
-out vec2 texture_coord;
+uniform TRANSFORM
+{
+    mat4 model;
+    mat4 view;
+    mat4 projection;
+} transform;
 
-uniform mat4  transform_model;
-uniform mat4  transform_view;
-uniform mat4  transform_projection;
-uniform float time_absolute;
-uniform float time_delta;
+// Output //////////////////////////////////////////////////////////////////////
 
+out VERTEX_OUT
+{
+    vec3 position; // position XYZ
+    vec3 color;    // color    RGB
+    vec2 texture;  // texture  UV
+    
+    mat4 TBN_matrix;
+} vertex_out;
+
+////////////////////////////////////////////////////////////////////////////////
 
 void main()
 {
-    mat4 rotation;
-    float sin_val = sin( radians( time_absolute ) * 10.0 );
-    float cos_val = cos( radians( time_absolute ) * 10.0 );
-    rotation[ 0 ] = vec4(  cos_val, sin_val, 0.0, 0.0 );
-    rotation[ 1 ] = vec4( -sin_val, cos_val, 0.0, 0.0 );
-    rotation[ 2 ] = vec4(      0.0,     0.0, 1.0, 0.0 );
-    rotation[ 3 ] = vec4(      0.0,     0.0, 0.0, 1.0 );
-    
-    gl_Position = (
-          transform_projection
-        * transform_view
-        * rotation
-        * transform_model
-        * vec4(
-            position.x,
-            position.y * -1.0,
-            position.z,
-            1.0
-        )
+    mat4 transform = (
+          transform.projection
+        * transform.view
+        * transform.model
     );
     
-    color = color_in;
-    texture_coord = texture_coord_in;
+    vec4 adjusted_position = vec4(
+        vertex_in_position.x,
+        vertex_in_position.y * -1.0,
+        vertex_in_position.z,
+        1.0
+    );
+    
+    gl_Position = transform * adjusted_position;
+    
+    vertex_out.color   = vertex_in_color;
+    vertex_out.texture = vertex_in_texture;
+    
+    vertex_out.position = adjusted_position.xyz;
+    
+    vec3 N = normalize( vec3( transform.model * vec4(  vertex_in_normal, 0.0 ) ) );
+    vec3 T = normalize( vec3( transform.model * vec4( vertex_in_tangent, 0.0 ) ) );
+    vec3 B = cross( N, T );
+    vertex_out.TBN_matrix = transpose( mat3( T, B, N ) );
 }
-
-
-/*
-#version 150 core
-
-
-in vec2 position;
-in vec3 color_in;
-in float sides;
-
-out vec3 vertex_color;
-out float vertex_sides;
-
-
-void main()
-{
-    gl_Position = vec4( position, 0.0, 1.0 );
-    vertex_color = color_in;
-    vertex_sides = sides;
-}
-*/

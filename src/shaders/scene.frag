@@ -1,92 +1,65 @@
 #version 150 core
 
+// Input ///////////////////////////////////////////////////////////////////////
 
-in vec3 color;
-in vec2 texture_coord;
+in VERTEX_OUT
+{
+    vec3 position;  // position XYZ
+    vec3 color;     // color    RGB
+    vec2 texture;   // texture  UV
+    
+    mat4 TBN_matrix;
+} fragment_in;
 
-out vec4 color_out;
+uniform HAS_MAP
+{
+    bool color;
+    bool normal;
+    bool specular;
+    bool mask;
+} has_map;
 
-uniform sampler2D texture_A;
-uniform sampler2D texture_B;
-uniform vec3 tint;
+uniform MAP
+{
+    sampler2D color;
+    sampler2D normal;
+    sampler2D specular;
+    sampler2D mask;
+} map;
 
-uniform float time_absolute;
-uniform float time_delta;
+// Output //////////////////////////////////////////////////////////////////////
 
+out vec4 fragment_out_color;
+
+////////////////////////////////////////////////////////////////////////////////
 
 void main()
 {
-    vec4 color_A = texture(
-        texture_A,
-        vec2(
-                  texture_coord.x,
-            1.0 - texture_coord.y
-        )
-    );
-    vec4 color_B = texture(
-        texture_B,
-        vec2(
-                  texture_coord.x,
-            1.0 - texture_coord.y
-        )
-    );
-    // vec4 color_B = texture(
-    //     texture_B,
-    //     vec2(
-    //         texture_coord.x + sin(
-    //             texture_coord.y * 60.0
-    //             + time_absolute * 2.0
-    //         ) / 30.0,
-    //         1.0 - texture_coord.y
-    //     )
-    // );
-    color_out = mix(
-        color_A,
-        color_B,
-        // texture_coord.x
-        // ( sin( time_absolute * 2.0 ) + 1.0 ) / 2.0
-        0.0
-    );
-    // // color_out *= vec4(
-    // //     1.0 - color.r,
-    // //     1.0 - color.g,
-    // //     1.0 - color.b,
-    // //     1.0
-    // // );
+    // Basic fragment color
+    if( has_map.color )
+        fragment_out_color = texture(
+            map.color,
+            vec2(
+                      fragment_in.texture.x,
+                1.0 - fragment_in.texture.y
+            )
+        );
+    else
+        fragment_out_color = vec4( 0.5, 0.5, 0.5, 1.0 );
     
-    float offset = radians( 120.0 );
-    color_out *= vec4(
-        ( sin( time_absolute + 0 * offset ) + 1.0 ) / 2.0,
-        ( sin( time_absolute + 1 * offset ) + 1.0 ) / 2.0,
-        ( sin( time_absolute + 2 * offset ) + 1.0 ) / 2.0,
-        1.0
-    );
+    // // Fragment normal
+    // vec3 normal;
+    // if( has_map.normal )
+    //     normal = texture(
+    //         map.normal,
+    //         vec2(
+    //                   fragment_in.texture.x,
+    //             1.0 - fragment_in.texture.y
+    //         )
+    //     );
+    // else
+    //     normal = vec3( 0.5, 0.5, 1.0 );
+    // normal = normalize( normal );
     
-    color_out *= vec4( color, 1.0 );
-    color_out *= vec4( tint,  1.0 );
-    
-    
-    // // Depth buffer:
-    // color_out = vec4(
-    //     gl_FragCoord.z /* / gl_FragCoord.w */,
-    //     gl_FragCoord.z /* / gl_FragCoord.w */,
-    //     gl_FragCoord.z /* / gl_FragCoord.w */,
-    //     1.0f
-    // );
+    // // Apply lighting;
 }
-
-
-/*
-#version 150 core
-
-
-in vec3 fragment_color;
-
-out vec4 color_out;
-
-
-void main()
-{
-    color_out = vec4( fragment_color, 1.0 );
-}
-*/

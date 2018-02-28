@@ -39,7 +39,7 @@ namespace yavsg { namespace gl
             while( ( gl_error_code = glGetError() ) != GL_NO_ERROR ) \
                 error_codes.push_back( gl_error_code ); \
              \
-            throw summary_error( \
+            throw yavsg::gl::summary_error( \
                 ( MESSAGE_EXPRESSION ), \
                 error_codes \
             ); \
