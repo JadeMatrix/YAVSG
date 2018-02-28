@@ -30,8 +30,8 @@ namespace gl_tut // gl_tut_postprocess_render_step implementations /////////////
             2, 3, 0
         } )
     {
-        postprocess_program.link_attribute< 0 >( "position"         );
-        postprocess_program.link_attribute< 1 >( "texture_coord_in" );
+        postprocess_program.link_attribute< 0 >( "position"        , vertices );
+        postprocess_program.link_attribute< 1 >( "texture_coord_in", vertices );
         postprocess_program.bind_target< 0 >( "color_out" );
     }
     

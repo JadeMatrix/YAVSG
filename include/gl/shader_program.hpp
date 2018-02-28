@@ -71,7 +71,8 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
         // does not exist, and throws `yavsg::gl::summary_error` if the variable
         // exists but could not be linked.
         template< std::size_t Nth > bool link_attribute(
-            const std::string& attribute_name
+            const std::string& attribute_name,
+            const attribute_buffer_type& dummy_attributes
         );
         template< typename T > bool set_uniform(
             const std::string& uniform_name,
@@ -374,7 +375,8 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
     template< class AttributeBuffer, class Framebuffer >
     template< std::size_t Nth >
     bool shader_program< AttributeBuffer, Framebuffer >::link_attribute(
-        const std::string& attribute_name
+        const std::string& attribute_name,
+        const attribute_buffer_type& dummy_attributes
     )
     {
         GLint attribute_location;
@@ -382,6 +384,11 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             return false;
         
         bind_vao();
+        
+        attribute_buffer_type& buffer_ref = const_cast<
+            attribute_buffer_type&
+        >( dummy_attributes );
+        glBindBuffer( GL_ARRAY_BUFFER, buffer_ref.gl_buffer_id() );
         
         glEnableVertexAttribArray( attribute_location );
         YAVSG_GL_THROW_FOR_ERRORS(

@@ -24,18 +24,44 @@ namespace yavsg
             ).id
         } )
     {
-        scene_program.link_attribute< 0 >( "vertex_in_position" );
-        scene_program.link_attribute< 1 >( "vertex_in_normal"   );
-        scene_program.link_attribute< 2 >( "vertex_in_tangent"  );
-        scene_program.link_attribute< 3 >( "vertex_in_color"    );
-        scene_program.link_attribute< 4 >( "vertex_in_texture"  );
+        // scene_program.link_attribute< 0 >( "vertex_in_position" );
+        // scene_program.link_attribute< 1 >( "vertex_in_normal"   );
+        // scene_program.link_attribute< 2 >( "vertex_in_tangent"  );
+        // scene_program.link_attribute< 3 >( "vertex_in_color"    );
+        // scene_program.link_attribute< 4 >( "vertex_in_texture"  );
         
-        scene_program.bind_target< 0 >( "fragment_out_color" );
+        // scene_program.bind_target< 0 >( "fragment_out_color" );
     }
     
     void scene_render_step::run()
     {
         update();
+        
+        if( objects.size() )
+        {
+            scene_program.link_attribute< 0 >( "vertex_in_position", objects[ 0 ].vertices );
+            scene_program.link_attribute< 1 >( "vertex_in_normal"  , objects[ 0 ].vertices );
+            scene_program.link_attribute< 2 >( "vertex_in_tangent" , objects[ 0 ].vertices );
+            scene_program.link_attribute< 3 >( "vertex_in_color"   , objects[ 0 ].vertices );
+            scene_program.link_attribute< 4 >( "vertex_in_texture" , objects[ 0 ].vertices );
+        }
+        else
+        {
+            auto some_attribute_buffer = attribute_buffer_type( std::vector< vertex_type >{ {
+                { 0.0f, 0.0f, 0.0f },
+                { 0.0f, 0.0f, 0.0f },
+                { 0.0f, 0.0f, 0.0f },
+                { 0.0f, 0.0f, 0.0f },
+                { 0.0f, 0.0f }
+            } } );
+            scene_program.link_attribute< 0 >( "vertex_in_position", some_attribute_buffer );
+            scene_program.link_attribute< 1 >( "vertex_in_normal"  , some_attribute_buffer );
+            scene_program.link_attribute< 2 >( "vertex_in_tangent" , some_attribute_buffer );
+            scene_program.link_attribute< 3 >( "vertex_in_color"   , some_attribute_buffer );
+            scene_program.link_attribute< 4 >( "vertex_in_texture" , some_attribute_buffer );
+        }
+        
+        scene_program.bind_target< 0 >( "fragment_out_color" );
         
         // Set transforms //////////////////////////////////////////////////////
         
