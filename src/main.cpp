@@ -10,6 +10,7 @@
 #include "../include/sdl/sdl_utils.hpp"
 #include "../include/rendering/render_step.hpp"
 #include "../include/rendering/obj_render_step.hpp"
+// #include "../include/rendering/4up_postprocess_render_step.hpp"
 
 #include "../include/rendering/gl_tut.hpp"
 // #include "../include/rendering/gl_tut_scene_render_step.hpp"
@@ -69,6 +70,18 @@ int main( int argc, char* argv[] )
             new gl_tut::postprocess_render_step(
                 "../src/shaders/postprocess/dof.frag"
             )
+            // new yavsg::debug_4up_postprocess_render_step(
+            //     nullptr,
+            //     new gl_tut::postprocess_render_step(
+            //         "../src/shaders/postprocess/dof.frag"
+            //     ),
+            //     new gl_tut::postprocess_render_step(
+            //         "../src/shaders/postprocess/depth.frag"
+            //     ),
+            //     new gl_tut::postprocess_render_step(
+            //         "../src/shaders/postprocess/sobel.frag"
+            //     )
+            // )
         };
         
         yavsg::gl::framebuffer< 1 > buffer_A(
