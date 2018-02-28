@@ -16,7 +16,7 @@
 
 namespace yavsg
 {
-    class obj_render_step : public scene_render_step
+    class obj_render_step : public render_step
     {
     public:
         using attribute_buffer_type = yavsg::gl::attribute_buffer<

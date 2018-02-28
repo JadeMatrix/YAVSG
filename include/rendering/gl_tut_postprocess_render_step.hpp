@@ -15,7 +15,7 @@
 
 namespace gl_tut
 {
-    class postprocess_render_step : public yavsg::postprocess_render_step< 1 >
+    class postprocess_render_step : public yavsg::postprocess_step< 1 >
     {
     public:
         using attribute_buffer_type = yavsg::gl::attribute_buffer<

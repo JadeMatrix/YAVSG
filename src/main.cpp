@@ -44,8 +44,8 @@ int main( int argc, char* argv[] )
             throw std::runtime_error( "failed to initialize GLEW" );
     #endif
         
-        std::vector< yavsg::scene_render_step* > scene_steps = {
-            // new gl_tut::scene_render_step()
+        std::vector< yavsg::render_step* > scene_steps = {
+            // new gl_tut::render_step()
             new yavsg::obj_render_step(
                 "../local/Crytek Sponza Atrium/sponza.obj",
                 "../local/Crytek Sponza Atrium/"
@@ -53,7 +53,7 @@ int main( int argc, char* argv[] )
                 // "../local/cube/"
             )
         };
-        std::vector< yavsg::postprocess_render_step< 1 >* > postprocess_steps = {
+        std::vector< yavsg::postprocess_step< 1 >* > postprocess_steps = {
             // new gl_tut::postprocess_render_step(
             //     "../src/shaders/postprocess/sobel.frag"
             // ),

@@ -12,7 +12,7 @@
 
 namespace gl_tut
 {
-    class scene_render_step : public yavsg::scene_render_step
+    class scene_render_step : public yavsg::render_step
     {
     public:
         using program_type = yavsg::gl::shader_program<
