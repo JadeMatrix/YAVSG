@@ -15,7 +15,7 @@ namespace yavsg { namespace gl
         // friend class shader_program< Attributes... >;
         
     protected:
-        GLuint gl_id;
+        GLuint gl_id = 0;
         std::size_t vertex_count;
         
     public:
@@ -25,6 +25,7 @@ namespace yavsg { namespace gl
         // template< std::size_t N > attribute_buffer(
         //     const std::array< tuple_type, N >& vertices
         // );
+        attribute_buffer( attribute_buffer&& o );
         
         ~attribute_buffer();
         
@@ -43,11 +44,12 @@ namespace yavsg { namespace gl
         // template< typename... Attributes > friend class shader_program;
         
     protected:
-        GLuint gl_id;
+        GLuint gl_id = 0;
         std::size_t index_count;
         
     public:
         index_buffer( const std::vector< GLuint >& indices );
+        index_buffer( index_buffer&& o );
         
         ~index_buffer();
         
@@ -75,9 +77,17 @@ namespace yavsg { namespace gl // Vertex buffer implementation /////////////////
     }
     
     template< typename... Attributes >
+    attribute_buffer< Attributes... >::attribute_buffer( attribute_buffer&& o )
+    {
+        std::swap( gl_id, o.gl_id );
+        std::swap( vertex_count, o.vertex_count );
+    }
+    
+    template< typename... Attributes >
     attribute_buffer< Attributes... >::~attribute_buffer()
     {
-        glDeleteBuffers( 1, &gl_id );
+        if( gl_id != 0 )
+            glDeleteBuffers( 1, &gl_id );
     }
     
     template< typename... Attributes >
@@ -137,9 +147,16 @@ namespace yavsg { namespace gl // Index buffer implementation //////////////////
         upload_data( indices );
     }
     
+    inline index_buffer::index_buffer( index_buffer&& o )
+    {
+        std::swap( gl_id, o.gl_id );
+        std::swap( index_count, o.index_count );
+    }
+    
     inline index_buffer::~index_buffer()
     {
-        glDeleteBuffers( 1, &gl_id );
+        if( gl_id != 0 )
+            glDeleteBuffers( 1, &gl_id );
     }
     
     inline void index_buffer::upload_data( const std::vector< GLuint >& indices )
