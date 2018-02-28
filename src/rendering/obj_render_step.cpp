@@ -284,10 +284,10 @@ namespace yavsg
             << std::endl
         ;
         
-        scene_program.link_attribute< 0 >( "position"         );
-        scene_program.link_attribute< 1 >( "normal_in"        );
-        scene_program.link_attribute< 2 >( "color_in"         );
-        scene_program.link_attribute< 3 >( "texture_coord_in" );
+        scene_program.link_attribute< 0 >( "position"        , *vertices );
+        scene_program.link_attribute< 1 >( "normal_in"       , *vertices );
+        scene_program.link_attribute< 2 >( "color_in"        , *vertices );
+        scene_program.link_attribute< 3 >( "texture_coord_in", *vertices );
         scene_program.bind_target< 0 >( "color_out" );
     }
     

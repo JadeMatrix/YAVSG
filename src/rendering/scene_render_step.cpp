@@ -39,11 +39,11 @@ namespace yavsg
         
         if( objects.size() )
         {
-            scene_program.link_attribute< 0 >( "vertex_in_position", objects[ 0 ].vertices );
-            scene_program.link_attribute< 1 >( "vertex_in_normal"  , objects[ 0 ].vertices );
-            scene_program.link_attribute< 2 >( "vertex_in_tangent" , objects[ 0 ].vertices );
-            scene_program.link_attribute< 3 >( "vertex_in_color"   , objects[ 0 ].vertices );
-            scene_program.link_attribute< 4 >( "vertex_in_texture" , objects[ 0 ].vertices );
+            scene_program.link_attribute< 0 >( "vertex_in_position", *objects[ 0 ].vertices );
+            scene_program.link_attribute< 1 >( "vertex_in_normal"  , *objects[ 0 ].vertices );
+            scene_program.link_attribute< 2 >( "vertex_in_tangent" , *objects[ 0 ].vertices );
+            scene_program.link_attribute< 3 >( "vertex_in_color"   , *objects[ 0 ].vertices );
+            scene_program.link_attribute< 4 >( "vertex_in_texture" , *objects[ 0 ].vertices );
         }
         else
         {
