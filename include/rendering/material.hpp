@@ -53,10 +53,6 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         {
             texture.bind_as< ActiveTexture >();
             program.template set_uniform< GLint >( name, ActiveTexture );
-            program.template set_uniform< GLboolean >(
-                "has_" + name,
-                GL_TRUE
-            );
         }
     };
     
@@ -76,19 +72,9 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
             {
                 texture -> bind_as< ActiveTexture >();
                 program.template set_uniform< GLint >( name, ActiveTexture );
-                program.template set_uniform< GLboolean >(
-                    "has_" + name,
-                    GL_TRUE
-                );
             }
             else
-            {
                 gl::unbind_texture< ActiveTexture >();
-                program.template set_uniform< GLboolean >(
-                    "has_" + name,
-                    GL_FALSE
-                );
-            }
         }
     };
     
