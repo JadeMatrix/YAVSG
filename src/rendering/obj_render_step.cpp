@@ -69,56 +69,43 @@ namespace yavsg
         {
             material_description description;
             
-            // TODO: Loop
-            if( material.diffuse_texname.size() )
+            struct texture_info
             {
-                std::string texture_filename =
-                    obj_mtl_directory + material.diffuse_texname;
-                
-                description.color_map = new gl::texture( gl::texture::from_file(
-                    texture_filename
-                ) );
-                
-                description.color_map -> filtering( {
-                    gl::texture::filter_settings::magnify_mode::LINEAR,
-                    gl::texture::filter_settings::minify_mode::LINEAR,
-                    gl::texture::filter_settings::mipmap_type::LINEAR,
-                } );
+                gl::texture*& texture;
+                const std::string& filename;
+            };
+            
+            gl::texture*    color_map = nullptr;
+            gl::texture*   normal_map = nullptr;
+            gl::texture* specular_map = nullptr;
+            
+            for( auto& info : {
+                texture_info{    color_map, material.diffuse_texname  },
+                texture_info{   normal_map, material.bump_texname     },
+                texture_info{ specular_map, material.specular_texname }
+            } )
+            {
+                if( info.filename.size() )
+                {
+                    std::string texture_filename =
+                        obj_mtl_directory + info.filename;
+                    
+                    info.texture = new gl::texture(
+                        gl::texture::from_file( texture_filename )
+                    );
+                    info.texture -> filtering( {
+                        gl::texture::filter_settings::magnify_mode::LINEAR,
+                        gl::texture::filter_settings::minify_mode::LINEAR,
+                        gl::texture::filter_settings::mipmap_type::LINEAR,
+                    } );
+                }
             }
             
-            if( material.bump_texname.size() )
-            {
-                std::string texture_filename =
-                    obj_mtl_directory + material.bump_texname;
-                
-                description.normal_map = new gl::texture( gl::texture::from_file(
-                    texture_filename
-                ) );
-                
-                description.normal_map -> filtering( {
-                    gl::texture::filter_settings::magnify_mode::LINEAR,
-                    gl::texture::filter_settings::minify_mode::LINEAR,
-                    gl::texture::filter_settings::mipmap_type::LINEAR,
-                } );
-            }
-            
-            if( material.specular_texname.size() )
-            {
-                std::string texture_filename =
-                    obj_mtl_directory + material.specular_texname;
-                
-                description.specular_map = new gl::texture( gl::texture::from_file(
-                    texture_filename
-                ) );
-                
-                description.specular_map -> filtering( {
-                    gl::texture::filter_settings::magnify_mode::LINEAR,
-                    gl::texture::filter_settings::minify_mode::LINEAR,
-                    gl::texture::filter_settings::mipmap_type::LINEAR,
-                } );
-            }
-            
-            materials.push_back( std::move( description ) );
+            materials.push_back( material_description{
+                   color_map,
+                  normal_map,
+                specular_map
+            } );
         }
         
         // Create vertices
@@ -335,66 +322,14 @@ namespace yavsg
         {
             for( auto& group : object.render_groups )
             {
-                // Can't loop over texture IDs, as texture::bind_as<>() requires
-                // it at compile-time -- the goal is eventually have a material
-                // destription metaclass that will chose IDs at compile time as
-                // they aren't meaningful in themselves anyways.  (Material bind
-                // method will need a "starting at ID" parameter so more than
-                // one material can be used at once).
-                
-                if( group.material.color_map )
-                {
-                    group.material.color_map -> bind_as< 0 >();
-                    scene_program.set_uniform< GLint >( "color_map", 0 );
-                    scene_program.set_uniform< GLboolean >(
-                        "has_color_map",
-                        GL_TRUE
-                    );
-                }
-                else
-                {
-                    gl::unbind_texture< 0 >();
-                    scene_program.set_uniform< GLboolean >(
-                        "has_color_map",
-                        GL_FALSE
-                    );
-                }
-                
-                if( group.material.normal_map )
-                {
-                    group.material.normal_map -> bind_as< 1 >();
-                    scene_program.set_uniform< GLint >( "normal_map", 1 );
-                    scene_program.set_uniform< GLboolean >(
-                        "has_normal_map",
-                        GL_TRUE
-                    );
-                }
-                else
-                {
-                    gl::unbind_texture< 1 >();
-                    scene_program.set_uniform< GLboolean >(
-                        "has_normal_map",
-                        GL_FALSE
-                    );
-                }
-                
-                if( group.material.specular_map )
-                {
-                    group.material.specular_map -> bind_as< 2 >();
-                    scene_program.set_uniform< GLint >( "specular_map", 2 );
-                    scene_program.set_uniform< GLboolean >(
-                        "has_specular_map",
-                        GL_TRUE
-                    );
-                }
-                else
-                {
-                    gl::unbind_texture< 2 >();
-                    scene_program.set_uniform< GLboolean >(
-                        "has_specular_map",
-                        GL_FALSE
-                    );
-                }
+                group.material.bind(
+                    scene_program,
+                    {
+                        "color_map",
+                        "normal_map",
+                        "specular_map"
+                    }
+                );
                 
                 scene_program.run(
                     object.vertices,

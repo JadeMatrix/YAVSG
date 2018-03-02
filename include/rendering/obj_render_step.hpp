@@ -5,6 +5,7 @@
 
 #include "render_step.hpp"
 #include "render_object_manager.hpp"
+#include "material.hpp"
 #include "../gl/shader_program.hpp"
 #include "../gl/attribute_buffer.hpp"
 #include "../gl/texture.hpp"
@@ -17,29 +18,45 @@
 
 namespace yavsg
 {
-    class material_description
+    // TODO: std::optional<gl::texture>
+    using material_description_base = material<
+        gl::texture*,
+        gl::texture*,
+        gl::texture*
+    >;
+    class material_description : public material_description_base
     {
     public:
-        // TODO: std::optional< gl::texture >
-        gl::texture*    color_map = nullptr;
-        gl::texture*   normal_map = nullptr;
-        gl::texture* specular_map = nullptr;
+              gl::texture*    color_map()       { return std::get< 0 >( values ); }
+              gl::texture*   normal_map()       { return std::get< 1 >( values ); }
+              gl::texture* specular_map()       { return std::get< 2 >( values ); }
+        const gl::texture*    color_map() const { return std::get< 0 >( values ); }
+        const gl::texture*   normal_map() const { return std::get< 1 >( values ); }
+        const gl::texture* specular_map() const { return std::get< 2 >( values ); }
         
-        material_description() {}
+        using material_description_base::material;
+        
+        material_description() : material_description_base(
+            nullptr,
+            nullptr,
+            nullptr
+        ) {}
         material_description( const material_description& o ) = delete;
-        material_description( material_description&& o )
+        material_description( material_description&& o ) :
+            material_description_base(
+                o.   color_map(),
+                o.  normal_map(),
+                o.specular_map()
+            )
         {
-            std::swap(    color_map, o.   color_map );
-            std::swap(   normal_map, o.  normal_map );
-            std::swap( specular_map, o.specular_map );
+            o.values = { nullptr, nullptr, nullptr };
         }
         
         ~material_description()
         {
-            // Won't be necessary using std::optional
-            if(    color_map ) delete    color_map;
-            if(   normal_map ) delete   normal_map;
-            if( specular_map ) delete specular_map;
+            if(    color_map() ) delete    color_map();
+            if(   normal_map() ) delete   normal_map();
+            if( specular_map() ) delete specular_map();
         }
     };
     
