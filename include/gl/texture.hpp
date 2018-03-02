@@ -70,7 +70,7 @@ namespace yavsg { namespace gl
                 ( ActiveTexture < GL_MAX_TEXTURE_UNITS ),
                 int
             >::type = 0
-        > void bind_as()
+        > void bind_as() const
         {
             glActiveTexture( GL_TEXTURE0 + ActiveTexture );
             YAVSG_GL_THROW_FOR_ERRORS(
