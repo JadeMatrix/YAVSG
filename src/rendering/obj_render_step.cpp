@@ -54,30 +54,32 @@ namespace yavsg
         else if( !tinyobj_error.empty() )
             std::cerr << "tinyobj warning: " << tinyobj_error << std::endl;
         
+        ////////////////////////////////////////////////////////////////////////
+        
+        GLfloat obj_max_x = 0.0f;
+        GLfloat obj_min_x = 0.0f;
+        GLfloat obj_max_y = 0.0f;
+        GLfloat obj_min_y = 0.0f;
+        GLfloat obj_max_z = 0.0f;
+        GLfloat obj_min_z = 0.0f;
+        
         // Load textures
+        std::vector< material_description > materials;
         for( auto& material : obj_materials )
-        // for( int i = 0; i < obj_materials.size(); ++i )
         {
-            render_groups.push_back( {
-                nullptr,
-                nullptr,
-                nullptr,
-                nullptr,
-                {},
-                nullptr
-            } );
-            auto& group = render_groups.back();
+            material_description description;
             
+            // TODO: Loop
             if( material.diffuse_texname.size() )
             {
                 std::string texture_filename =
                     obj_mtl_directory + material.diffuse_texname;
                 
-                group.color_map = new gl::texture( gl::texture::from_file(
+                description.color_map = new gl::texture( gl::texture::from_file(
                     texture_filename
                 ) );
                 
-                group.color_map -> filtering( {
+                description.color_map -> filtering( {
                     gl::texture::filter_settings::magnify_mode::LINEAR,
                     gl::texture::filter_settings::minify_mode::LINEAR,
                     gl::texture::filter_settings::mipmap_type::LINEAR,
@@ -89,11 +91,11 @@ namespace yavsg
                 std::string texture_filename =
                     obj_mtl_directory + material.bump_texname;
                 
-                group.normal_map = new gl::texture( gl::texture::from_file(
+                description.normal_map = new gl::texture( gl::texture::from_file(
                     texture_filename
                 ) );
                 
-                group.normal_map -> filtering( {
+                description.normal_map -> filtering( {
                     gl::texture::filter_settings::magnify_mode::LINEAR,
                     gl::texture::filter_settings::minify_mode::LINEAR,
                     gl::texture::filter_settings::mipmap_type::LINEAR,
@@ -105,37 +107,23 @@ namespace yavsg
                 std::string texture_filename =
                     obj_mtl_directory + material.specular_texname;
                 
-                group.specular_map = new gl::texture( gl::texture::from_file(
+                description.specular_map = new gl::texture( gl::texture::from_file(
                     texture_filename
                 ) );
                 
-                group.specular_map -> filtering( {
+                description.specular_map -> filtering( {
                     gl::texture::filter_settings::magnify_mode::LINEAR,
                     gl::texture::filter_settings::minify_mode::LINEAR,
                     gl::texture::filter_settings::mipmap_type::LINEAR,
                 } );
             }
             
-            if( material.alpha_texname.size() )
-            {
-                std::string texture_filename =
-                    obj_mtl_directory + material.alpha_texname;
-                
-                group.mask_map = new gl::texture( gl::texture::from_file(
-                    texture_filename
-                ) );
-                
-                group.mask_map -> filtering( {
-                    gl::texture::filter_settings::magnify_mode::LINEAR,
-                    gl::texture::filter_settings::minify_mode::LINEAR,
-                    gl::texture::filter_settings::mipmap_type::LINEAR,
-                } );
-            }
+            materials.push_back( std::move( description ) );
         }
         
-        std::vector< vertex_type > vertex_storage;
-        
         // Create vertices
+        std::vector< vertex_type > vertices;
+        std::vector< std::vector< GLuint > > indices( materials.size() );
         for( auto& obj_shape : obj_shapes )
         {
             std::size_t index_offset = 0;
@@ -148,15 +136,22 @@ namespace yavsg
                 << std::endl
             ;
             
-            // for( auto& vertex_count : obj_shape.mesh.num_face_vertices )
-            for( size_t face = 0; face < obj_shape.mesh.num_face_vertices.size(); ++face )
+            for(
+                std::size_t face = 0;
+                face < obj_shape.mesh.num_face_vertices.size();
+                ++face
+            )
             {
                 auto vertex_count = obj_shape.mesh.num_face_vertices[ face ];
                 
+                // TODO: Suport other vertex counts
                 if( vertex_count != 3 )
-                    throw std::runtime_error( "vertex count = " + std::to_string( vertex_count ) );
+                    throw std::runtime_error(
+                        "vertex count = "
+                        + std::to_string( vertex_count )
+                    );
                 
-                auto& group = render_groups[
+                auto& group_indices = indices[
                     obj_shape.mesh.material_ids[ face ]
                 ];
                 
@@ -180,14 +175,13 @@ namespace yavsg
                     auto tu = obj_attributes.texcoords[ 2 * index.texcoord_index + 0 ];
                     auto tv = obj_attributes.texcoords[ 2 * index.texcoord_index + 1 ];
                     
-                    // TODO: Normalize to vertices so each attribute combo is stored once
-                    vertex_storage.push_back( {
+                    vertices.push_back( {
                         { vx, vz, vy }, // { vx, vy, vz },
                         { nx, nz, ny },
                         { cr, cb, cg },
                         { tu, tv }
                     } );
-                    group.temp_index_storage.push_back( vertex_storage.size() - 1 );
+                    group_indices.push_back( vertices.size() - 1 );
                     
                     if( vx > obj_max_x )
                         obj_max_x = vx;
@@ -209,104 +203,67 @@ namespace yavsg
             }
         }
         
-        vertices = new program_type::attribute_buffer_type( vertex_storage );
-        for( auto& group : render_groups )
-            group.vertex_indices = new gl::index_buffer( group.temp_index_storage );
-        
-        // // DEBUG:
-        // std::cout
-        //     << "loaded "
-        //     << render_groups.size()
-        //     << " render groups:"
-        //     << std::endl
-        // ;
-        // for( auto& group : render_groups )
-        //     std::cout
-        //         << "  group:"
-        //         << std::endl
-        //         << "    color map: "
-        //         << ( group.has_color_map ? std::to_string( group.color_map ) : "none" )
-        //         << std::endl
-        //         << "    vertices: "
-        //         << group.vertices.size()
-        //         << std::endl
-        //     ;
-        
-        // // DEBUG:
-        // for( auto& group : render_groups )
-        // {
-        //     std::cout
-        //         << "group:"
-        //         << std::endl
-        //         << "  color map: "
-        //         << ( group.has_color_map ? std::to_string( group.color_map ) : "none" )
-        //         << std::endl
-        //         << "  vertices ("
-        //         << group.vertices.size()
-        //         << "):"
-        //         << std::endl
-        //     ;
+        // Move OBJ data over to manager
+        {
+            using group_type = render_object_manager<
+                attribute_buffer_type,
+                material_description
+            >::render_group;
             
-        //     for( auto& vertex : group.vertices )
-        //         std::cout
-        //             << "    "
-        //             << std::get< 0 >( vertex )
-        //             << ", "
-        //             << std::get< 1 >( vertex )
-        //             << ", "
-        //             << std::get< 2 >( vertex )
-        //             << std::endl
-        //         ;
-        // }
-        
-        GLfloat width  = obj_max_x - obj_min_x;
-        GLfloat length = obj_max_y - obj_min_y;
-        GLfloat height = obj_max_z - obj_min_z;
-        GLfloat scale  = std::max( { width, length, height } );
-        // model_scale_transform = scaling< GLfloat >( 1.0f / scale );
-        // model_scale_transform = identity_matrix< GLfloat, 4 >();
-        model_scale_transform = scaling< GLfloat >( vector< GLfloat, 3 >{
-            13.0f / scale /*width*/,
-            13.0f / scale /*length*/,
-            13.0f / scale /*height*/
-        } );
-        
-        // DEBUG:
-        std::cout
-            << "OBJ max X = " << obj_max_x << std::endl
-            << "OBJ min X = " << obj_min_x << std::endl
-            << "OBJ max Y = " << obj_max_y << std::endl
-            << "OBJ min Y = " << obj_min_y << std::endl
-            << "OBJ max Z = " << obj_max_z << std::endl
-            << "OBJ min Z = " << obj_min_z << std::endl
-            << "scale transform = "
-            << model_scale_transform
-            << std::endl
-        ;
-        
-        scene_program.link_attribute< 0 >( "position"        , *vertices );
-        scene_program.link_attribute< 1 >( "normal_in"       , *vertices );
-        scene_program.link_attribute< 2 >( "color_in"        , *vertices );
-        scene_program.link_attribute< 3 >( "texture_coord_in", *vertices );
-        scene_program.bind_target< 0 >( "color_out" );
+            auto objects_ref = object_manager.write();
+            
+            objects_ref -> emplace_back(
+                std::vector< group_type >{},
+                vertices
+            );
+            
+            auto& groups = objects_ref -> back().render_groups;
+            
+            for( std::size_t i = 0; i < materials.size(); ++i )
+                groups.emplace_back(
+                    std::move( materials[ i ] ),
+                    indices[ i ]
+                );
+            
+            GLfloat width  = obj_max_x - obj_min_x;
+            GLfloat length = obj_max_y - obj_min_y;
+            GLfloat height = obj_max_z - obj_min_z;
+            GLfloat scale  = std::max( { width, length, height } );
+            // model_scale_transform = scaling< GLfloat >( 1.0f / scale );
+            // model_scale_transform = identity_matrix< GLfloat, 4 >();
+            model_scale_transform = scaling< GLfloat >( vector< GLfloat, 3 >{
+                13.0f / scale /*width*/,
+                13.0f / scale /*length*/,
+                13.0f / scale /*height*/
+            } );
+            
+            // DEBUG:
+            std::cout
+                << "OBJ max X = " << obj_max_x << std::endl
+                << "OBJ min X = " << obj_min_x << std::endl
+                << "OBJ max Y = " << obj_max_y << std::endl
+                << "OBJ min Y = " << obj_min_y << std::endl
+                << "OBJ max Z = " << obj_max_z << std::endl
+                << "OBJ min Z = " << obj_min_z << std::endl
+                << "scale transform = "
+                << model_scale_transform
+                << std::endl
+            ;
+            
+            auto& uploaded_vertices = objects_ref -> back().vertices;
+            
+            scene_program.link_attribute< 0 >( "position"        , uploaded_vertices );
+            scene_program.link_attribute< 1 >( "normal_in"       , uploaded_vertices );
+            scene_program.link_attribute< 2 >( "color_in"        , uploaded_vertices );
+            scene_program.link_attribute< 3 >( "texture_coord_in", uploaded_vertices );
+            scene_program.bind_target< 0 >( "color_out" );
+        }
     }
     
-    obj_render_step::~obj_render_step()
-    {
-        for( auto group : render_groups )
-        {
-            if( group.color_map )
-                delete group.color_map;
-            if( group.normal_map )
-                delete group.normal_map;
-            if( group.specular_map )
-                delete group.specular_map;
-            if( group.mask_map )
-                delete group.mask_map;
-            delete group.vertex_indices;
-        }
-        delete vertices;
-    }
+    // obj_render_step::~obj_render_step()
+    // {
+        
+    // }
     
     void obj_render_step::run()
     {
@@ -372,84 +329,78 @@ namespace yavsg
             yavsg::vector< GLfloat, 3 >( 1.0f, 1.0f, 1.0f )
         );
         
-        for( auto& group : render_groups )
+        auto objects_ref = object_manager.read();
+        
+        for( auto& object : *objects_ref )
         {
-            if( group.color_map )
+            for( auto& group : object.render_groups )
             {
-                group.color_map -> bind_as< 0 >();
-                scene_program.set_uniform< GLint >( "color_map", 0 );
-                scene_program.set_uniform< GLboolean >(
-                    "has_color_map",
-                    GL_TRUE
+                // Can't loop over texture IDs, as texture::bind_as<>() requires
+                // it at compile-time -- the goal is eventually have a material
+                // destription metaclass that will chose IDs at compile time as
+                // they aren't meaningful in themselves anyways.  (Material bind
+                // method will need a "starting at ID" parameter so more than
+                // one material can be used at once).
+                
+                if( group.material.color_map )
+                {
+                    group.material.color_map -> bind_as< 0 >();
+                    scene_program.set_uniform< GLint >( "color_map", 0 );
+                    scene_program.set_uniform< GLboolean >(
+                        "has_color_map",
+                        GL_TRUE
+                    );
+                }
+                else
+                {
+                    gl::unbind_texture< 0 >();
+                    scene_program.set_uniform< GLboolean >(
+                        "has_color_map",
+                        GL_FALSE
+                    );
+                }
+                
+                if( group.material.normal_map )
+                {
+                    group.material.normal_map -> bind_as< 1 >();
+                    scene_program.set_uniform< GLint >( "normal_map", 1 );
+                    scene_program.set_uniform< GLboolean >(
+                        "has_normal_map",
+                        GL_TRUE
+                    );
+                }
+                else
+                {
+                    gl::unbind_texture< 1 >();
+                    scene_program.set_uniform< GLboolean >(
+                        "has_normal_map",
+                        GL_FALSE
+                    );
+                }
+                
+                if( group.material.specular_map )
+                {
+                    group.material.specular_map -> bind_as< 2 >();
+                    scene_program.set_uniform< GLint >( "specular_map", 2 );
+                    scene_program.set_uniform< GLboolean >(
+                        "has_specular_map",
+                        GL_TRUE
+                    );
+                }
+                else
+                {
+                    gl::unbind_texture< 2 >();
+                    scene_program.set_uniform< GLboolean >(
+                        "has_specular_map",
+                        GL_FALSE
+                    );
+                }
+                
+                scene_program.run(
+                    object.vertices,
+                    group.indices
                 );
             }
-            else
-            {
-                gl::unbind_texture< 0 >();
-                scene_program.set_uniform< GLboolean >(
-                    "has_color_map",
-                    GL_FALSE
-                );
-            }
-            
-            if( group.normal_map )
-            {
-                group.normal_map -> bind_as< 1 >();
-                scene_program.set_uniform< GLint >( "normal_map", 1 );
-                scene_program.set_uniform< GLboolean >(
-                    "has_normal_map",
-                    GL_TRUE
-                );
-            }
-            else
-            {
-                gl::unbind_texture< 1 >();
-                scene_program.set_uniform< GLboolean >(
-                    "has_normal_map",
-                    GL_FALSE
-                );
-            }
-            
-            if( group.specular_map )
-            {
-                group.specular_map -> bind_as< 2 >();
-                scene_program.set_uniform< GLint >( "specular_map", 2 );
-                scene_program.set_uniform< GLboolean >(
-                    "has_specular_map",
-                    GL_TRUE
-                );
-            }
-            else
-            {
-                gl::unbind_texture< 2 >();
-                scene_program.set_uniform< GLboolean >(
-                    "has_specular_map",
-                    GL_FALSE
-                );
-            }
-            
-            if( group.mask_map )
-            {
-                group.mask_map -> bind_as< 3 >();
-                scene_program.set_uniform< GLint >( "mask_map", 3 );
-                scene_program.set_uniform< GLboolean >(
-                    "has_mask_map",
-                    GL_TRUE
-                );
-            }
-            else
-            {
-                gl::unbind_texture< 3 >();
-                scene_program.set_uniform< GLboolean >(
-                    "has_mask_map",
-                    GL_FALSE
-                );
-            }
-            
-            scene_program.run(
-                *vertices,
-                *group.vertex_indices
-            );
         }
     }
 }
