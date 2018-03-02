@@ -75,11 +75,12 @@ namespace yavsg
             framebuffer_type
         >;
         using vertex_type = attribute_buffer_type::tuple_type;
-        
-        render_object_manager<
+        using render_object_manager_type = render_object_manager<
             attribute_buffer_type,
             material_description
-        > object_manager;
+        >;
+        
+        render_object_manager_type object_manager;
         
         struct render_group
         {

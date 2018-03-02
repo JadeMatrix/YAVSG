@@ -12,29 +12,15 @@
 #include <iostream>     // std::cerr for tinyobj warnings
 
 
-namespace yavsg
+namespace
 {
-    obj_render_step::obj_render_step(
+    void manager_insert_obj(
+        yavsg::obj_render_step::render_object_manager_type& manager,
         const std::string& obj_filename,
-        const std::string& obj_mtl_directory
-    ) :
-        model_scale_transform(
-            square_matrix< GLfloat, 4 >::make_uninitialized()
-        ),
-        scene_program( {
-            gl::shader::from_file(
-                GL_VERTEX_SHADER,
-                "../src/shaders/obj_scene.vert"
-            ).id,
-            gl::shader::from_file(
-                GL_FRAGMENT_SHADER,
-                "../src/shaders/obj_scene.frag"
-            ).id
-        } )
+        const std::string& obj_mtl_directory,
+        yavsg::square_matrix< GLfloat, 4 >& model_scale_transform
+    )
     {
-        start_time = std::chrono::high_resolution_clock::now();
-        previous_time = start_time;
-        
         tinyobj::attrib_t obj_attributes;
         std::vector< tinyobj::shape_t    > obj_shapes;
         std::vector< tinyobj::material_t > obj_materials;
@@ -54,30 +40,21 @@ namespace yavsg
         else if( !tinyobj_error.empty() )
             std::cerr << "tinyobj warning: " << tinyobj_error << std::endl;
         
-        ////////////////////////////////////////////////////////////////////////
-        
-        GLfloat obj_max_x = 0.0f;
-        GLfloat obj_min_x = 0.0f;
-        GLfloat obj_max_y = 0.0f;
-        GLfloat obj_min_y = 0.0f;
-        GLfloat obj_max_z = 0.0f;
-        GLfloat obj_min_z = 0.0f;
-        
         // Load textures
-        std::vector< material_description > materials;
+        std::vector< yavsg::material_description > materials;
         for( auto& material : obj_materials )
         {
-            material_description description;
+            yavsg::material_description description;
             
             struct texture_info
             {
-                gl::texture*& texture;
+                yavsg::gl::texture*& texture;
                 const std::string& filename;
             };
             
-            gl::texture*    color_map = nullptr;
-            gl::texture*   normal_map = nullptr;
-            gl::texture* specular_map = nullptr;
+            yavsg::gl::texture*    color_map = nullptr;
+            yavsg::gl::texture*   normal_map = nullptr;
+            yavsg::gl::texture* specular_map = nullptr;
             
             for( auto& info : {
                 texture_info{    color_map, material.diffuse_texname  },
@@ -90,18 +67,18 @@ namespace yavsg
                     std::string texture_filename =
                         obj_mtl_directory + info.filename;
                     
-                    info.texture = new gl::texture(
-                        gl::texture::from_file( texture_filename )
+                    info.texture = new yavsg::gl::texture(
+                        yavsg::gl::texture::from_file( texture_filename )
                     );
                     info.texture -> filtering( {
-                        gl::texture::filter_settings::magnify_mode::LINEAR,
-                        gl::texture::filter_settings::minify_mode::LINEAR,
-                        gl::texture::filter_settings::mipmap_type::LINEAR,
+                        yavsg::gl::texture::filter_settings::magnify_mode::LINEAR,
+                        yavsg::gl::texture::filter_settings::minify_mode::LINEAR,
+                        yavsg::gl::texture::filter_settings::mipmap_type::LINEAR,
                     } );
                 }
             }
             
-            materials.push_back( material_description{
+            materials.push_back( yavsg::material_description{
                    color_map,
                   normal_map,
                 specular_map
@@ -109,8 +86,14 @@ namespace yavsg
         }
         
         // Create vertices
-        std::vector< vertex_type > vertices;
+        std::vector< yavsg::obj_render_step::vertex_type > vertices;
         std::vector< std::vector< GLuint > > indices( materials.size() );
+        GLfloat obj_max_x = 0.0f;
+        GLfloat obj_min_x = 0.0f;
+        GLfloat obj_max_y = 0.0f;
+        GLfloat obj_min_y = 0.0f;
+        GLfloat obj_max_z = 0.0f;
+        GLfloat obj_min_z = 0.0f;
         for( auto& obj_shape : obj_shapes )
         {
             std::size_t index_offset = 0;
@@ -192,12 +175,10 @@ namespace yavsg
         
         // Move OBJ data over to manager
         {
-            using group_type = render_object_manager<
-                attribute_buffer_type,
-                material_description
-            >::render_group;
+            using group_type =
+                yavsg::obj_render_step::render_object_manager_type::render_group;
             
-            auto objects_ref = object_manager.write();
+            auto objects_ref = manager.write();
             
             objects_ref -> emplace_back(
                 std::vector< group_type >{},
@@ -218,11 +199,13 @@ namespace yavsg
             GLfloat scale  = std::max( { width, length, height } );
             // model_scale_transform = scaling< GLfloat >( 1.0f / scale );
             // model_scale_transform = identity_matrix< GLfloat, 4 >();
-            model_scale_transform = scaling< GLfloat >( vector< GLfloat, 3 >{
-                13.0f / scale /*width*/,
-                13.0f / scale /*length*/,
-                13.0f / scale /*height*/
-            } );
+            model_scale_transform = yavsg::scaling< GLfloat >(
+                yavsg::vector< GLfloat, 3 >{
+                    13.0f / scale /*width*/,
+                    13.0f / scale /*length*/,
+                    13.0f / scale /*height*/
+                }
+            );
             
             // DEBUG:
             std::cout
@@ -236,15 +219,50 @@ namespace yavsg
                 << model_scale_transform
                 << std::endl
             ;
-            
-            auto& uploaded_vertices = objects_ref -> back().vertices;
-            
-            scene_program.link_attribute< 0 >( "position"        , uploaded_vertices );
-            scene_program.link_attribute< 1 >( "normal_in"       , uploaded_vertices );
-            scene_program.link_attribute< 2 >( "color_in"        , uploaded_vertices );
-            scene_program.link_attribute< 3 >( "texture_coord_in", uploaded_vertices );
-            scene_program.bind_target< 0 >( "color_out" );
         }
+    }
+}
+
+
+namespace yavsg
+{
+    obj_render_step::obj_render_step(
+        const std::string& obj_filename,
+        const std::string& obj_mtl_directory
+    ) :
+        model_scale_transform(
+            square_matrix< GLfloat, 4 >::make_uninitialized()
+        ),
+        scene_program( {
+            gl::shader::from_file(
+                GL_VERTEX_SHADER,
+                "../src/shaders/obj_scene.vert"
+            ).id,
+            gl::shader::from_file(
+                GL_FRAGMENT_SHADER,
+                "../src/shaders/obj_scene.frag"
+            ).id
+        } )
+    {
+        start_time = std::chrono::high_resolution_clock::now();
+        previous_time = start_time;
+        
+        manager_insert_obj(
+            object_manager,
+            obj_filename,
+            obj_mtl_directory,
+            model_scale_transform
+        );
+        
+        // Link attributes
+        auto objects_ref = object_manager.write();
+        auto& uploaded_vertices = objects_ref -> back().vertices;
+        scene_program.link_attribute< 0 >( "position"        , uploaded_vertices );
+        scene_program.link_attribute< 1 >( "normal_in"       , uploaded_vertices );
+        scene_program.link_attribute< 2 >( "color_in"        , uploaded_vertices );
+        scene_program.link_attribute< 3 >( "texture_coord_in", uploaded_vertices );
+        
+        scene_program.bind_target< 0 >( "color_out" );
     }
     
     // obj_render_step::~obj_render_step()
