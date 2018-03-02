@@ -97,7 +97,6 @@ namespace yavsg
         std::chrono::high_resolution_clock::time_point start_time;
         std::chrono::high_resolution_clock::time_point previous_time;
         program_type scene_program;
-        square_matrix< GLfloat, 4 > model_scale_transform;
         
         obj_render_step(
             const std::string& obj_filename,

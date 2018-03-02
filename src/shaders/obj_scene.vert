@@ -17,18 +17,10 @@ uniform float time_delta;
 
 void main()
 {
-    mat4 rotation;
-    float sin_val = sin( radians( time_absolute ) * 10.0 );
-    float cos_val = cos( radians( time_absolute ) * 10.0 );
-    rotation[ 0 ] = vec4(  cos_val, sin_val, 0.0, 0.0 );
-    rotation[ 1 ] = vec4( -sin_val, cos_val, 0.0, 0.0 );
-    rotation[ 2 ] = vec4(      0.0,     0.0, 1.0, 0.0 );
-    rotation[ 3 ] = vec4(      0.0,     0.0, 0.0, 1.0 );
-    
     gl_Position = (
           transform_projection
         * transform_view
-        * rotation
+        // * rotation
         * transform_model
         * vec4(
             position.x,

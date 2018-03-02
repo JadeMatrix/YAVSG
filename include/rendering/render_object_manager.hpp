@@ -5,6 +5,10 @@
 
 #include "../gl/_gl_base.hpp"
 #include "../gl/attribute_buffer.hpp"
+#include "../math/transforms.hpp"
+#include "../math/matrix.hpp"
+#include "../math/quaternion.hpp"
+#include "../math/vector.hpp"
 
 #include <mutex>
 #include <vector>
@@ -45,21 +49,45 @@ namespace yavsg
             std::vector< render_group > render_groups;
             AttributeBuffer vertices;
             
-            render_object() = default;
+            // TODO: Subclassing for customizing these
+            // Basic transforms; applied scale then rotation then position
+            vector< GLfloat, 3 > position;
+            vector< GLfloat, 3 > scale;
+            versor< GLfloat > rotation;
+            
+            // render_object() = default;
             render_object( const render_object& o ) = delete;
             
             render_object(
                 std::vector< render_group >&& rg,
-                AttributeBuffer            && v
+                AttributeBuffer            && v,
+                const vector< GLfloat, 3 >  & p,
+                const vector< GLfloat, 3 >  & s,
+                const versor< GLfloat >     & r
             ) :
                 render_groups( std::move( rg ) ),
-                vertices(      std::move( v  ) )
+                vertices(      std::move( v  ) ),
+                position( p ),
+                scale(    s ),
+                rotation( r )
             {}
             
             render_object( render_object&& o ) :
                 render_groups( std::move( o.render_groups ) ),
-                vertices(      std::move( o.vertices      ) )
+                vertices(      std::move( o.vertices      ) ),
+                position(      std::move( o.position      ) ),
+                scale(         std::move( o.scale         ) ),
+                rotation(      std::move( o.rotation      ) )
             {}
+            
+            square_matrix< GLfloat, 4 > transform_model() const
+            {
+                return (
+                      yavsg::translation< GLfloat >( position )
+                    * yavsg::    scaling< GLfloat >( scale    )
+                    * yavsg::   rotation< GLfloat >( rotation )
+                );
+            }
         };
         
         using object_list = std::vector< render_object >;

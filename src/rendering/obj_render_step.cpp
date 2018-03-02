@@ -17,8 +17,7 @@ namespace
     void manager_insert_obj(
         yavsg::obj_render_step::render_object_manager_type& manager,
         const std::string& obj_filename,
-        const std::string& obj_mtl_directory,
-        yavsg::square_matrix< GLfloat, 4 >& model_scale_transform
+        const std::string& obj_mtl_directory
     )
     {
         tinyobj::attrib_t obj_attributes;
@@ -180,9 +179,20 @@ namespace
             
             auto objects_ref = manager.write();
             
+            GLfloat width  = obj_max_x - obj_min_x;
+            GLfloat length = obj_max_y - obj_min_y;
+            GLfloat height = obj_max_z - obj_min_z;
+            GLfloat scale  = 13.0f / std::max( { width, length, height } );
+            
             objects_ref -> emplace_back(
                 std::vector< group_type >{},
-                vertices
+                vertices,
+                yavsg::vector< GLfloat, 3 >{ 0.0f, 0.0f, 0.0f },
+                yavsg::vector< GLfloat, 3 >{ scale, scale, scale },
+                yavsg::versor_from_euler< GLfloat >(
+                    yavsg::radians< GLfloat >( 0.0f ),
+                    yavsg::vector< GLfloat, 3 >{ 0.0f, 0.0f, 1.0f }
+                )
             );
             
             auto& groups = objects_ref -> back().render_groups;
@@ -192,33 +202,6 @@ namespace
                     std::move( materials[ i ] ),
                     indices[ i ]
                 );
-            
-            GLfloat width  = obj_max_x - obj_min_x;
-            GLfloat length = obj_max_y - obj_min_y;
-            GLfloat height = obj_max_z - obj_min_z;
-            GLfloat scale  = std::max( { width, length, height } );
-            // model_scale_transform = scaling< GLfloat >( 1.0f / scale );
-            // model_scale_transform = identity_matrix< GLfloat, 4 >();
-            model_scale_transform = yavsg::scaling< GLfloat >(
-                yavsg::vector< GLfloat, 3 >{
-                    13.0f / scale /*width*/,
-                    13.0f / scale /*length*/,
-                    13.0f / scale /*height*/
-                }
-            );
-            
-            // DEBUG:
-            std::cout
-                << "OBJ max X = " << obj_max_x << std::endl
-                << "OBJ min X = " << obj_min_x << std::endl
-                << "OBJ max Y = " << obj_max_y << std::endl
-                << "OBJ min Y = " << obj_min_y << std::endl
-                << "OBJ max Z = " << obj_max_z << std::endl
-                << "OBJ min Z = " << obj_min_z << std::endl
-                << "scale transform = "
-                << model_scale_transform
-                << std::endl
-            ;
         }
     }
 }
@@ -230,9 +213,6 @@ namespace yavsg
         const std::string& obj_filename,
         const std::string& obj_mtl_directory
     ) :
-        model_scale_transform(
-            square_matrix< GLfloat, 4 >::make_uninitialized()
-        ),
         scene_program( {
             gl::shader::from_file(
                 GL_VERTEX_SHADER,
@@ -250,8 +230,7 @@ namespace yavsg
         manager_insert_obj(
             object_manager,
             obj_filename,
-            obj_mtl_directory,
-            model_scale_transform
+            obj_mtl_directory
         );
         
         // Link attributes
@@ -282,11 +261,6 @@ namespace yavsg
               GL_COLOR_BUFFER_BIT
             | GL_DEPTH_BUFFER_BIT
             | GL_STENCIL_BUFFER_BIT
-        );
-        
-        scene_program.set_uniform(
-            "transform_model",
-            model_scale_transform
         );
         
         auto transform_view = (
@@ -338,6 +312,29 @@ namespace yavsg
         
         for( auto& object : *objects_ref )
         {
+            radians< GLfloat > rotate_by = degrees< GLfloat >(
+                std::chrono::duration_cast<
+                    std::chrono::duration< float >
+                >( current_time - start_time ).count()
+                * 10
+            );
+            
+            auto sin_val = ( GLfloat )sin( rotate_by );
+            auto cos_val = ( GLfloat )cos( rotate_by );
+            
+            auto rotation_matrix = square_matrix< GLfloat, 4 >{
+                {      cos_val,      sin_val, ( GLfloat )0, ( GLfloat )0 },
+                {     -sin_val,      cos_val, ( GLfloat )0, ( GLfloat )0 },
+                { ( GLfloat )0, ( GLfloat )0, ( GLfloat )1, ( GLfloat )0 },
+                { ( GLfloat )0, ( GLfloat )0, ( GLfloat )0, ( GLfloat )1 }
+            };
+            
+            scene_program.set_uniform(
+                "transform_model",
+                rotation_matrix
+                * object.transform_model()
+            );
+            
             for( auto& group : object.render_groups )
             {
                 group.material.bind(
