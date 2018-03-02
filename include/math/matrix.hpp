@@ -54,24 +54,24 @@ namespace yavsg
         {
             // Implements same semantics as partial array initialization via
             // brace-enclosed lists (uninitialized members become 0)
-            auto row_iter = il.begin();
-            for( unsigned int i = 0; i < Rows; ++i )
+            auto col_iter = il.begin();
+            for( unsigned int j = 0; j < Cols; ++j )
             {
-                if( row_iter == il.end() )
-                    for( unsigned int j = 0; j < Cols; ++j )
+                if( col_iter == il.end() )
+                    for( unsigned int i = 0; i < Rows; ++i )
                         values[ j ][ i ] = 0;
                 else
                 {
-                    auto col_iter = row_iter -> begin();
-                    for( unsigned int j = 0; j < Cols; ++j )
-                        if( col_iter == row_iter -> end() )
+                    auto row_iter = col_iter -> begin();
+                    for( unsigned int i = 0; i < Rows; ++i )
+                        if( row_iter == col_iter -> end() )
                             values[ j ][ i ] = 0;
                         else
                         {
-                            values[ j ][ i ] = *col_iter;
-                            ++col_iter;
+                            values[ j ][ i ] = *row_iter;
+                            ++row_iter;
                         }
-                    ++row_iter;
+                    ++col_iter;
                 }
             }
         }
