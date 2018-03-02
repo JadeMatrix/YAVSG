@@ -38,6 +38,13 @@ namespace
             return false;
         }
     }
+    
+    enum
+    {
+        NEED_CHECK,
+        SUPPORTED,
+        UNSUPPORTED
+    } anisotropic_filtering_supported = NEED_CHECK;
 }
 
 
@@ -311,6 +318,19 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
         using  minify_mode = filter_settings::minify_mode;
         using  mipmap_type = filter_settings::mipmap_type;
         
+        if( anisotropic_filtering_supported == NEED_CHECK )
+        #ifdef __APPLE__
+            // For now, assume this won't be compiled on one version of macOS
+            // and expected to run on an older one
+            anisotropic_filtering_supported = SUPPORTED;
+        #else
+            anisotropic_filtering_supported = (
+                GLEW_EXT_texture_filter_anisotropic
+                ? SUPPORTED
+                : UNSUPPORTED
+            );
+        #endif
+        
         glBindTexture( GL_TEXTURE_2D, gl_id );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't bind texture "
@@ -389,6 +409,20 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
                 + std::to_string( gl_id )
                 + " for yavsg::gl::texture::filtering()"
             );
+            
+            if( anisotropic_filtering_supported == SUPPORTED )
+            {
+                GLfloat max_anisotropic_level;
+                glGetFloatv(
+                    GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT,
+                    &max_anisotropic_level
+                );
+                glTexParameterf(
+                    GL_TEXTURE_2D,
+                    GL_TEXTURE_MAX_ANISOTROPY_EXT,
+                    max_anisotropic_level
+                );
+            }
         }
     }
     
