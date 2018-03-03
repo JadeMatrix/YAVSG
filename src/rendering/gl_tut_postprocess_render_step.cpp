@@ -35,7 +35,7 @@ namespace gl_tut // gl_tut_postprocess_render_step implementations /////////////
         postprocess_program.bind_target< 0 >( "color_out" );
     }
     
-    void postprocess_render_step::run( yavsg::gl::framebuffer< 1 >& source )
+    void postprocess_render_step::run( framebuffer_type& source )
     {
         // TODO: error handling
         
