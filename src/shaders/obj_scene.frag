@@ -6,9 +6,9 @@ in vec2 texture_coord;
 
 out vec4 color_out;
 
-uniform sampler2D     color_map;
-uniform sampler2D     normal_map;
-uniform sampler2D     specular_map;
+uniform sampler2D color_map;
+uniform sampler2D normal_map;
+uniform sampler2D specular_map;
 
 uniform vec3 tint;
 

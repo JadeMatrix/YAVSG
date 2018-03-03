@@ -1,20 +1,15 @@
-// #include "gl_utils.hpp"
-// #include "sdl_utils.hpp"
-// #include "render_steps.hpp"
-
 #include "../include/gl/_gl_base.hpp" // For GLEW initialization, if any
 
 #include "../include/gl/error.hpp"
 #include "../include/gl/framebuffer.hpp"
-#include "../include/gl/shader.hpp"
 #include "../include/sdl/sdl_utils.hpp"
 #include "../include/rendering/render_step.hpp"
-#include "../include/rendering/obj_render_step.hpp"
-#include "../include/rendering/4up_postprocess_render_step.hpp"
 
+// DEVEL:
 #include "../include/rendering/gl_tut.hpp"
-// #include "../include/rendering/gl_tut_scene_render_step.hpp"
-#include "../include/rendering/gl_tut_postprocess_render_step.hpp"
+#include "../include/rendering/obj_render_step.hpp"
+#include "../include/rendering/basic_postprocess_step.hpp"
+#include "../include/rendering/4up_postprocess_step.hpp"
 
 #include <exception>
 #include <iostream>
@@ -46,39 +41,21 @@ int main( int argc, char* argv[] )
     #endif
         
         std::vector< yavsg::render_step* > scene_steps = {
-            // new gl_tut::render_step()
             new yavsg::obj_render_step(
                 "../local/Crytek Sponza Atrium/sponza.obj",
                 "../local/Crytek Sponza Atrium/"
-                // "../local/cube/cube.obj",
-                // "../local/cube/"
             )
         };
         std::vector< yavsg::postprocess_step< 1 >* > postprocess_steps = {
-            // new gl_tut::postprocess_render_step(
-            //     "../src/shaders/postprocess/sobel.frag"
-            // ),
-            // new gl_tut::postprocess_render_step(
-            //     "../src/shaders/postprocess/box_blur.frag"
-            // ),
-            // new gl_tut::postprocess_render_step(
-            //     "../src/shaders/postprocess/circular_gradient.frag"
-            // ),
-            // new gl_tut::postprocess_render_step(
-            //     "../src/shaders/postprocess/depth.frag"
-            // ),
-            // new gl_tut::postprocess_render_step(
-            //     "../src/shaders/postprocess/dof.frag"
-            // )
-            new yavsg::debug_4up_postprocess_render_step(
+            new yavsg::debug_4up_postprocess_step(
                 nullptr,
-                new gl_tut::postprocess_render_step(
+                new yavsg::basic_postprocess_step(
                     "../src/shaders/postprocess/dof.frag"
                 ),
-                new gl_tut::postprocess_render_step(
+                new yavsg::basic_postprocess_step(
                     "../src/shaders/postprocess/depth.frag"
                 ),
-                new gl_tut::postprocess_render_step(
+                new yavsg::basic_postprocess_step(
                     "../src/shaders/postprocess/sobel.frag"
                 )
             )

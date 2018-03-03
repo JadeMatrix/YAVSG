@@ -54,10 +54,10 @@ ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
     src/gl/texture.cpp
     src/gl/shader.cpp
     # src/rendering/gl_tut_scene_render_step.cpp
-    src/rendering/gl_tut_postprocess_render_step.cpp
-    src/rendering/4up_postprocess_render_step.cpp
+    src/rendering/basic_postprocess_step.cpp
+    src/rendering/4up_postprocess_step.cpp
     src/rendering/obj_render_step.cpp
-    src/rendering/scene_render_step.cpp
+    # src/rendering/scene_render_step.cpp
 )
 SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_INFO_PLIST           "Info.plist.in"

@@ -1,12 +1,12 @@
 #include "../../include/rendering/gl_tut.hpp"
-#include "../../include/rendering/gl_tut_postprocess_render_step.hpp"
+#include "../../include/rendering/basic_postprocess_step.hpp"
 
 #include "../../include/gl/shader.hpp"
 
 
-namespace gl_tut // gl_tut_postprocess_render_step implementations ////////////////////
+namespace yavsg
 {
-    postprocess_render_step::postprocess_render_step(
+    basic_postprocess_step::basic_postprocess_step(
         const std::string& fragment_shader_filename
     ) :
         postprocess_program( {
@@ -35,7 +35,7 @@ namespace gl_tut // gl_tut_postprocess_render_step implementations /////////////
         postprocess_program.bind_target< 0 >( "color_out" );
     }
     
-    void postprocess_render_step::run( framebuffer_type& source )
+    void basic_postprocess_step::run( framebuffer_type& source )
     {
         // TODO: error handling
         
@@ -56,11 +56,11 @@ namespace gl_tut // gl_tut_postprocess_render_step implementations /////////////
         
         postprocess_program.set_uniform(
             "view_width",
-            ( GLfloat )window_width
+            ( GLfloat )gl_tut::window_width
         );
         postprocess_program.set_uniform(
             "view_height",
-            ( GLfloat )window_height
+            ( GLfloat )gl_tut::window_height
         );
         
         postprocess_program.run(

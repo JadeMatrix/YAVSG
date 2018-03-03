@@ -1,6 +1,6 @@
 #pragma once
-#ifndef YAVSG_RENDERING_GL_TUT_POSTPROCESS_RENDER_STEP_HPP
-#define YAVSG_RENDERING_GL_TUT_POSTPROCESS_RENDER_STEP_HPP
+#ifndef YAVSG_RENDERING_BASIC_POSTPROCESS_STEP_HPP
+#define YAVSG_RENDERING_BASIC_POSTPROCESS_STEP_HPP
 
 
 #include "render_step.hpp"
@@ -9,13 +9,12 @@
 #include "../gl/attribute_buffer.hpp"
 #include "../math/vector.hpp"
 
-#include <chrono>
 #include <string>
 
 
-namespace gl_tut
+namespace yavsg
 {
-    class postprocess_render_step : public yavsg::postprocess_step< 1 >
+    class basic_postprocess_step : public yavsg::postprocess_step< 1 >
     {
     public:
         using attribute_buffer_type = yavsg::gl::attribute_buffer<
@@ -32,10 +31,9 @@ namespace gl_tut
         attribute_buffer_type   vertices;
         yavsg::gl::index_buffer indices;
         
-        postprocess_render_step(
+        basic_postprocess_step(
             const std::string& fragment_shader_filename
         );
-        // ~postprocess_render_step();
         virtual void run( framebuffer_type& source );
     };
 }

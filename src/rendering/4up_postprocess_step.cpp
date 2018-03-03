@@ -1,5 +1,5 @@
 #include "../../include/rendering/gl_tut.hpp"
-#include "../../include/rendering/4up_postprocess_render_step.hpp"
+#include "../../include/rendering/4up_postprocess_step.hpp"
 
 #include "../../include/gl/shader.hpp"
 
@@ -67,7 +67,7 @@ void main()
 
 namespace yavsg
 {
-    debug_4up_postprocess_render_step::debug_4up_postprocess_render_step(
+    debug_4up_postprocess_step::debug_4up_postprocess_step(
         postprocess_step< 1 >* top_left,
         postprocess_step< 1 >* top_right,
         postprocess_step< 1 >* bottom_left,
@@ -140,7 +140,7 @@ namespace yavsg
         postprocess_program.bind_target< 0 >( "color_out" );
     }
     
-    debug_4up_postprocess_render_step::~debug_4up_postprocess_render_step()
+    debug_4up_postprocess_step::~debug_4up_postprocess_step()
     {
         if( top_left )
             delete top_left;
@@ -152,7 +152,7 @@ namespace yavsg
             delete bottom_right;
     }
     
-    void debug_4up_postprocess_render_step::run( framebuffer_type& source )
+    void debug_4up_postprocess_step::run( framebuffer_type& source )
     {
         // TODO: error handling
         
