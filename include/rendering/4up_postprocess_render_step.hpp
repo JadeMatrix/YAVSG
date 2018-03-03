@@ -36,10 +36,12 @@ namespace yavsg
         postprocess_step< 1 >* bottom_left;
         postprocess_step< 1 >* bottom_right;
         
-        yavsg::gl::index_buffer top_left_indices;
-        yavsg::gl::index_buffer top_right_indices;
-        yavsg::gl::index_buffer bottom_left_indices;
-        yavsg::gl::index_buffer bottom_right_indices;
+        gl::index_buffer top_left_indices;
+        gl::index_buffer top_right_indices;
+        gl::index_buffer bottom_left_indices;
+        gl::index_buffer bottom_right_indices;
+        
+        gl::framebuffer< 1 > sub_buffer;
         
         debug_4up_postprocess_render_step(
             postprocess_step< 1 >* top_left,
