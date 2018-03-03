@@ -28,6 +28,40 @@ namespace
             );
         }
     };
+    
+    const std::string vertex_shader = R"<<<(
+#version 150 core
+in vec2 position;
+in vec2 texture_coord_in;
+out vec2 texture_coord;
+void main()
+{
+    texture_coord = texture_coord_in;
+    gl_Position = vec4(
+        position.x,
+        position.y,
+        0.0,
+        1.0
+    );
+}
+)<<<";
+    
+    const std::string fragment_shader = R"<<<(
+#version 150 core
+in vec2 texture_coord;
+out vec4 color_out;
+uniform sampler2D framebuffer;
+void main()
+{
+    color_out = texture(
+        framebuffer,
+        vec2(
+            texture_coord.x,
+            texture_coord.y * -1
+        )
+    );
+}
+)<<<";
 }
 
 
@@ -44,14 +78,8 @@ namespace yavsg
         bottom_left(  bottom_left  ),
         bottom_right( bottom_right ),
         postprocess_program( {
-            yavsg::gl::shader::from_file(
-                GL_VERTEX_SHADER,
-                "../src/shaders/postprocess.vert"
-            ).id,
-            yavsg::gl::shader::from_file(
-                GL_FRAGMENT_SHADER,
-                "../src/shaders/postprocess.frag"
-            ).id
+            gl::shader( GL_VERTEX_SHADER  ,  vertex_shader ).id,
+            gl::shader( GL_FRAGMENT_SHADER,fragment_shader ).id
         } ),
         vertices( {
             /*
