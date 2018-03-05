@@ -50,33 +50,35 @@ namespace yavsg
     
     #endif
     
-    namespace shader_strings
+    enum class shader_string_id
     {
-        const std::string& vertex_in_position();
-        const std::string& vertex_in_normal  ();
-        const std::string& vertex_in_tangent ();
-        const std::string& vertex_in_color   ();
-        const std::string& vertex_in_texture ();
+        VERTEX_IN_POSITION,
+        VERTEX_IN_NORMAL,
+        VERTEX_IN_TANGENT,
+        VERTEX_IN_COLOR,
+        VERTEX_IN_TEXTURE,
         
-        const std::string& transform_model     ();
-        const std::string& transform_view      ();
-        const std::string& transform_projection();
+        TRANSFORM_MODEL,
+        TRANSFORM_VIEW,
+        TRANSFORM_PROJECTION,
         
-        const std::string& vertex_out_position  ();
-        const std::string& vertex_out_color     ();
-        const std::string& vertex_out_texture   ();
-        const std::string& vertex_out_TBN_matrix();
-        const std::string& fragment_in_position  ();
-        const std::string& fragment_in_color     ();
-        const std::string& fragment_in_texture   ();
-        const std::string& fragment_in_TBN_matrix();
+        VERTEX_OUT_POSITION,
+        VERTEX_OUT_COLOR,
+        VERTEX_OUT_TEXTURE,
+        VERTEX_OUT_TBN_MATRIX,
+        FRAGMENT_IN_POSITION,
+        FRAGMENT_IN_COLOR,
+        FRAGMENT_IN_TEXTURE,
+        FRAGMENT_IN_TBN_MATRIX,
         
-        const std::string& map_color   ();
-        const std::string& map_normal  ();
-        const std::string& map_specular();
+        MAP_COLOR,
+        MAP_NORMAL,
+        MAP_SPECULAR,
         
-        const std::string& fragment_out_color();
-    }
+        FRAGMENT_OUT_COLOR
+    };
+    
+    const std::string& shader_string( shader_string_id );
 }
 
 

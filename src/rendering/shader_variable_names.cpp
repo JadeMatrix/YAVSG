@@ -34,138 +34,51 @@ namespace
 }
 
 
-namespace yavsg // Vertex in attributes ////////////////////////////////////////
+namespace yavsg
 {
-    namespace shader_strings
+    const std::string& shader_string( shader_string_id id )
     {
-        const std::string& vertex_in_position()
+        switch( id )
         {
+        case shader_string_id::VERTEX_IN_POSITION:
             return vertex_in_position_str;
-        }
-        
-        const std::string& vertex_in_normal()
-        {
+        case shader_string_id::VERTEX_IN_NORMAL:
             return vertex_in_normal_str;
-        }
-        
-        const std::string& vertex_in_tangent()
-        {
+        case shader_string_id::VERTEX_IN_TANGENT:
             return vertex_in_tangent_str;
-        }
-        
-        const std::string& vertex_in_color()
-        {
+        case shader_string_id::VERTEX_IN_COLOR:
             return vertex_in_color_str;
-        }
-        
-        const std::string& vertex_in_texture()
-        {
+        case shader_string_id::VERTEX_IN_TEXTURE:
             return vertex_in_texture_str;
-        }
-    }
-}
-
-
-namespace yavsg // Vertex in uniforms //////////////////////////////////////////
-{
-    namespace shader_strings
-    {
-        const std::string& transform_model()
-        {
+        case shader_string_id::TRANSFORM_MODEL:
             return transform_model_str;
-        }
-        
-        const std::string& transform_view()
-        {
+        case shader_string_id::TRANSFORM_VIEW:
             return transform_view_str;
-        }
-        
-        const std::string& transform_projection()
-        {
+        case shader_string_id::TRANSFORM_PROJECTION:
             return transform_projection_str;
-        }
-    }
-}
-
-
-namespace yavsg // Vertex out / fragment in ////////////////////////////////////
-{
-    namespace shader_strings
-    {
-        const std::string& vertex_out_position()
-        {
+        case shader_string_id::VERTEX_OUT_POSITION:
             return vertex_out_position_str;
-        }
-        
-        const std::string& vertex_out_color()
-        {
+        case shader_string_id::VERTEX_OUT_COLOR:
             return vertex_out_color_str;
-        }
-        
-        const std::string& vertex_out_texture()
-        {
+        case shader_string_id::VERTEX_OUT_TEXTURE:
             return vertex_out_texture_str;
-        }
-        
-        const std::string& vertex_out_TBN_matrix()
-        {
+        case shader_string_id::VERTEX_OUT_TBN_MATRIX:
             return vertex_out_TBN_matrix_str;
-        }
-    }
-    
-    namespace shader_strings
-    {
-        const std::string& fragment_in_position()
-        {
+        case shader_string_id::FRAGMENT_IN_POSITION:
             return fragment_in_position_str;
-        }
-        
-        const std::string& fragment_in_color()
-        {
+        case shader_string_id::FRAGMENT_IN_COLOR:
             return fragment_in_color_str;
-        }
-        
-        const std::string& fragment_in_texture()
-        {
+        case shader_string_id::FRAGMENT_IN_TEXTURE:
             return fragment_in_texture_str;
-        }
-        
-        const std::string& fragment_in_TBN_matrix()
-        {
+        case shader_string_id::FRAGMENT_IN_TBN_MATRIX:
             return fragment_in_TBN_matrix_str;
-        }
-    }
-}
-
-
-namespace yavsg // Fragment in uniforms ////////////////////////////////////////
-{
-    namespace shader_strings
-    {
-        const std::string& map_color()
-        {
+        case shader_string_id::MAP_COLOR:
             return map_color_str;
-        }
-        
-        const std::string& map_normal()
-        {
+        case shader_string_id::MAP_NORMAL:
             return map_normal_str;
-        }
-        
-        const std::string& map_specular()
-        {
+        case shader_string_id::MAP_SPECULAR:
             return map_specular_str;
-        }
-    }
-}
-
-
-namespace yavsg // Fragment out ////////////////////////////////////////////////
-{
-    namespace shader_strings
-    {
-        const std::string& fragment_out_color()
-        {
+        case shader_string_id::FRAGMENT_OUT_COLOR:
             return fragment_out_color_str;
         }
     }
