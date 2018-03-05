@@ -6,7 +6,6 @@
 #include "../gl/shader_program.hpp"
 #include "../gl/texture.hpp"
 
-#include <array>
 #include <string>
 #include <tuple>
 #include <utility>  // std::size_t
@@ -15,9 +14,9 @@
 // When setting up materials for a render pass, it's (purposefully) not possible
 // to loop over active-texture IDs with texture::bind_as<>(), as this function
 // checks active-texture ID bounds at compile-time.  This material descriptor
-// metaclass provides a bind() method that takes an array of names to use for
-// binding material variables, chosing IDs at compile time as they aren't 
-// meaningful in themselves anyways.
+// metaclass provides a bind() method that takes an array (or similar container)
+// of names to use for binding material variables, chosing IDs at compile time
+// as they aren't meaningful in themselves anyways.
 
 
 namespace yavsg // Binding attributes //////////////////////////////////////////
@@ -28,7 +27,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         static const std::size_t increment_active_texture = 0;
         
         template< std::size_t ActiveTexture >
-        static void asdfasdfasdf(
+        static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
             const std::string& name,
             const T& value
@@ -45,7 +44,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         static const std::size_t increment_active_texture = 1;
         
         template< std::size_t ActiveTexture >
-        static void asdfasdfasdf(
+        static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
             const std::string& name,
             const gl::texture& texture
@@ -62,7 +61,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         static const std::size_t increment_active_texture = 1;
         
         template< std::size_t ActiveTexture >
-        static void asdfasdfasdf(
+        static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
             const std::string& name,
             const gl::texture* texture
@@ -87,12 +86,10 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
     >
     struct bind_material_values
     {
+        template< class IndexableNames >
         static void bind(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
-            const std::array<
-                std::string,
-                std::tuple_size< TupleType >::value
-            >& names,
+            const IndexableNames& names,
             const TupleType& values
         )
         {
@@ -117,7 +114,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
                 Framebuffer
             >::bind( program, names, values );
             
-            bind_attributes_type::template asdfasdfasdf< FirstActiveTexture >(
+            bind_attributes_type::template bind_one< FirstActiveTexture >(
                 program,
                 std::get< TupleIndex - 1 >( names ),
                 std::get< TupleIndex - 1 >( values )
@@ -139,12 +136,10 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         Framebuffer
     >
     {
+        template< class IndexableNames >
         static void bind(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
-            const std::array<
-                std::string,
-                std::tuple_size< TupleType >::value
-            >& names,
+            const IndexableNames& names,
             const TupleType& values
         ) {}
     };
@@ -170,10 +165,14 @@ namespace yavsg // Material descriptor /////////////////////////////////////////
         
         // TODO: "starting at ID" parameter so more than one material can be
         // bound at once
-        template< class AttributeBuffer, class Framebuffer >
+        template<
+            class AttributeBuffer,
+            class Framebuffer,
+            class IndexableNames
+        >
         void bind(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
-            const std::array< std::string, sizeof...( Attributes ) >& names
+            const IndexableNames& names
         ) const
         {
             bind_material_values<

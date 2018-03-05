@@ -9,7 +9,9 @@
 #include <tiny_obj_loader.h>
 
 #include <algorithm>    // std::max()
+#include <array>
 #include <exception>
+#include <functional>   // std::reference_wrapper
 #include <iostream>     // std::cerr for tinyobj warnings
 
 
@@ -335,7 +337,10 @@ namespace yavsg
             {
                 group.material.bind(
                     scene_program,
-                    {
+                    std::array<
+                        std::reference_wrapper< const std::string >,
+                        std::tuple_size< material_description::tuple_type >::value
+                    >{
                         shader_string( shader_string_id::MAP_COLOR    ),
                         shader_string( shader_string_id::MAP_NORMAL   ),
                         shader_string( shader_string_id::MAP_SPECULAR )
