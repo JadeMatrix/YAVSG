@@ -338,12 +338,12 @@ namespace yavsg
                 group.material.bind(
                     scene_program,
                     std::array<
-                        std::reference_wrapper< const std::string >,
+                        shader_string_id,
                         std::tuple_size< material_description::tuple_type >::value
                     >{
-                        shader_string( shader_string_id::MAP_COLOR    ),
-                        shader_string( shader_string_id::MAP_NORMAL   ),
-                        shader_string( shader_string_id::MAP_SPECULAR )
+                        shader_string_id::MAP_COLOR,
+                        shader_string_id::MAP_NORMAL,
+                        shader_string_id::MAP_SPECULAR
                     }
                 );
                 

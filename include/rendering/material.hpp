@@ -3,6 +3,7 @@
 #define YAVSG_RENDERING_MATERIAL_HPP
 
 
+#include "shader_variable_names.hpp"
 #include "../gl/shader_program.hpp"
 #include "../gl/texture.hpp"
 
@@ -35,6 +36,20 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         {
             program.template set_uniform< T >( name, value );
         }
+        
+        template< std::size_t ActiveTexture >
+        static void bind_one(
+            gl::shader_program< AttributeBuffer, Framebuffer >& program,
+            shader_string_id name_id,
+            const T& value
+        )
+        {
+            bind_one< ActiveTexture >(
+                program,
+                shader_string( name_id ),
+                value
+            );
+        }
     };
     
     // TODO: std::optional< gl::texture >, or just texture ref type
@@ -52,6 +67,20 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         {
             texture.bind_as< ActiveTexture >();
             program.template set_uniform< GLint >( name, ActiveTexture );
+        }
+        
+        template< std::size_t ActiveTexture >
+        static void bind_one(
+            gl::shader_program< AttributeBuffer, Framebuffer >& program,
+            shader_string_id name_id,
+            const gl::texture& texture
+        )
+        {
+            bind_one< ActiveTexture >(
+                program,
+                shader_string( name_id ),
+                texture
+            );
         }
     };
     
@@ -75,8 +104,26 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
             else
                 gl::unbind_texture< ActiveTexture >();
         }
+        
+        template< std::size_t ActiveTexture >
+        static void bind_one(
+            gl::shader_program< AttributeBuffer, Framebuffer >& program,
+            shader_string_id name_id,
+            const gl::texture* texture
+        )
+        {
+            bind_one< ActiveTexture >(
+                program,
+                shader_string( name_id ),
+                texture
+            );
+        }
     };
-    
+}
+
+
+namespace yavsg // Specializable bind delegation ///////////////////////////////
+{
     template<
         std::size_t FirstActiveTexture,
         std::size_t TupleIndex,
