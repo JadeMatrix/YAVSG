@@ -169,24 +169,57 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         /* if( gl_program_id == 0 ) */ YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't create program for yavsg::gl::shader_program"
         );
-        for( auto& shader_id : shaders )
+        
+        try
         {
-            glAttachShader( gl_program_id, shader_id );
+            for( auto& shader_id : shaders )
+            {
+                glAttachShader( gl_program_id, shader_id );
+                YAVSG_GL_THROW_FOR_ERRORS(
+                    "couldn't attach shader "
+                    + std::to_string( shader_id )
+                    + " to program "
+                    + std::to_string( gl_program_id )
+                    + " for yavsg::gl::shader_program"
+                );
+            }
+            
+            glLinkProgram( gl_program_id );
             YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't attach shader "
-                + std::to_string( shader_id )
-                + " to program "
+                "couldn't link program "
                 + std::to_string( gl_program_id )
                 + " for yavsg::gl::shader_program"
             );
+            
+            GLint link_status;
+            glGetProgramiv(
+                gl_program_id,
+                GL_LINK_STATUS,
+                &link_status
+            );
+            if( link_status != GL_TRUE )
+            {
+                GLsizei log_buffer_length = 1024;
+                char log_buffer[ log_buffer_length ];
+                glGetProgramInfoLog(
+                    gl_program_id,
+                    log_buffer_length,
+                    &log_buffer_length,
+                    log_buffer
+                );
+                std::string program_error_string = (
+                    "failed to link shader program:\n"
+                    + std::string( log_buffer, log_buffer_length )
+                );
+                glDeleteProgram( gl_program_id );
+                throw std::runtime_error( program_error_string );
+            }
         }
-        
-        glLinkProgram( gl_program_id );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't link program "
-            + std::to_string( gl_program_id )
-            + " for yavsg::gl::shader_program"
-        );
+        catch( ... )
+        {
+            glDeleteProgram( gl_program_id );
+            throw;
+        }
     }
     
     template< class AttributeBuffer, class Framebuffer >
@@ -331,6 +364,7 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             + std::to_string( gl_program_id )
             + " for yavsg::gl::shader_program::has_attribute()"
         );
+        
         if( result == -1 )
             return false;
         else
@@ -363,6 +397,7 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             + std::to_string( gl_program_id )
             + " for yavsg::gl::shader_program::has_uniform()"
         );
+        
         if( result == -1 )
             return false;
         else
