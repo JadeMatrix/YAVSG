@@ -58,6 +58,7 @@ ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
     src/rendering/4up_postprocess_step.cpp
     src/rendering/obj_render_step.cpp
     # src/rendering/scene_render_step.cpp
+    src/rendering/shader_variable_names.cpp
 )
 SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_INFO_PLIST           "Info.plist.in"
