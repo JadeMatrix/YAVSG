@@ -13,12 +13,15 @@ out vec4 fragment_out_color;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-uniform sampler2D framebuffer;
-uniform sampler2D framebuffer_depth_stencil;
+uniform sampler2D framebuffer_source_color;
+uniform sampler2D framebuffer_source_depth_stencil;
 
 void main()
 {
-    float depth = texture( framebuffer_depth_stencil, fragment_in.texture ).r;
+    float depth = texture(
+        framebuffer_source_depth_stencil,
+        fragment_in.texture
+    ).r;
     
     int radius;
     if( depth >= 0.0 && depth < 0.2 )
@@ -42,7 +45,7 @@ void main()
         for( int y = -radius; y <= radius; ++y )
         {
             float sample_depth = texture(
-                framebuffer_depth_stencil,
+                framebuffer_source_depth_stencil,
                 vec2(
                     fragment_in.texture.x + x * blur_size_h,
                     fragment_in.texture.y + y * blur_size_v
@@ -52,7 +55,7 @@ void main()
             float weight = 1.0 + ( sample_depth - depth );
             
             fragment_out_color += texture(
-                framebuffer,
+                framebuffer_source_color,
                 vec2(
                     fragment_in.texture.x + x * blur_size_h,
                     fragment_in.texture.y + y * blur_size_v
@@ -67,7 +70,10 @@ void main()
 
 // void main()
 // {
-//     float depth = texture( framebuffer_depth_stencil, fragment_in.texture ).r;
+//     float depth = texture(
+//         framebuffer_source_depth_stencil,
+//         fragment_in.texture
+//     ).r;
     
 //     int radius;
 //     if( depth >= 0.0 && depth < 0.2 )
@@ -91,7 +97,7 @@ void main()
 //         for( int y = -radius; y <= radius; ++y )
 //         {
 //             fragment_out_color += texture(
-//                 framebuffer,
+//                 framebuffer_source_color,
 //                 vec2(
 //                     fragment_in.texture.x + x * blur_size_h,
 //                     fragment_in.texture.y + y * blur_size_v

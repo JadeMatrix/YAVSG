@@ -58,18 +58,24 @@ namespace yavsg
         glDisable( GL_DEPTH_TEST );
         
         source.color_buffer< 0 >().bind_as< 0 >();
-        postprocess_program.set_uniform( "framebuffer", 0 );
+        postprocess_program.set_uniform(
+            shader_string( shader_string_id::FRAMEBUFFER_SOURCE_COLOR ),
+            0
+        );
         
         // Depth buffer
         source.depth_stencil_buffer().bind_as< 1 >();
-        postprocess_program.set_uniform( "framebuffer_depth_stencil", 1 );
+        postprocess_program.set_uniform(
+            shader_string( shader_string_id::FRAMEBUFFER_SOURCE_DEPTH_STENCIL ),
+            1
+        );
         
         postprocess_program.set_uniform(
-            "view_width",
+            shader_string( shader_string_id::FRAMEBUFFER_TARGET_WIDTH ),
             ( GLfloat )gl_tut::window_width
         );
         postprocess_program.set_uniform(
-            "view_height",
+            shader_string( shader_string_id::FRAMEBUFFER_TARGET_HEIGHT ),
             ( GLfloat )gl_tut::window_height
         );
         

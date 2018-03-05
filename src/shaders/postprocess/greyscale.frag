@@ -13,11 +13,14 @@ out vec4 fragment_out_color;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-uniform sampler2D framebuffer;
+uniform sampler2D framebuffer_source_color;
 
 void main()
 {
-    fragment_out_color = texture( framebuffer, fragment_in.texture );
+    fragment_out_color = texture(
+        framebuffer_source_color,
+        fragment_in.texture
+    );
     
     // // Unweighted
     // float average = (

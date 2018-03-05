@@ -8,8 +8,8 @@
 
 namespace yavsg
 {
-    #if 0
-    
+    // Standard declarations in shaders
+#if 0
     in vec3 vertex_in_position;
     in vec3 vertex_in_normal;
     in vec3 vertex_in_tangent;
@@ -38,7 +38,7 @@ namespace yavsg
         mat4 TBN_matrix;
     } fragment_in;
     
-    uniform MAP
+    uniform struct
     {
         sampler2D color;
         sampler2D normal;
@@ -46,9 +46,23 @@ namespace yavsg
         sampler2D mask;
     } map;
     
-    out vec4 fragment_out_color;
+    uniform struct
+    {
+        float near;
+        float focal;
+        float far;
+    } camera_point;
     
-    #endif
+    uniform sampler2D framebuffer_source_color;
+    uniform sampler2D framebuffer_source_depth_stencil;
+    uniform struct
+    {
+        float width;
+        float height;
+    } framebuffer_target;
+    
+    out vec4 fragment_out_color;
+#endif
     
     enum class shader_string_id
     {
@@ -74,6 +88,15 @@ namespace yavsg
         MAP_COLOR,
         MAP_NORMAL,
         MAP_SPECULAR,
+        
+        CAMERA_POINT_NEAR,
+        CAMERA_POINT_FOCAL,
+        CAMERA_POINT_FAR,
+        
+        FRAMEBUFFER_SOURCE_COLOR,
+        FRAMEBUFFER_SOURCE_DEPTH_STENCIL,
+        FRAMEBUFFER_TARGET_WIDTH,
+        FRAMEBUFFER_TARGET_HEIGHT,
         
         FRAGMENT_OUT_COLOR
     };

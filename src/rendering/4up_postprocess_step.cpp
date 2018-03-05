@@ -58,11 +58,11 @@ in VERTEX_OUT
     vec2 texture;
 } fragment_in;
 out vec4 fragment_out_color;
-uniform sampler2D framebuffer;
+uniform sampler2D framebuffer_source_color;
 void main()
 {
     fragment_out_color = texture(
-        framebuffer,
+        framebuffer_source_color,
         vec2(
             fragment_in.texture.x,
             fragment_in.texture.y * -1
@@ -208,15 +208,9 @@ namespace yavsg
                 source_buffer = &source;
             
             source_buffer -> color_buffer< 0 >().bind_as< 0 >();
-            postprocess_program.set_uniform( "framebuffer", 0 );
-            
             postprocess_program.set_uniform(
-                "view_width",
-                ( GLfloat )gl_tut::window_width
-            );
-            postprocess_program.set_uniform(
-                "view_height",
-                ( GLfloat )gl_tut::window_height
+                shader_string( shader_string_id::FRAMEBUFFER_SOURCE_COLOR ),
+                0
             );
             
             postprocess_program.run(

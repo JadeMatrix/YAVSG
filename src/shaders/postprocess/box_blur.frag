@@ -13,7 +13,7 @@ out vec4 fragment_out_color;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-uniform sampler2D framebuffer;
+uniform sampler2D framebuffer_source_color;
 
 void main()
 {
@@ -25,7 +25,7 @@ void main()
         for( int y = -4; y <= 4; ++y )
         // {
         //     vec4 sample = texture(
-        //         framebuffer,
+        //         framebuffer_source_color,
         //         vec2(
         //             fragment_in.texture.x + x * blur_size_h,
         //             fragment_in.texture.y + y * blur_size_v
@@ -40,7 +40,7 @@ void main()
         //     );
         // }
             fragment_out_color += texture(
-                framebuffer,
+                framebuffer_source_color,
                 vec2(
                     fragment_in.texture.x + x * blur_size_h,
                     fragment_in.texture.y + y * blur_size_v
