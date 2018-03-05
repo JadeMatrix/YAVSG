@@ -1,5 +1,7 @@
-#include "../../include/rendering/gl_tut.hpp"
 #include "../../include/rendering/basic_postprocess_step.hpp"
+
+#include "../../include/rendering/gl_tut.hpp"
+#include "../../include/rendering/shader_variable_names.hpp"
 
 #include "../../include/gl/shader.hpp"
 
@@ -30,9 +32,17 @@ namespace yavsg
             2, 3, 0
         } )
     {
-        postprocess_program.link_attribute< 0 >( "position"        , vertices );
-        postprocess_program.link_attribute< 1 >( "texture_coord_in", vertices );
-        postprocess_program.bind_target< 0 >( "color_out" );
+        postprocess_program.link_attribute< 0 >(
+            shader_string( shader_string_id::VERTEX_IN_POSITION ),
+            vertices
+        );
+        postprocess_program.link_attribute< 1 >(
+            shader_string( shader_string_id::VERTEX_IN_TEXTURE ),
+            vertices
+        );
+        postprocess_program.bind_target< 0 >(
+            shader_string( shader_string_id::FRAGMENT_OUT_COLOR )
+        );
     }
     
     void basic_postprocess_step::run( framebuffer_type& source )

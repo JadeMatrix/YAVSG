@@ -1,14 +1,21 @@
 #version 150 core
 
+// Input ///////////////////////////////////////////////////////////////////////
 
-in vec2 texture_coord;
+in VERTEX_OUT
+{
+    vec2 texture;
+} fragment_in;
 
-out vec4 color_out;
+// Output //////////////////////////////////////////////////////////////////////
+
+out vec4 fragment_out_color;
+
+////////////////////////////////////////////////////////////////////////////////
 
 uniform sampler2D framebuffer;
 
-
 void main()
 {
-    color_out = texture( framebuffer, texture_coord );
+    fragment_out_color = texture( framebuffer, fragment_in.texture );
 }

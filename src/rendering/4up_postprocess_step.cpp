@@ -1,5 +1,7 @@
-#include "../../include/rendering/gl_tut.hpp"
 #include "../../include/rendering/4up_postprocess_step.hpp"
+
+#include "../../include/rendering/gl_tut.hpp"
+#include "../../include/rendering/shader_variable_names.hpp"
 
 #include "../../include/gl/shader.hpp"
 
@@ -31,15 +33,18 @@ namespace
     
     const std::string vertex_shader = R"<<<(
 #version 150 core
-in vec2 position;
-in vec2 texture_coord_in;
-out vec2 texture_coord;
+in vec3 vertex_in_position;
+in vec2 vertex_in_texture;
+out VERTEX_OUT
+{
+    vec2 texture;
+} vertex_out;
 void main()
 {
-    texture_coord = texture_coord_in;
+    vertex_out.texture = vertex_in_texture;
     gl_Position = vec4(
-        position.x,
-        position.y,
+        vertex_in_position.x,
+        vertex_in_position.y,
         0.0,
         1.0
     );
@@ -48,16 +53,19 @@ void main()
     
     const std::string fragment_shader = R"<<<(
 #version 150 core
-in vec2 texture_coord;
-out vec4 color_out;
+in VERTEX_OUT
+{
+    vec2 texture;
+} fragment_in;
+out vec4 fragment_out_color;
 uniform sampler2D framebuffer;
 void main()
 {
-    color_out = texture(
+    fragment_out_color = texture(
         framebuffer,
         vec2(
-            texture_coord.x,
-            texture_coord.y * -1
+            fragment_in.texture.x,
+            fragment_in.texture.y * -1
         )
     );
 }
@@ -135,9 +143,17 @@ namespace yavsg
             gl_tut::window_height
         )
     {
-        postprocess_program.link_attribute< 0 >( "position"        , vertices );
-        postprocess_program.link_attribute< 1 >( "texture_coord_in", vertices );
-        postprocess_program.bind_target< 0 >( "color_out" );
+        postprocess_program.link_attribute< 0 >(
+            shader_string( shader_string_id::VERTEX_IN_POSITION ),
+            vertices
+        );
+        postprocess_program.link_attribute< 1 >(
+            shader_string( shader_string_id::VERTEX_IN_TEXTURE ),
+            vertices
+        );
+        postprocess_program.bind_target< 0 >(
+            shader_string( shader_string_id::FRAGMENT_OUT_COLOR )
+        );
     }
     
     debug_4up_postprocess_step::~debug_4up_postprocess_step()

@@ -1,35 +1,47 @@
 #version 150 core
 
+// Input ///////////////////////////////////////////////////////////////////////
 
-in vec3 position;
-in vec3 color_in;
-in vec2 texture_coord_in;
+in vec3 vertex_in_position; // position XYZ
+// in vec3 vertex_in_normal;   // normal   XYZ
+// in vec3 vertex_in_tangent;  // tangent  XYZ
+in vec3 vertex_in_color;    // color    RGB
+in vec2 vertex_in_texture;  // texture  UV
 
-out vec3 color;
-out vec2 texture_coord;
+uniform struct
+{
+    mat4 model;
+    mat4 view;
+    mat4 projection;
+} transform;
 
-uniform mat4  transform_model;
-uniform mat4  transform_view;
-uniform mat4  transform_projection;
-uniform float time_absolute;
-uniform float time_delta;
+// Output //////////////////////////////////////////////////////////////////////
 
+out VERTEX_OUT
+{
+    // vec3 position; // position XYZ
+    vec3 color;    // color    RGB
+    vec2 texture;  // texture  UV
+    // mat4 TBN_matrix;
+} vertex_out;
+
+////////////////////////////////////////////////////////////////////////////////
 
 void main()
 {
     gl_Position = (
-          transform_projection
-        * transform_view
-        // * rotation
-        * transform_model
+          transform.projection
+        * transform.view
+        * transform.model
         * vec4(
-            position.x,
-            position.y * -1.0,
-            position.z,
+            vertex_in_position.x,
+            vertex_in_position.y * -1.0,
+            vertex_in_position.z,
             1.0
         )
     );
     
-    color = color_in;
-    texture_coord = texture_coord_in;
+    // vertex_out.position = gl_Position.xyz;
+    vertex_out.color    = vertex_in_color;
+    vertex_out.texture  = vertex_in_texture;
 }

@@ -4,6 +4,7 @@
 #include "../../include/gl/shader.hpp"
 #include "../../include/gl/texture.hpp"
 #include "../../include/rendering/gl_tut.hpp"   // gl_tut::window_width & gl_tut::window_height
+#include "../../include/rendering/shader_variable_names.hpp"
 
 #include <tiny_obj_loader.h>
 
@@ -236,12 +237,26 @@ namespace yavsg
         // Link attributes
         auto objects_ref = object_manager.write();
         auto& uploaded_vertices = objects_ref -> back().vertices;
-        scene_program.link_attribute< 0 >( "position"        , uploaded_vertices );
-        scene_program.link_attribute< 1 >( "normal_in"       , uploaded_vertices );
-        scene_program.link_attribute< 2 >( "color_in"        , uploaded_vertices );
-        scene_program.link_attribute< 3 >( "texture_coord_in", uploaded_vertices );
+        scene_program.link_attribute< 0 >(
+            shader_string( shader_string_id::VERTEX_IN_POSITION ),
+            uploaded_vertices
+        );
+        scene_program.link_attribute< 1 >(
+            shader_string( shader_string_id::VERTEX_IN_NORMAL ),
+            uploaded_vertices
+        );
+        scene_program.link_attribute< 2 >(
+            shader_string( shader_string_id::VERTEX_IN_COLOR ),
+            uploaded_vertices
+        );
+        scene_program.link_attribute< 3 >(
+            shader_string( shader_string_id::VERTEX_IN_TEXTURE ),
+            uploaded_vertices
+        );
         
-        scene_program.bind_target< 0 >( "color_out" );
+        scene_program.bind_target< 0 >(
+            shader_string( shader_string_id::FRAGMENT_OUT_COLOR )
+        );
     }
     
     // obj_render_step::~obj_render_step()
@@ -272,7 +287,7 @@ namespace yavsg
             )
         );
         scene_program.set_uniform(
-            "transform_view",
+            shader_string( shader_string_id::TRANSFORM_VIEW ),
             transform_view
         );
         
@@ -285,27 +300,8 @@ namespace yavsg
             10.0f
         );
         scene_program.set_uniform(
-            "transform_projection",
+            shader_string( shader_string_id::TRANSFORM_PROJECTION ),
             transform_projection
-        );
-        
-        scene_program.set_uniform(
-            "time_absolute",
-            std::chrono::duration_cast<
-                std::chrono::duration< float >
-            >( current_time - start_time ).count()
-        );
-        
-        scene_program.set_uniform(
-            "time_delta",
-            std::chrono::duration_cast<
-                std::chrono::duration< float >
-            >( current_time - previous_time ).count()
-        );
-        
-        scene_program.set_uniform(
-            "tint",
-            yavsg::vector< GLfloat, 3 >( 1.0f, 1.0f, 1.0f )
         );
         
         auto objects_ref = object_manager.read();
@@ -330,7 +326,7 @@ namespace yavsg
             };
             
             scene_program.set_uniform(
-                "transform_model",
+                shader_string( shader_string_id::TRANSFORM_MODEL ),
                 rotation_matrix
                 * object.transform_model()
             );
@@ -340,9 +336,9 @@ namespace yavsg
                 group.material.bind(
                     scene_program,
                     {
-                        "color_map",
-                        "normal_map",
-                        "specular_map"
+                        shader_string( shader_string_id::MAP_COLOR    ),
+                        shader_string( shader_string_id::MAP_NORMAL   ),
+                        shader_string( shader_string_id::MAP_SPECULAR )
                     }
                 );
                 

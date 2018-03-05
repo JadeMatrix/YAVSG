@@ -1,14 +1,21 @@
 #version 150 core
 
+// Input ///////////////////////////////////////////////////////////////////////
 
-in vec2 texture_coord;
+in VERTEX_OUT
+{
+    vec2 texture;
+} fragment_in;
 
-out vec4 color_out;
+// Output //////////////////////////////////////////////////////////////////////
+
+out vec4 fragment_out_color;
+
+////////////////////////////////////////////////////////////////////////////////
 
 uniform sampler2D framebuffer;
 uniform float view_width;
 uniform float view_height;
-
 
 void main()
 {
@@ -16,7 +23,7 @@ void main()
         ( gl_FragCoord.x - ( view_width  / 2 ) ) / view_width,
         ( gl_FragCoord.y - ( view_height / 2 ) ) / view_height
     );
-    color_out = texture( framebuffer, texture_coord ) * ( 1 - sqrt(
+    fragment_out_color = texture( framebuffer, fragment_in.texture ) * ( 1 - sqrt(
           norm_screen_coord.x * norm_screen_coord.x
         + norm_screen_coord.y * norm_screen_coord.y
     ) );

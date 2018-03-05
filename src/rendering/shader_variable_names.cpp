@@ -26,9 +26,9 @@ namespace
     std::string fragment_in_texture_str    = "fragment_in." + texture_str;
     std::string fragment_in_TBN_matrix_str = "fragment_in." + TBN_matrix_str;
     
-    std::string map_color_str              = "map.color";
-    std::string map_normal_str             = "map.normal";
-    std::string map_specular_str           = "map.specular";
+    std::string map_color_str              = "map_color";
+    std::string map_normal_str             = "map_normal";
+    std::string map_specular_str           = "map_specular";
     
     std::string fragment_out_color_str     = "fragment_out_color";
 }

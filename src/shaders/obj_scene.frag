@@ -1,20 +1,24 @@
 #version 150 core
 
+// Input ///////////////////////////////////////////////////////////////////////
 
-in vec3 color;
-in vec2 texture_coord;
+in VERTEX_OUT
+{
+    // vec3 position;  // position XYZ
+    vec3 color;     // color    RGB
+    vec2 texture;   // texture  UV
+    // mat4 TBN_matrix;
+} fragment_in;
 
-out vec4 color_out;
+uniform sampler2D map_color;
+// uniform sampler2D map_normal;
+// uniform sampler2D map_specular;
 
-uniform sampler2D color_map;
-uniform sampler2D normal_map;
-uniform sampler2D specular_map;
+// Output //////////////////////////////////////////////////////////////////////
 
-uniform vec3 tint;
+out vec4 fragment_out_color;
 
-uniform float time_absolute;
-uniform float time_delta;
-
+////////////////////////////////////////////////////////////////////////////////
 
 // (Theoretically) vendor-independent check for invalid normal texture
 bool valid_normal( vec3 normal )
@@ -27,37 +31,34 @@ bool valid_normal( vec3 normal )
     );
 }
 
-
 void main()
 {
-    color_out = texture(
-        color_map,
+    fragment_out_color = texture(
+        map_color,
         vec2(
-                  texture_coord.x,
-            1.0 - texture_coord.y
+                  fragment_in.texture.x,
+            1.0 - fragment_in.texture.y
         )
     );
     
-    vec3 normal = texture(
-        normal_map,
-        vec2(
-                  texture_coord.x,
-            1.0 - texture_coord.y
-        )
-    ).xyz;
-    if( !valid_normal( normal ) )
-        normal = vec3( 0.5, 0.5, 1.0 );
+    // vec3 normal = texture(
+    //     map_normal,
+    //     vec2(
+    //               fragment_in.texture.x,
+    //         1.0 - fragment_in.texture.y
+    //     )
+    // ).xyz;
+    // if( !valid_normal( normal ) )
+    //     normal = vec3( 0.5, 0.5, 1.0 );
     
-    // if( has_specular_map )
-    //     color_out += texture(
-    //         specular_map,
-    //         vec2(
-    //                   texture_coord.x,
-    //             1.0 - texture_coord.y
-    //         )
-    //     );
+    // fragment_out_color *= vec4( fragment_in.color, 1.0 );
     
-    color_out *= vec4( color, 1.0 );
-    
-    color_out *= vec4( tint,  1.0 );
+    // // if( has_map_specular )
+    // //     fragment_out_color += texture(
+    // //         map_specular,
+    // //         vec2(
+    // //                   fragment_in.texture.x,
+    // //             1.0 - fragment_in.texture.y
+    // //         )
+    // //     );
 }

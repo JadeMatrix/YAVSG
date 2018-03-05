@@ -1,30 +1,37 @@
 #version 150 core
 
+// Input ///////////////////////////////////////////////////////////////////////
 
-in vec2 texture_coord;
+in VERTEX_OUT
+{
+    vec2 texture;
+} fragment_in;
 
-out vec4 color_out;
+// Output //////////////////////////////////////////////////////////////////////
+
+out vec4 fragment_out_color;
+
+////////////////////////////////////////////////////////////////////////////////
 
 uniform sampler2D framebuffer;
 
-
 void main()
 {
-    color_out = texture( framebuffer, texture_coord );
+    fragment_out_color = texture( framebuffer, fragment_in.texture );
     
     // // Unweighted
     // float average = (
-    //       color_out.r
-    //     + color_out.g
-    //     + color_out.b
+    //       fragment_out_color.r
+    //     + fragment_out_color.g
+    //     + fragment_out_color.b
     // ) / 3.0;
     
     // Weighted:
     float average = (
-          color_out.r * 0.2126
-        + color_out.g * 0.7152
-        + color_out.b * 0.0722
+          fragment_out_color.r * 0.2126
+        + fragment_out_color.g * 0.7152
+        + fragment_out_color.b * 0.0722
     );
     
-    color_out = vec4( vec3( average ), 1.0 );
+    fragment_out_color = vec4( vec3( average ), 1.0 );
 }

@@ -1,18 +1,25 @@
 #version 150 core
 
+// Input ///////////////////////////////////////////////////////////////////////
 
-in vec2 position;
-in vec2 texture_coord_in;
+in vec3 vertex_in_position;
+in vec2 vertex_in_texture;
 
-out vec2 texture_coord;
+// Output //////////////////////////////////////////////////////////////////////
 
+out VERTEX_OUT
+{
+    vec2 texture;
+} vertex_out;
+
+////////////////////////////////////////////////////////////////////////////////
 
 void main()
 {
-    texture_coord = texture_coord_in;
+    vertex_out.texture = vertex_in_texture;
     gl_Position = vec4(
-        position.x,
-        position.y * -1.0,
+        vertex_in_position.x,
+        vertex_in_position.y * -1.0,
         0.0,
         1.0
     );

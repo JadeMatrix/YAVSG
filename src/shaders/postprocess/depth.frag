@@ -1,26 +1,31 @@
 #version 150 core
 
+// Input ///////////////////////////////////////////////////////////////////////
 
-in vec2 texture_coord;
+in VERTEX_OUT
+{
+    vec2 texture;
+} fragment_in;
 
-out vec4 color_out;
+// Output //////////////////////////////////////////////////////////////////////
+
+out vec4 fragment_out_color;
+
+////////////////////////////////////////////////////////////////////////////////
 
 uniform sampler2D framebuffer;
 uniform sampler2D framebuffer_depth_stencil;
-uniform float view_width;
-uniform float half_height;
-
 
 void main()
 {
-    float depth = texture( framebuffer_depth_stencil, texture_coord ).r;
+    float depth = texture( framebuffer_depth_stencil, fragment_in.texture ).r;
     
     // depth = pow( depth, 256 );
-    color_out = vec4( depth, depth, depth, 1.0 );
+    fragment_out_color = vec4( depth, depth, depth, 1.0 );
     
-    // color_out = vec4(
-    //     1.0, // texture( framebuffer_depth_stencil, texture_coord ).r,
-    //     texture( framebuffer_depth_stencil, texture_coord ).a,
+    // fragment_out_color = vec4(
+    //     1.0, // texture( framebuffer_depth_stencil, fragment_in.texture ).r,
+    //     texture( framebuffer_depth_stencil, fragment_in.texture ).a,
     //     1.0,
     //     1.0
     // );
