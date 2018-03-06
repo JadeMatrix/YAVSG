@@ -54,7 +54,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
     
     // TODO: std::optional< gl::texture >, or just texture ref type
     template< class AttributeBuffer, class Framebuffer >
-    struct bind_attributes< gl::texture, AttributeBuffer, Framebuffer >
+    struct bind_attributes< gl::texture<>, AttributeBuffer, Framebuffer >
     {
         static const std::size_t increment_active_texture = 1;
         
@@ -62,7 +62,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
             const std::string& name,
-            const gl::texture& texture
+            const gl::texture<>& texture
         )
         {
             texture.bind_as< ActiveTexture >();
@@ -73,7 +73,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
             shader_string_id name_id,
-            const gl::texture& texture
+            const gl::texture<>& texture
         )
         {
             bind_one< ActiveTexture >(
@@ -85,7 +85,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
     };
     
     template< class AttributeBuffer, class Framebuffer >
-    struct bind_attributes< gl::texture*, AttributeBuffer, Framebuffer >
+    struct bind_attributes< gl::texture<>*, AttributeBuffer, Framebuffer >
     {
         static const std::size_t increment_active_texture = 1;
         
@@ -93,7 +93,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
             const std::string& name,
-            const gl::texture* texture
+            const gl::texture<>* texture
         )
         {
             if( texture )
@@ -109,7 +109,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
             shader_string_id name_id,
-            const gl::texture* texture
+            const gl::texture<>* texture
         )
         {
             bind_one< ActiveTexture >(

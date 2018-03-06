@@ -20,19 +20,19 @@ namespace yavsg
 {
     // TODO: std::optional<gl::texture>
     using material_description_base = material<
-        gl::texture*,
-        gl::texture*,
-        gl::texture*
+        gl::texture<>*,
+        gl::texture<>*,
+        gl::texture<>*
     >;
     class material_description : public material_description_base
     {
     public:
-              gl::texture*    color_map()       { return std::get< 0 >( values ); }
-              gl::texture*   normal_map()       { return std::get< 1 >( values ); }
-              gl::texture* specular_map()       { return std::get< 2 >( values ); }
-        const gl::texture*    color_map() const { return std::get< 0 >( values ); }
-        const gl::texture*   normal_map() const { return std::get< 1 >( values ); }
-        const gl::texture* specular_map() const { return std::get< 2 >( values ); }
+              gl::texture<>*    color_map()       { return std::get< 0 >( values ); }
+              gl::texture<>*   normal_map()       { return std::get< 1 >( values ); }
+              gl::texture<>* specular_map()       { return std::get< 2 >( values ); }
+        const gl::texture<>*    color_map() const { return std::get< 0 >( values ); }
+        const gl::texture<>*   normal_map() const { return std::get< 1 >( values ); }
+        const gl::texture<>* specular_map() const { return std::get< 2 >( values ); }
         
         using material_description_base::material;
         
@@ -81,18 +81,6 @@ namespace yavsg
         >;
         
         render_object_manager_type object_manager;
-        
-        struct render_group
-        {
-            // TODO: std::optional< gl::texture >
-            gl::texture* color_map;
-            gl::texture* normal_map;
-            gl::texture* specular_map;
-            gl::texture* mask_map;
-            
-            std::vector< GLuint > temp_index_storage;
-            gl::index_buffer* vertex_indices;
-        };
         
         std::chrono::high_resolution_clock::time_point start_time;
         std::chrono::high_resolution_clock::time_point previous_time;

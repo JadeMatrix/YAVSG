@@ -60,18 +60,18 @@ namespace yavsg { namespace gl
         public base_framebuffer
     {
     protected:
-        texture _depth_stencil_buffer;
+        texture<> _depth_stencil_buffer;
         
         // Eh, I'll improve it later
         typename std::enable_if<
             ( ColorTargets < GL_MAX_COLOR_ATTACHMENTS - 1 ),
             char
         >::type color_buffers[
-            sizeof( texture ) * ColorTargets
+            sizeof( texture<> ) * ColorTargets
         ];
         
         GLuint             framebuffer_init();
-        texture   depth_stencil_buffer_init();
+        texture<> depth_stencil_buffer_init();
         // Recursive initializer to help with cleanup on errors
         void             color_buffers_init( std::size_t i = 0 );
         void check_finalized();
@@ -85,8 +85,8 @@ namespace yavsg { namespace gl
         );
         ~framebuffer();
         
-        texture& depth_stencil_buffer();
-        template< std::size_t N > texture& color_buffer();
+        texture<>& depth_stencil_buffer();
+        template< std::size_t N > texture<>& color_buffer();
     };
 } }
 
@@ -106,7 +106,7 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
     }
     
     template< std::size_t ColorTargets >
-    texture framebuffer< ColorTargets >::depth_stencil_buffer_init()
+    texture<> framebuffer< ColorTargets >::depth_stencil_buffer_init()
     {
         // glGenRenderbuffers( 1, &id );
         // glBindRenderbuffer( GL_RENDERBUFFER, id );
@@ -122,7 +122,7 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
         //     id
         // );
         
-        auto t = texture::make_empty();
+        auto t = texture<>::make_empty();
         auto t_id = t.gl_texture_id();
         
         glBindTexture( GL_TEXTURE_2D, t_id );
@@ -157,9 +157,9 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
         );
         
         t.filtering( {
-            texture::filter_settings::magnify_mode::LINEAR,
-            texture::filter_settings::minify_mode::LINEAR,
-            texture::filter_settings::mipmap_type::NONE,
+            texture_filter_settings::magnify_mode::LINEAR,
+            texture_filter_settings::minify_mode::LINEAR,
+            texture_filter_settings::mipmap_type::NONE,
         } );
         
         glFramebufferTexture2D(
@@ -186,12 +186,12 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
         if( i < ColorTargets )
         {
             auto& color_buffer_array = *( std::array<
-                texture,
+                texture<>,
                 ColorTargets
             >* )color_buffers;
             
-            new( &color_buffer_array[ i ] ) texture(
-                texture::make_empty()
+            new( &color_buffer_array[ i ] ) texture<>(
+                texture<>::make_empty()
             );
             
             try
@@ -235,9 +235,9 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
                 );
                 
                 color_buffer_array[ i ].filtering( {
-                    texture::filter_settings::magnify_mode::LINEAR,
-                    texture::filter_settings::minify_mode::LINEAR,
-                    texture::filter_settings::mipmap_type::NONE,
+                    texture_filter_settings::magnify_mode::LINEAR,
+                    texture_filter_settings::minify_mode::LINEAR,
+                    texture_filter_settings::mipmap_type::NONE,
                 } );
                 
                 glFramebufferTexture2D(
@@ -252,7 +252,7 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
             }
             catch( ... )
             {
-                color_buffer_array[ i ].~texture();
+                color_buffer_array[ i ].~texture<>();
                 throw;
             }
         }
@@ -292,10 +292,13 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
     template< std::size_t ColorTargets >
     framebuffer< ColorTargets >::~framebuffer()
     {
-        auto& color_buffer_array = *( std::array< texture, ColorTargets >* )color_buffers;
+        auto& color_buffer_array = *( std::array<
+            texture<>,
+            ColorTargets
+        >* )color_buffers;
         
         for( auto& t : color_buffer_array )
-            t.~texture();
+            t.~texture<>();
         
         glDeleteFramebuffers( 1, &gl_id );
         
@@ -303,16 +306,19 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
     }
     
     template< std::size_t ColorTargets >
-    texture& framebuffer< ColorTargets >::depth_stencil_buffer()
+    texture<>& framebuffer< ColorTargets >::depth_stencil_buffer()
     {
         return _depth_stencil_buffer;
     }
     
     template< std::size_t ColorTargets >
     template< std::size_t N >
-    texture& framebuffer< ColorTargets >::color_buffer()
+    texture<>& framebuffer< ColorTargets >::color_buffer()
     {
-        auto& color_buffer_array = *( std::array< texture, ColorTargets >* )color_buffers;
+        auto& color_buffer_array = *( std::array<
+            texture<>,
+            ColorTargets
+        >* )color_buffers;
         return std::get< N >( color_buffer_array );
     }
 } }
