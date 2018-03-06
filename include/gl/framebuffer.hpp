@@ -43,7 +43,17 @@ namespace yavsg { namespace gl
         
         void bind();
         
-        // void alpha_blending( bool enable );
+        enum class alpha_blend_mode
+        {
+            DISABLED,
+            PREMULTIPLIED,
+            // Premultiplied alpha blending should generally be preferred over
+            // these two if alpha blending is enabled
+            BASIC,      // Source & target alpha blended
+            PASSTHROUGH // Source alpha written
+        };
+        
+        void alpha_blending( alpha_blend_mode );
     };
     
     template< std::size_t ColorTargets > class framebuffer :
