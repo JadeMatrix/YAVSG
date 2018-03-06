@@ -11,15 +11,45 @@
 #include <type_traits>  // std::enable_if
 
 
+namespace yavsg
+{
+    class SDL_window_manager;
+}
+
+
 namespace yavsg { namespace gl
 {
-    template< std::size_t ColorTargets > class framebuffer
+    class base_framebuffer
     {
+        // This is so the window can create a base_framebuffer for the default
+        // framebuffer
+        friend class yavsg::SDL_window_manager;
+        
     protected:
-        std::size_t width;
-        std::size_t height;
+        std::size_t _width;
+        std::size_t _height;
         
         GLuint gl_id;
+        
+        base_framebuffer(
+            GLuint,
+            std::size_t,
+            std::size_t
+        );
+        
+    public:
+        std::size_t  width() const;
+        std::size_t height() const;
+        
+        void bind();
+        
+        // void alpha_blending( bool enable );
+    };
+    
+    template< std::size_t ColorTargets > class framebuffer :
+        public base_framebuffer
+    {
+    protected:
         texture _depth_stencil_buffer;
         
         // Eh, I'll improve it later
@@ -45,13 +75,9 @@ namespace yavsg { namespace gl
         );
         ~framebuffer();
         
-        void bind();
-        
         texture& depth_stencil_buffer();
         template< std::size_t N > texture& color_buffer();
     };
-    
-    void bind_default_framebuffer();
 } }
 
 
@@ -77,7 +103,7 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
         // glRenderbufferStorage(
         //     GL_RENDERBUFFER,
         //     GL_DEPTH24_STENCIL8,
-        //     width, height
+        //     _width, _height
         // );
         // glFramebufferRenderbuffer(
         //     GL_FRAMEBUFFER,
@@ -102,7 +128,7 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
             GL_TEXTURE_2D,
             0,
             GL_DEPTH24_STENCIL8,
-            width, height,
+            _width, _height,
             0,
             GL_DEPTH_STENCIL,
             GL_UNSIGNED_INT_24_8,
@@ -110,9 +136,9 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
         );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't allocate "
-            + std::to_string( width )
+            + std::to_string( _width )
             + "x"
-            + std::to_string( height )
+            + std::to_string( _height )
             + " depth buffer texture "
             + std::to_string( t_id )
             + " for framebuffer "
@@ -147,7 +173,7 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
     template< std::size_t ColorTargets >
     void framebuffer< ColorTargets >::color_buffers_init( std::size_t i )
     {
-        if( i < ColorTargets  )
+        if( i < ColorTargets )
         {
             auto& color_buffer_array = *( std::array<
                 texture,
@@ -177,17 +203,17 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
                     GL_TEXTURE_2D,
                     0,
                     GL_RGB,
-                    width, height,
+                    _width, _height,
                     0,
                     GL_RGB,
-                    GL_UNSIGNED_BYTE,
+                    GL_FLOAT,
                     nullptr
                 );
                 YAVSG_GL_THROW_FOR_ERRORS(
                     "couldn't allocate "
-                    + std::to_string( width )
+                    + std::to_string( _width )
                     + "x"
-                    + std::to_string( height )
+                    + std::to_string( _height )
                     + " texture "
                     + std::to_string( texture_id )
                     + " for color buffer "
@@ -208,7 +234,7 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
                     GL_COLOR_ATTACHMENT0 + i,
                     GL_TEXTURE_2D,
                     texture_id,
-                    0   // Mipmap level (not useful)
+                    0   // Mipmap level (unused for now)
                 );
                 
                 color_buffers_init( i + 1 );
@@ -242,9 +268,11 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
         std::size_t width,
         std::size_t height
     ) :
-        width( width ),
-        height( height ),
-        gl_id( framebuffer_init() ),
+        base_framebuffer(
+            framebuffer_init(),
+            width,
+            height
+        ),
         _depth_stencil_buffer( depth_stencil_buffer_init() )
     {
         color_buffers_init();
@@ -261,17 +289,6 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
         glDeleteFramebuffers( 1, &gl_id );
         
         // glDeleteRenderbuffers( 1, &depth_stencil_buffer );
-    }
-    
-    template< std::size_t ColorTargets >
-    void framebuffer< ColorTargets >::bind()
-    {
-        glBindFramebuffer( GL_FRAMEBUFFER, gl_id );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't bind framebuffer "
-            + std::to_string( gl_id )
-            + " for yavsg::gl::framebuffer::bind()"
-        );
     }
     
     template< std::size_t ColorTargets >

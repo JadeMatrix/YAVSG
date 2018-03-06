@@ -95,7 +95,7 @@ int main( int argc, char* argv[] )
             if( postprocess_steps.size() )
                 target_buffer -> bind();
             else
-                yavsg::gl::bind_default_framebuffer();
+                window.default_framebuffer.bind();
             for( auto step : scene_steps )
                 step -> run();
             
@@ -107,7 +107,7 @@ int main( int argc, char* argv[] )
                 // Get the current step before advancing the iterator
                 auto step = *postprocess_step_iter;
                 if( ++postprocess_step_iter == postprocess_steps.end() )
-                    yavsg::gl::bind_default_framebuffer();
+                    window.default_framebuffer.bind();
                 else
                     target_buffer -> bind();
                 

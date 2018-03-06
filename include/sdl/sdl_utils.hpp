@@ -3,11 +3,8 @@
 #define YAVSG_SDL_UTILS_HPP
 
 
-// Must be included before SDL2/SDL_opengl.h for OpenGL versioning
-#include "../gl/_gl_base.hpp"
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include "_sdl_base.hpp"
+#include "../gl/framebuffer.hpp"
 
 #include <string>
 
@@ -26,6 +23,8 @@ namespace yavsg
     public:
         SDL_Window*   sdl_window;
         SDL_GLContext gl_context;
+        
+        yavsg::gl::base_framebuffer default_framebuffer;
         
         SDL_window_manager(
             const std::string& title,

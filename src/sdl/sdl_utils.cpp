@@ -58,7 +58,8 @@ namespace yavsg // SDL_window_manager //////////////////////////////////////////
         int x, int y,
         int w, int h,
         Uint32 flags
-    )
+    ) :
+        default_framebuffer( 0, w, h )
     {
         sdl_window = SDL_CreateWindow(
             title.c_str(),

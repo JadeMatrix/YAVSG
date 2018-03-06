@@ -5,7 +5,7 @@
 
 #include "_gl_base.hpp"
 #include "error.hpp"
-#include "../sdl/sdl_utils.hpp"
+#include "../sdl/_sdl_base.hpp"
 
 #include <string>
 #include <type_traits>  // std::enable_if
