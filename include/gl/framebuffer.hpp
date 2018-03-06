@@ -209,13 +209,14 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
                     + " for yavsg::gl::framebuffer::color_buffers_init()"
                 );
                 
+                // TODO: some way to configure alpha for each color target
                 glTexImage2D(
                     GL_TEXTURE_2D,
                     0,
-                    GL_RGB,
+                    GL_RGBA, // GL_RGB,
                     _width, _height,
                     0,
-                    GL_RGB,
+                    GL_RGBA, // GL_RGB,
                     GL_FLOAT,
                     nullptr
                 );
