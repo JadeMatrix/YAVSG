@@ -40,18 +40,25 @@ namespace yavsg { namespace gl
             } mipmaps;
         };
         
-        texture( SDL_Surface* sdl_surface ); // Not `const` due to the SDL API
+        texture(
+            SDL_Surface*, // Not `const` due to the SDL API
+            const filter_settings&
+        );
         texture( texture&& );
         
         // Disable copy & assignment
         texture( const texture& ) = delete;
         texture& operator=( const texture& ) = delete;
         
-        static texture from_file( const std::string& filename );
+        static texture from_file(
+            const std::string& filename,
+            const filter_settings& settings
+        );
         static texture rgba8_from_bytes(
             unsigned int width,
             unsigned int height,
-            const char* bytes
+            const char* bytes,
+            const filter_settings& settings
         );
         // For use by stuff like framebuffers that need to control texture
         // allocation

@@ -69,14 +69,18 @@ namespace
                     std::string texture_filename =
                         obj_mtl_directory + info.filename;
                     
+                    using settings = yavsg::gl::texture::filter_settings;
+                    
                     info.texture = new yavsg::gl::texture(
-                        yavsg::gl::texture::from_file( texture_filename )
+                        yavsg::gl::texture::from_file(
+                            texture_filename,
+                            {
+                                settings::magnify_mode::LINEAR,
+                                settings::minify_mode::LINEAR,
+                                settings::mipmap_type::LINEAR,
+                            }
+                        )
                     );
-                    info.texture -> filtering( {
-                        yavsg::gl::texture::filter_settings::magnify_mode::LINEAR,
-                        yavsg::gl::texture::filter_settings::minify_mode::LINEAR,
-                        yavsg::gl::texture::filter_settings::mipmap_type::LINEAR,
-                    } );
                 }
             }
             

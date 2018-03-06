@@ -58,7 +58,10 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
         );
     }
     
-    texture::texture( SDL_Surface* sdl_surface ) : texture()
+    texture::texture(
+        SDL_Surface* sdl_surface,
+        const filter_settings& settings
+    ) : texture()
     {
         // Surface is passed as a pointer for consistency with the SDL API, so
         // we'll want to check if it's NULL
@@ -142,6 +145,8 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
                 + std::to_string( gl_id )
                 + " for yavsg::gl::texture"
             );
+            
+            filtering( settings );
         }
         catch( ... )
         {
@@ -297,7 +302,10 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
 
 namespace yavsg { namespace gl // Texture static method implementations ////////
 {
-    texture texture::from_file( const std::string& filename )
+    texture texture::from_file(
+        const std::string& filename,
+        const filter_settings& settings
+    )
     {
         SDL_Surface* sdl_surface = IMG_Load(
             filename.c_str()
@@ -325,7 +333,7 @@ namespace yavsg { namespace gl // Texture static method implementations ////////
         //         << std::endl
         //     ;
         
-        texture created_texture = texture( sdl_surface );
+        texture created_texture = texture( sdl_surface, settings );
         SDL_FreeSurface( sdl_surface );
         return created_texture;
     }
@@ -333,7 +341,8 @@ namespace yavsg { namespace gl // Texture static method implementations ////////
     // texture texture::rgba8_from_bytes(
     //     unsigned int width,
     //     unsigned int height,
-    //     const char* bytes
+    //     const char* bytes,
+    //     const filter_settings& settings
     // )
     // {
         
