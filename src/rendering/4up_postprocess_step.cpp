@@ -144,15 +144,15 @@ namespace yavsg
         )
     {
         postprocess_program.link_attribute< 0 >(
-            shader_string( shader_string_id::VERTEX_IN_POSITION ),
+            shader_string_id::VERTEX_IN_POSITION,
             vertices
         );
         postprocess_program.link_attribute< 1 >(
-            shader_string( shader_string_id::VERTEX_IN_TEXTURE ),
+            shader_string_id::VERTEX_IN_TEXTURE,
             vertices
         );
         postprocess_program.bind_target< 0 >(
-            shader_string( shader_string_id::FRAGMENT_OUT_COLOR )
+            shader_string_id::FRAGMENT_OUT_COLOR
         );
     }
     
@@ -209,7 +209,7 @@ namespace yavsg
             
             source_buffer -> color_buffer< 0 >().bind_as< 0 >();
             postprocess_program.set_uniform(
-                shader_string( shader_string_id::FRAMEBUFFER_SOURCE_COLOR ),
+                shader_string_id::FRAMEBUFFER_SOURCE_COLOR,
                 0
             );
             

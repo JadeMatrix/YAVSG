@@ -240,24 +240,24 @@ namespace yavsg
         auto objects_ref = object_manager.write();
         auto& uploaded_vertices = objects_ref -> back().vertices;
         scene_program.link_attribute< 0 >(
-            shader_string( shader_string_id::VERTEX_IN_POSITION ),
+            shader_string_id::VERTEX_IN_POSITION,
             uploaded_vertices
         );
         scene_program.link_attribute< 1 >(
-            shader_string( shader_string_id::VERTEX_IN_NORMAL ),
+            shader_string_id::VERTEX_IN_NORMAL,
             uploaded_vertices
         );
         scene_program.link_attribute< 2 >(
-            shader_string( shader_string_id::VERTEX_IN_COLOR ),
+            shader_string_id::VERTEX_IN_COLOR,
             uploaded_vertices
         );
         scene_program.link_attribute< 3 >(
-            shader_string( shader_string_id::VERTEX_IN_TEXTURE ),
+            shader_string_id::VERTEX_IN_TEXTURE,
             uploaded_vertices
         );
         
         scene_program.bind_target< 0 >(
-            shader_string( shader_string_id::FRAGMENT_OUT_COLOR )
+            shader_string_id::FRAGMENT_OUT_COLOR
         );
     }
     
@@ -289,7 +289,7 @@ namespace yavsg
             )
         );
         scene_program.set_uniform(
-            shader_string( shader_string_id::TRANSFORM_VIEW ),
+            shader_string_id::TRANSFORM_VIEW,
             transform_view
         );
         
@@ -302,7 +302,7 @@ namespace yavsg
             10.0f
         );
         scene_program.set_uniform(
-            shader_string( shader_string_id::TRANSFORM_PROJECTION ),
+            shader_string_id::TRANSFORM_PROJECTION,
             transform_projection
         );
         
@@ -328,7 +328,7 @@ namespace yavsg
             };
             
             scene_program.set_uniform(
-                shader_string( shader_string_id::TRANSFORM_MODEL ),
+                shader_string_id::TRANSFORM_MODEL,
                 rotation_matrix
                 * object.transform_model()
             );

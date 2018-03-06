@@ -8,6 +8,7 @@
 #include "attribute_buffer.hpp"
 #include "../math/matrix.hpp"
 #include "../math/vector.hpp"
+#include "../rendering/shader_variable_names.hpp"
 
 #include <tuple>
 #include <exception>
@@ -74,8 +75,16 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
             const std::string& attribute_name,
             const attribute_buffer_type& dummy_attributes
         );
+        template< std::size_t Nth > bool link_attribute(
+            shader_string_id attribute_name_id,
+            const attribute_buffer_type& dummy_attributes
+        );
         template< typename T > bool set_uniform(
             const std::string& uniform_name,
+            const T& uniform_value
+        );
+        template< typename T > bool set_uniform(
+            shader_string_id uniform_name_id,
             const T& uniform_value
         );
         
@@ -89,6 +98,15 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
             >::type = 0
         > void bind_target(
             const std::string& target_name
+        );
+        template<
+            std::size_t Nth,
+            typename std::enable_if<
+                ( Nth < framebuffer_type::num_color_targets ),
+                int
+            >::type = 0
+        > void bind_target(
+            shader_string_id target_name_id
         );
     };
 } }
@@ -463,6 +481,19 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
     }
     
     template< class AttributeBuffer, class Framebuffer >
+    template< std::size_t Nth >
+    bool shader_program< AttributeBuffer, Framebuffer >::link_attribute(
+        shader_string_id attribute_name_id,
+        const attribute_buffer_type& dummy_attributes
+    )
+    {
+        return link_attribute< Nth >(
+            shader_string( attribute_name_id ),
+            dummy_attributes
+        );
+    }
+    
+    template< class AttributeBuffer, class Framebuffer >
     template< typename T >
     bool shader_program< AttributeBuffer, Framebuffer >::set_uniform(
         const std::string& uniform_name,
@@ -480,6 +511,19 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             gl_program_id
         );
         return true;
+    }
+    
+    template< class AttributeBuffer, class Framebuffer >
+    template< typename T >
+    bool shader_program< AttributeBuffer, Framebuffer >::set_uniform(
+        shader_string_id uniform_name_id,
+        const T& uniform_value
+    )
+    {
+        return set_uniform(
+            shader_string( uniform_name_id ),
+            uniform_value
+        );
     }
     
     template< class AttributeBuffer, class Framebuffer >
@@ -502,6 +546,21 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             + std::to_string( gl_program_id )
             + " for yavsg::gl::shader_program::bind_target()"
         );
+    }
+    
+    template< class AttributeBuffer, class Framebuffer >
+    template<
+        std::size_t Nth,
+        typename std::enable_if<
+            ( Nth < Framebuffer::num_color_targets ),
+            int
+        >::type
+    >
+    void shader_program< AttributeBuffer, Framebuffer >::bind_target(
+        shader_string_id target_name_id
+    )
+    {
+        return bind_target< Nth >( shader_string( target_name_id ) );
     }
 } }
 
