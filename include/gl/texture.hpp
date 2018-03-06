@@ -14,8 +14,6 @@
 
 namespace yavsg { namespace gl
 {
-    void load_bound_texture( const std::string& filename );
-    
     static const GLuint default_texture_gl_id = 0x00;
     
     class texture
