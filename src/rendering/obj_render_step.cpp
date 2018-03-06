@@ -300,7 +300,8 @@ namespace yavsg
         auto transform_projection = yavsg::perspective< GLfloat >(
             yavsg::radians< GLfloat >( 45 ),
             yavsg::  ratio< GLfloat >(
-                ( float )gl_tut::window_width / ( float )gl_tut::window_height
+                  static_cast< GLfloat >( gl_tut::window_width )
+                / static_cast< GLfloat >( gl_tut::window_height )
             ),
             1.0f,
             10.0f
@@ -321,14 +322,14 @@ namespace yavsg
                 * 10
             );
             
-            auto sin_val = ( GLfloat )sin( rotate_by );
-            auto cos_val = ( GLfloat )cos( rotate_by );
+            auto sin_val = static_cast< GLfloat >( sin( rotate_by ) );
+            auto cos_val = static_cast< GLfloat >( cos( rotate_by ) );
             
             auto rotation_matrix = square_matrix< GLfloat, 4 >{
-                {      cos_val,      sin_val, ( GLfloat )0, ( GLfloat )0 },
-                {     -sin_val,      cos_val, ( GLfloat )0, ( GLfloat )0 },
-                { ( GLfloat )0, ( GLfloat )0, ( GLfloat )1, ( GLfloat )0 },
-                { ( GLfloat )0, ( GLfloat )0, ( GLfloat )0, ( GLfloat )1 }
+                {  cos_val, sin_val, 0.0f, 0.0f },
+                { -sin_val, cos_val, 0.0f, 0.0f },
+                {     0.0f,    0.0f, 1.0f, 0.0f },
+                {     0.0f,    0.0f, 0.0f, 1.0f }
             };
             
             scene_program.set_uniform(

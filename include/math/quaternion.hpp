@@ -31,14 +31,25 @@ namespace yavsg
     public:
         template< typename O > constexpr quaternion(
             const quaternion< O >& o
-        ) : values( { ( T )o[ W ], ( T )o[ I ], ( T )o[ J ], ( T )o[ K ] } )
+        ) : values( {
+            static_cast< T >( o[ W ] ),
+            static_cast< T >( o[ I ] ),
+            static_cast< T >( o[ J ] ),
+            static_cast< T >( o[ K ] )
+        } )
         {}
         
         template< typename O > constexpr quaternion(
             const vector< O, 4 >& o
-        ) : values( { ( T )o[ W ], ( T )o[ I ], ( T )o[ J ], ( T )o[ K ] } )
+        ) : values( {
+            static_cast< T >( o[ W ] ),
+            static_cast< T >( o[ I ] ),
+            static_cast< T >( o[ J ] ),
+            static_cast< T >( o[ K ] )
+        } )
         {}
         
+        // TODO: template< typename... O > ... std::initializer_list< O > ...
         constexpr quaternion( std::initializer_list< T > il ) :
             values( vector< T, 4 >::make_uninitialized() )
         {

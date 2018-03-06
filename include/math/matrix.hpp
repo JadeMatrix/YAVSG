@@ -36,7 +36,7 @@ namespace yavsg
         {
             for( unsigned int i = 0; i < Rows; ++i )
                 for( unsigned int j = 0; j < Cols; ++j )
-                    values[ j ][ i ] = ( O )a[ j ][ i ];
+                    values[ j ][ i ] = static_cast< T >( a[ j ][ i ] );
         }
         
         template< typename O > constexpr matrix(
@@ -45,9 +45,10 @@ namespace yavsg
         {
             for( unsigned int i = 0; i < Rows; ++i )
                 for( unsigned int j = 0; j < Cols; ++j )
-                    values[ j ][ i ] = ( O )o[ j ][ i ];
+                    values[ j ][ i ] = static_cast< T >( o[ j ][ i ] );
         }
         
+        // TODO: template< typename... O > ... std::initializer_list< O > ...
         constexpr matrix(
             const std::initializer_list< std::initializer_list< T > > il
         )

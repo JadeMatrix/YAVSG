@@ -29,7 +29,7 @@ namespace yavsg
         )
         {
             for( unsigned int i = 0; i < D; ++i )
-                values[ i ] = ( O )a[ i ];
+                values[ i ] = static_cast< T >( a[ i ] );
         }
         
         template< typename O > constexpr vector(
@@ -37,7 +37,7 @@ namespace yavsg
         )
         {
             for( unsigned int i = 0; i < D; ++i )
-                values[ i ] = ( O )o[ i ];
+                values[ i ] = static_cast< T >( o[ i ] );
         }
         
         template< typename... O > constexpr vector(
@@ -45,6 +45,7 @@ namespace yavsg
         ) : values( { args... } )
         {}
         
+        // TODO: template< typename... O > ... std::initializer_list< O > ...
         constexpr vector( std::initializer_list< T > il )
         {
             // Implements same semantics as partial array initialization via
@@ -293,26 +294,28 @@ namespace yavsg // Equality operators //////////////////////////////////////////
 }
 
 
-// namespace yavsg // (Magnitude) comparison operators ////////////////////////////
-// {
-//     #define DEFINE_OPERATORS_FOR_COMPARISON_OPERAND( OPERAND ) \
-//     template< typename L, typename R, unsigned int D > \
-//     constexpr \
-//     auto operator OPERAND ( \
-//         const vector< L, D >& lhs, \
-//         const vector< R, D >& rhs \
-//     ) -> decltype( lhs.magnitude() OPERAND rhs.magnitude() ) \
-//     { \
-//         return lhs.magnitude() OPERAND rhs.magnitude(); \
-//     }
+#if 0
+namespace yavsg // (Magnitude) comparison operators ////////////////////////////
+{
+    #define DEFINE_OPERATORS_FOR_COMPARISON_OPERAND( OPERAND ) \
+    template< typename L, typename R, unsigned int D > \
+    constexpr \
+    auto operator OPERAND ( \
+        const vector< L, D >& lhs, \
+        const vector< R, D >& rhs \
+    ) -> decltype( lhs.magnitude() OPERAND rhs.magnitude() ) \
+    { \
+        return lhs.magnitude() OPERAND rhs.magnitude(); \
+    }
     
-//     DEFINE_OPERATORS_FOR_COMPARISON_OPERAND( <  )
-//     DEFINE_OPERATORS_FOR_COMPARISON_OPERAND( >  )
-//     DEFINE_OPERATORS_FOR_COMPARISON_OPERAND( <= )
-//     DEFINE_OPERATORS_FOR_COMPARISON_OPERAND( >= )
+    DEFINE_OPERATORS_FOR_COMPARISON_OPERAND( <  )
+    DEFINE_OPERATORS_FOR_COMPARISON_OPERAND( >  )
+    DEFINE_OPERATORS_FOR_COMPARISON_OPERAND( <= )
+    DEFINE_OPERATORS_FOR_COMPARISON_OPERAND( >= )
     
-//     #undef DEFINE_OPERATORS_FOR_COMPARISON_OPERAND
-// }
+    #undef DEFINE_OPERATORS_FOR_COMPARISON_OPERAND
+}
+#endif
 
 
 namespace yavsg // Matrix-vector multiplication ////////////////////////////////

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef YAVSG_GL__GL_BASE_HPP
-#define YAVSG_GL__GL_BASE_HPP
+#ifndef YAVSG_GL_GL_BASE_HPP
+#define YAVSG_GL_GL_BASE_HPP
 
 
 // As including OpenGL can be finnicky (order-dependent, breaks on multiple-

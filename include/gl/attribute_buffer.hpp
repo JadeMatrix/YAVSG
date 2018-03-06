@@ -3,9 +3,10 @@
 #define YAVSG_GL_ATTRIBUTE_BUFFER_HPP
 
 
+#include <array>
+#include <cstdint>  // std::uintptr_t
 #include <tuple>
 #include <vector>
-#include <array>
 
 
 namespace yavsg { namespace gl
@@ -102,7 +103,9 @@ namespace yavsg { namespace gl // Vertex buffer implementation /////////////////
             + " for yavsg::gl::attribute_buffer::upload_data()"
         );
         
-        void* elements_ptr = ( void* )&vertices[ 0 ];
+        auto elements_ptr = static_cast< const tuple_type* >(
+            &vertices[ 0 ]
+        );
         
         glBufferData(
             GL_ARRAY_BUFFER,
@@ -114,7 +117,9 @@ namespace yavsg { namespace gl // Vertex buffer implementation /////////////////
             "couldn't upload "
             + std::to_string( vertices.size() )
             + " buffer elements at "
-            + std::to_string( ( unsigned long )elements_ptr )
+            + std::to_string(
+                reinterpret_cast< std::uintptr_t >( elements_ptr )
+            )
             + " for yavsg::gl::attribute_buffer::upload_data()"
         );
         
@@ -159,7 +164,9 @@ namespace yavsg { namespace gl // Index buffer implementation //////////////////
             glDeleteBuffers( 1, &gl_id );
     }
     
-    inline void index_buffer::upload_data( const std::vector< GLuint >& indices )
+    inline void index_buffer::upload_data(
+        const std::vector< GLuint >& indices
+    )
     {
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gl_id );
         YAVSG_GL_THROW_FOR_ERRORS(
@@ -168,7 +175,7 @@ namespace yavsg { namespace gl // Index buffer implementation //////////////////
             + " for yavsg::gl::index_buffer::upload_data()"
         );
         
-        void* elements_ptr = ( void* )&indices[ 0 ];
+        auto elements_ptr = static_cast< const GLuint* >( &indices[ 0 ] );
         
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,
@@ -180,7 +187,9 @@ namespace yavsg { namespace gl // Index buffer implementation //////////////////
             "couldn't upload "
             + std::to_string( indices.size() )
             + " buffer elements at "
-            + std::to_string( ( unsigned long )elements_ptr )
+            + std::to_string(
+                reinterpret_cast< std::uintptr_t >( elements_ptr )
+            )
             + " for yavsg::gl::index_buffer::upload_data()"
         );
         

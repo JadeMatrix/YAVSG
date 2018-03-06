@@ -167,7 +167,7 @@ int main( int argc, char* argv[] )
                     std::cerr << "GL_TABLE_TOO_LARGE";
                     break;
                 default:
-                    std::cerr << std::to_string( ( unsigned int )code );
+                    std::cerr << std::to_string( code );
                     break;
                 }
                 std::cerr << std::endl;

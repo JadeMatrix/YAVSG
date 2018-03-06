@@ -13,14 +13,14 @@ namespace yavsg
     class render_step
     {
     public:
-        virtual ~render_step() {};
+        virtual ~render_step() {}
         virtual void run() = 0;
     };
     
     template< std::size_t ColorTargets > class postprocess_step
     {
     public:
-        virtual ~postprocess_step() {};
+        virtual ~postprocess_step() {}
         virtual void run( gl::framebuffer< ColorTargets >& source ) = 0;
     };
 }

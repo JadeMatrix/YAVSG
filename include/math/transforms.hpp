@@ -24,10 +24,10 @@ namespace yavsg // Rotation models to matrix conversions ///////////////////////
     )
     {
         return {
-            ( V )( axis[ 0 ] * sin( r / 2 ) ),
-            ( V )( axis[ 1 ] * sin( r / 2 ) ),
-            ( V )( axis[ 2 ] * sin( r / 2 ) ),
-            ( V )(             cos( r / 2 ) )
+            static_cast< V >( axis[ 0 ] * sin( r / 2 ) ),
+            static_cast< V >( axis[ 1 ] * sin( r / 2 ) ),
+            static_cast< V >( axis[ 2 ] * sin( r / 2 ) ),
+            static_cast< V >(             cos( r / 2 ) )
         };
     }
     
@@ -40,10 +40,10 @@ namespace yavsg // Rotation models to matrix conversions ///////////////////////
     )
     {
         return {
-            ( V )( cos( roll / 2 ) * cos( pitch / 2 ) * cos( yaw / 2 ) + sin( roll / 2 ) * sin( pitch / 2 ) * sin( yaw / 2 ) ),
-            ( V )( sin( roll / 2 ) * cos( pitch / 2 ) * cos( yaw / 2 ) - cos( roll / 2 ) * sin( pitch / 2 ) * sin( yaw / 2 ) ),
-            ( V )( cos( roll / 2 ) * sin( pitch / 2 ) * cos( yaw / 2 ) + sin( roll / 2 ) * cos( pitch / 2 ) * sin( yaw / 2 ) ),
-            ( V )( cos( roll / 2 ) * cos( pitch / 2 ) * sin( yaw / 2 ) - sin( roll / 2 ) * sin( pitch / 2 ) * cos( yaw / 2 ) )
+            static_cast< V >( cos( roll / 2 ) * cos( pitch / 2 ) * cos( yaw / 2 ) + sin( roll / 2 ) * sin( pitch / 2 ) * sin( yaw / 2 ) ),
+            static_cast< V >( sin( roll / 2 ) * cos( pitch / 2 ) * cos( yaw / 2 ) - cos( roll / 2 ) * sin( pitch / 2 ) * sin( yaw / 2 ) ),
+            static_cast< V >( cos( roll / 2 ) * sin( pitch / 2 ) * cos( yaw / 2 ) + sin( roll / 2 ) * cos( pitch / 2 ) * sin( yaw / 2 ) ),
+            static_cast< V >( cos( roll / 2 ) * cos( pitch / 2 ) * sin( yaw / 2 ) - sin( roll / 2 ) * sin( pitch / 2 ) * cos( yaw / 2 ) )
         };
     }
 }
@@ -113,9 +113,9 @@ namespace yavsg // Scaling operations //////////////////////////////////////////
     square_matrix< M, 4 > scaling( const vector< V, 3 >& v )
     {
         auto m = identity_matrix< M, 4 >();
-        m[ 0 ][ 0 ] = ( V )v[ 0 ];
-        m[ 1 ][ 1 ] = ( V )v[ 1 ];
-        m[ 2 ][ 2 ] = ( V )v[ 2 ];
+        m[ 0 ][ 0 ] = static_cast< V >( v[ 0 ] );
+        m[ 1 ][ 1 ] = static_cast< V >( v[ 1 ] );
+        m[ 2 ][ 2 ] = static_cast< V >( v[ 2 ] );
         return m;
     }
     
@@ -137,9 +137,9 @@ namespace yavsg // Translation operations //////////////////////////////////////
     square_matrix< M, 4 > translation( const vector< V, 3 >& v )
     {
         auto m = identity_matrix< M, 4 >();
-        m[ 3 ][ 0 ] = ( V )v[ 0 ];
-        m[ 3 ][ 1 ] = ( V )v[ 1 ];
-        m[ 3 ][ 2 ] = ( V )v[ 2 ];
+        m[ 3 ][ 0 ] = static_cast< V >( v[ 0 ] );
+        m[ 3 ][ 1 ] = static_cast< V >( v[ 1 ] );
+        m[ 3 ][ 2 ] = static_cast< V >( v[ 2 ] );
         return m;
     }
 }

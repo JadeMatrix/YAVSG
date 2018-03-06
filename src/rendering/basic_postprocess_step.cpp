@@ -72,11 +72,11 @@ namespace yavsg
         
         postprocess_program.set_uniform(
             shader_string_id::FRAMEBUFFER_TARGET_WIDTH,
-            ( GLfloat )gl_tut::window_width
+            static_cast< GLfloat >( gl_tut::window_width )
         );
         postprocess_program.set_uniform(
             shader_string_id::FRAMEBUFFER_TARGET_HEIGHT,
-            ( GLfloat )gl_tut::window_height
+            static_cast< GLfloat >( gl_tut::window_height )
         );
         
         postprocess_program.run(

@@ -22,10 +22,10 @@ namespace yavsg // Views ///////////////////////////////////////////////////////
         auto           u = cross_product(           s, camera_axis ).unit();
         
         return {
-            { ( M )( s[ 0 ] ), ( M )( u[ 0 ] ), ( M )( -camera_axis[ 0 ] ), 0 },
-            { ( M )( s[ 1 ] ), ( M )( u[ 1 ] ), ( M )( -camera_axis[ 1 ] ), 0 },
-            { ( M )( s[ 2 ] ), ( M )( u[ 2 ] ), ( M )( -camera_axis[ 2 ] ), 0 },
-            {               0,               0,                          0, 1 }
+            { static_cast< M >( s[ 0 ] ), static_cast< M >( u[ 0 ] ), static_cast< M >( -camera_axis[ 0 ] ), 0 },
+            { static_cast< M >( s[ 1 ] ), static_cast< M >( u[ 1 ] ), static_cast< M >( -camera_axis[ 1 ] ), 0 },
+            { static_cast< M >( s[ 2 ] ), static_cast< M >( u[ 2 ] ), static_cast< M >( -camera_axis[ 2 ] ), 0 },
+            {                          0,                          0,                                     0, 1 }
         };
     }
     
@@ -47,10 +47,10 @@ namespace yavsg // Views ///////////////////////////////////////////////////////
         auto dc =  ( camera_axis.dot( position ) );
         
         return {
-            { ( M )( s[ 0 ] ), ( M )( u[ 0 ] ), ( M )( -camera_axis[ 0 ] ), 0 },
-            { ( M )( s[ 1 ] ), ( M )( u[ 1 ] ), ( M )( -camera_axis[ 1 ] ), 0 },
-            { ( M )( s[ 2 ] ), ( M )( u[ 2 ] ), ( M )( -camera_axis[ 2 ] ), 0 },
-            { ( M )        ds, ( M )        du, ( M )                   dc, 1 }
+            { static_cast< M >( s[ 0 ] ), static_cast< M >( u[ 0 ] ), static_cast< M >( -camera_axis[ 0 ] ), 0 },
+            { static_cast< M >( s[ 1 ] ), static_cast< M >( u[ 1 ] ), static_cast< M >( -camera_axis[ 1 ] ), 0 },
+            { static_cast< M >( s[ 2 ] ), static_cast< M >( u[ 2 ] ), static_cast< M >( -camera_axis[ 2 ] ), 0 },
+            { static_cast< M >(     ds ), static_cast< M >(     du ), static_cast< M >(                dc ), 1 }
         };
     }
 }
@@ -76,10 +76,10 @@ namespace yavsg // Projections /////////////////////////////////////////////////
         auto d = -2 / ( far - near );
         auto r = -( ( far + near ) / ( far - near ) );
         return {
-            { ( M )w,      0,      0,      0 },
-            {      0,      1,      0,      0 },
-            {      0,      0, ( M )d,      0 },
-            {      0,      0, ( M )r,      1 }
+            { static_cast< M >( w ),      0,                     0,      0 },
+            {                     0,      1,                     0,      0 },
+            {                     0,      0, static_cast< M >( d ),      0 },
+            {                     0,      0, static_cast< M >( r ),      1 }
         };
     }
     
@@ -110,10 +110,10 @@ namespace yavsg // Projections /////////////////////////////////////////////////
         auto ty = -( (   top + bottom ) / (   top - bottom ) );
         auto tz = -( (   far + near   ) / (   far - near   ) );
         return {
-            { ( M ) w,       0,       0,  0 },
-            {       0, ( M ) h,       0,  0 },
-            {       0,       0, ( M ) d, -1 },
-            { ( M )tx, ( M )ty, ( M )tz,  0 }
+            { static_cast< M >(  w ),                      0,                      0,  0 },
+            {                      0, static_cast< M >(  h ),                      0,  0 },
+            {                      0,                      0, static_cast< M >(  d ), -1 },
+            { static_cast< M >( tx ), static_cast< M >( ty ), static_cast< M >( tz ),  0 }
         };
     }
     
@@ -138,10 +138,10 @@ namespace yavsg // Projections /////////////////////////////////////////////////
         auto z1 = (     near + far ) / ( near - far );
         auto z2 = ( 2 * near * far ) / ( near - far );
         return {
-            { ( M )fx,       0,       0,  0 },
-            {       0, ( M )fy,       0,  0 },
-            {       0,       0, ( M )z1, -1 },
-            {       0,       0, ( M )z2,  0 }
+            { static_cast< M >( fx ),                      0,                      0,  0 },
+            {                      0, static_cast< M >( fy ),                      0,  0 },
+            {                      0,                      0, static_cast< M >( z1 ), -1 },
+            {                      0,                      0, static_cast< M >( z2 ),  0 }
         };
     }
     
@@ -165,10 +165,10 @@ namespace yavsg // Projections /////////////////////////////////////////////////
         auto z1 = (     near + far ) / ( near - far );
         auto z2 = ( 2 * near * far ) / ( near - far );
         return {
-            { ( M )f,                        0,       0,  0 },
-            {      0, ( M )( f * aspect_ratio),       0,  0 },
-            {      0,                        0, ( M )z1, -1 },
-            {      0,                        0, ( M )z2,  0 }
+            { static_cast< M >( f ),                                   0,                      0,  0 },
+            {                     0, static_cast< M >( f * aspect_ratio),                      0,  0 },
+            {                     0,                                   0, static_cast< M >( z1 ), -1 },
+            {                     0,                                   0, static_cast< M >( z2 ),  0 }
         };
     }
 }

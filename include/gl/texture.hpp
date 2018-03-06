@@ -214,7 +214,7 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
     ) : _texture_general(
         width,
         height,
-        ( void* )data,
+        data,
         settings,
         format_traits::gl_internal_format,
         format_traits::gl_format,

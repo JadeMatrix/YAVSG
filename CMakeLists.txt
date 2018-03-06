@@ -5,6 +5,7 @@ SET( CMAKE_BUILD_TYPE Debug )
 
 SET( CMAKE_CXX_STANDARD          14 )
 SET( CMAKE_CXX_STANDARD_REQUIRED ON )
+# SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic" )
 
 
 PROJECT( "YetAnotherVoxelSpessGame" )

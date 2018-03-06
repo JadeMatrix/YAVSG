@@ -20,7 +20,7 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
     // Helper function to allow partial specialization of
     // shader_program<>::set_uniform<>()
     template< typename T > void set_current_program_uniform(
-        GLuint uniform_location,
+        GLint uniform_location,
         const T& uniform_value,
         const std::string& uniform_name,    // Passed along for error handling
         GLuint& gl_program_id               // Passed along for error handling
@@ -346,7 +346,7 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             GL_TRIANGLES, // TODO: other primitive types
             count,
             GL_UNSIGNED_INT,
-            ( void* )( start * sizeof( GLuint ) )
+            reinterpret_cast< void* >( start * sizeof( GLuint ) )
         );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't draw triangles from vertex array buffer "
@@ -452,14 +452,17 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             + " for yavsg::gl::shader_program::link_attribute()"
         );
         
-        using attribute_type = typename std::tuple_element< Nth, tuple_type >::type;
+        using attribute_type = typename std::tuple_element<
+            Nth,
+            tuple_type
+        >::type;
         
         // I've tried everything I can think of, this seems to be the only way
         // to """safely""" get the byte offset of a tuple member.
-        const tuple_type& fake_tuple = *( tuple_type* )0x01;
+        const tuple_type& fake_tuple = *reinterpret_cast< tuple_type* >( 0x01 );
         auto offset_of_attribute = (
-              ( char* )&std::get< Nth >( fake_tuple )
-            - ( char* )&fake_tuple
+              reinterpret_cast< const char* >( &std::get< Nth >( fake_tuple ) )
+            - reinterpret_cast< const char* >( &fake_tuple                    )
         );
         
         glVertexAttribPointer(
@@ -468,7 +471,7 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             attribute_traits< attribute_type >::component_type,
             GL_FALSE,
             sizeof( tuple_type ),
-            ( void* )offset_of_attribute
+            reinterpret_cast< const void* >( offset_of_attribute )
         );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't link attribute \""
@@ -572,7 +575,7 @@ namespace yavsg { namespace gl // Uniform-set specializations //////////////////
         OPERATION \
     ) \
     template<> inline void set_current_program_uniform< TYPE >( \
-        GLuint uniform_location, \
+        GLint uniform_location, \
         const TYPE& uniform_value, \
         const std::string& uniform_name, \
         GLuint& gl_program_id \
@@ -616,7 +619,7 @@ namespace yavsg { namespace gl // Uniform-set specializations //////////////////
     template<> inline void set_current_program_uniform< \
         yavsg::vector< TYPE, DIMENSIONS > \
     >( \
-        GLuint uniform_location, \
+        GLint uniform_location, \
         const yavsg::vector< TYPE, DIMENSIONS >& uniform_value, \
         const std::string& uniform_name, \
         GLuint& gl_program_id \
@@ -662,7 +665,7 @@ namespace yavsg { namespace gl // Uniform-set specializations //////////////////
     template<> inline void set_current_program_uniform< \
         yavsg::square_matrix< TYPE, DIMENSIONS > \
     >( \
-        GLuint uniform_location, \
+        GLint uniform_location, \
         const yavsg::square_matrix< TYPE, DIMENSIONS >& uniform_value, \
         const std::string& uniform_name, \
         GLuint& gl_program_id \
@@ -699,7 +702,7 @@ namespace yavsg { namespace gl // Uniform-set specializations //////////////////
     template<> inline void set_current_program_uniform< \
         yavsg::matrix< TYPE, ROWS, COLS > \
     >( \
-        GLuint uniform_location, \
+        GLint uniform_location, \
         const yavsg::matrix< TYPE, ROWS, COLS >& uniform_value, \
         const std::string& uniform_name, \
         GLuint& gl_program_id \
