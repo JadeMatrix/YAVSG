@@ -48,9 +48,9 @@ namespace
 }
 
 
-namespace yavsg { namespace gl // Texture class implementation /////////////////
+namespace yavsg { namespace gl // Texture bas class implementation /////////////
 {
-    texture::texture()
+    _texture_general::_texture_general()
     {
         glGenTextures( 1, &gl_id );
         YAVSG_GL_THROW_FOR_ERRORS(
@@ -58,10 +58,11 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
         );
     }
     
-    texture::texture(
+    _texture_general::_texture_general(
         SDL_Surface* sdl_surface,
-        const filter_settings& settings
-    ) : texture()
+        const filter_settings& settings,
+        GLint gl_format
+    ) : _texture_general()
     {
         // Surface is passed as a pointer for consistency with the SDL API, so
         // we'll want to check if it's NULL
@@ -70,13 +71,14 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
                 "null SDL_Surface* for yavsg::gl::texture"
             );
         
-        GLenum texture_mode;
+        GLenum incoming_format;
+        GLenum incoming_type = GL_UNSIGNED_BYTE;
         SDL_Surface* converted_surface = nullptr;
         
         if( sdl_surface -> format -> format == SDL_PIXELFORMAT_RGBA8888 )
-            texture_mode = GL_RGBA;
+            incoming_format = GL_RGBA;
         else if( sdl_surface -> format -> format == SDL_PIXELFORMAT_RGB888 )
-            texture_mode = GL_RGB;
+            incoming_format = GL_RGB;
         else // Convert pixels
         {
             SDL_PixelFormat* new_format = nullptr;
@@ -84,24 +86,25 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
             if( format_has_alpha( sdl_surface -> format -> format ) )
             {
                 new_format = SDL_AllocFormat( SDL_PIXELFORMAT_RGBA32 );
-                texture_mode = GL_RGBA;
+                incoming_format = GL_RGBA;
             }
             else
             {
                 new_format = SDL_AllocFormat( SDL_PIXELFORMAT_RGB24 );\
-                texture_mode = GL_RGB;
+                incoming_format = GL_RGB;
             }
             
             if( !new_format )
                 throw std::runtime_error(
-                    "couldn't allocate SDL format for yavsg::gl::texture: "
+                    "couldn't allocate SDL format for "
+                    "yavsg::gl::_texture_general: "
                     + std::string( SDL_GetError() )
                 );
             
             converted_surface = SDL_ConvertSurface(
                 sdl_surface,
                 new_format,
-                0x00
+                0x00 // Flags (unused)
             );
             
             // Free format before possibly throwing an error
@@ -109,77 +112,58 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
             
             if( !converted_surface )
                 throw std::runtime_error(
-                    "couldn't convert SDL surface for yavsg::gl::texture: "
+                    "couldn't convert SDL surface for "
+                    "yavsg::gl::_texture_general: "
                     + std::string( SDL_GetError() )
                 );
             
             sdl_surface = converted_surface;
-        }
-        
-        try
-        {
-            glBindTexture( GL_TEXTURE_2D, gl_id );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't bind texture "
-                + std::to_string( gl_id )
-                + " for yavsg::gl::texture"
-            );
             
-            glTexImage2D(   // Loads starting at 0,0 as bottom left
-                GL_TEXTURE_2D,
-                0,                      // LoD, 0 = base
-                texture_mode,           // Internal format
-                sdl_surface -> w,       // Width
-                sdl_surface -> h,       // Height
-                0,                      // Border; must be 0
-                texture_mode,           // Incoming format
-                GL_UNSIGNED_BYTE,       // Pixel type
-                sdl_surface -> pixels   // Pixel data
-            );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't allocate "
-                + std::to_string( sdl_surface -> w )
-                + "x"
-                + std::to_string( sdl_surface -> h )
-                + " texture "
-                + std::to_string( gl_id )
-                + " for yavsg::gl::texture"
-            );
+            try
+            {
+                glBindTexture( GL_TEXTURE_2D, gl_id );
+                YAVSG_GL_THROW_FOR_ERRORS(
+                    "couldn't bind texture "
+                    + std::to_string( gl_id )
+                    + " for yavsg::gl::_texture_general"
+                );
+                
+                glTexImage2D(   // Loads starting at 0,0 as bottom left
+                    GL_TEXTURE_2D,
+                    0,                    // LoD, 0 = base
+                    gl_format,            // Internal format
+                    sdl_surface -> w,     // Width
+                    sdl_surface -> h,     // Height
+                    0,                    // Border; must be 0
+                    incoming_format,      // Incoming format
+                    incoming_type,        // Pixel type
+                    sdl_surface -> pixels // Pixel data
+                );
+                YAVSG_GL_THROW_FOR_ERRORS(
+                    "couldn't allocate "
+                    + std::to_string( sdl_surface -> w )
+                    + "x"
+                    + std::to_string( sdl_surface -> h )
+                    + " texture "
+                    + std::to_string( gl_id )
+                    + " for yavsg::gl::_texture_general"
+                );
+                
+                filtering( settings );
+            }
+            catch( ... )
+            {
+                if( converted_surface )
+                    SDL_FreeSurface( converted_surface );
+                throw;
+            }
             
-            filtering( settings );
-        }
-        catch( ... )
-        {
             if( converted_surface )
                 SDL_FreeSurface( converted_surface );
-            throw;
-        }
-        
-        if( converted_surface )
-            SDL_FreeSurface( converted_surface );
-    }
-    
-    texture::texture( texture&& o )
-    {
-        // gl_id = o.gl_id;
-        // o.gl_id = default_texture_gl_id;
-        std::swap( gl_id, o.gl_id );
-    }
-    
-    texture::~texture()
-    {
-        if( gl_id != default_texture_gl_id )
-        {
-            glDeleteTextures( 1, &gl_id );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't delete texture "
-                + std::to_string( gl_id )
-                + " for yavsg::gl::texture::~texture()"
-            );
         }
     }
     
-    void texture::filtering( const filter_settings& settings )
+    void _texture_general::filtering( const filter_settings& settings )
     {
         using magnify_mode = filter_settings::magnify_mode;
         using  minify_mode = filter_settings::minify_mode;
@@ -293,9 +277,44 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
         }
     }
     
-    GLuint texture::gl_texture_id()
+    GLuint _texture_general::gl_texture_id()
     {
         return gl_id;
+    }
+} }
+
+
+namespace yavsg { namespace gl // Texture class implementation /////////////////
+{
+    texture::texture() : _texture_general()
+    {}
+    
+    texture::texture(
+        SDL_Surface* sdl_surface,
+        const filter_settings& settings
+    ) : _texture_general(
+        sdl_surface,
+        settings,
+        texture_format_traits< GLfloat, 4 >::gl_format
+    )
+    {}
+    
+    texture::texture( texture&& o )
+    {
+        std::swap( gl_id, o.gl_id );
+    }
+    
+    texture::~texture()
+    {
+        if( gl_id != default_texture_gl_id )
+        {
+            glDeleteTextures( 1, &gl_id );
+            YAVSG_GL_THROW_FOR_ERRORS(
+                "couldn't delete texture "
+                + std::to_string( gl_id )
+                + " for yavsg::gl::texture::~texture()"
+            );
+        }
     }
 } }
 
