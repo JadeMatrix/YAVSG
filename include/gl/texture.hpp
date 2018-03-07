@@ -131,7 +131,10 @@ namespace yavsg { namespace gl
     public:
         using format_traits = texture_format_traits< DataType, Channels >;
         
-        texture(
+        template<
+            typename    InDataType = DataType,
+            std::size_t InChannels = Channels
+        > texture(
             std::size_t width,
             std::size_t height,
             const std::array< DataType, Channels >* data,
@@ -218,7 +221,8 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
     texture< DataType, Channels >::texture() : _texture_general()
     {}
     
-    template< typename DataType, std::size_t Channels >
+    template< typename   DataType, std::size_t   Channels >
+    template< typename InDataType, std::size_t InChannels >
     texture< DataType, Channels >::texture(
         std::size_t width,
         std::size_t height,
@@ -227,15 +231,19 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
         texture_flags flags
     ) : _texture_general()
     {
+        using in_format_traits = texture_format_traits<
+            InDataType,
+            InChannels
+        >;
         upload(
             width,
             height,
             data,
             settings,
             flags,
-            format_traits::gl_internal_format,
-            format_traits::gl_format,
-            format_traits::gl_type
+               format_traits::gl_internal_format,
+            in_format_traits::gl_format,
+            in_format_traits::gl_type
         );
     }
     
