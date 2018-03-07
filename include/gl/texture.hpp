@@ -83,6 +83,7 @@ namespace yavsg { namespace gl
         NONE                        = 0x00,
         // If alpha channel exists, don't premultiply alpha
         DISABLE_PREMULTIPLIED_ALPHA = 0x01 << 0,
+        // Ignore any input data and just tell OpenGL to allocate texture space
         ALLOCATE_ONLY               = 0x01 << 1
     };
     
@@ -290,17 +291,25 @@ namespace yavsg { namespace gl // Texture static method implementations ////////
                 + IMG_GetError()
             );
         
-        texture created_texture = texture::make_empty();
-        created_texture.upload(
-            sdl_surface,
-            settings,
-            flags,
-            format_traits::gl_internal_format
-        );
-        
-        SDL_FreeSurface( sdl_surface );
-        
-        return created_texture;
+        try
+        {
+            texture created_texture = texture::make_empty();
+            created_texture.upload(
+                sdl_surface,
+                settings,
+                flags,
+                format_traits::gl_internal_format
+            );
+            
+            SDL_FreeSurface( sdl_surface );
+            
+            return created_texture;
+        }
+        catch( ... )
+        {
+            SDL_FreeSurface( sdl_surface );
+            throw;
+        }
     }
     
     template< typename DataType, std::size_t Channels >
