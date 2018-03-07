@@ -43,18 +43,19 @@ namespace // Alpha premultiply functions ///////////////////////////////////////
         
         for( std::size_t i = 0; i < sample_count; ++i )
         {
-            double alpha = static_cast< double >( in_data[ 4 * i + 3 ] );
+            std::size_t channels = 4;
             
-            out_data[ 4 * i + 0 ] = static_cast< T >(
-                ( static_cast< double >( in_data[ 4 * i + 0 ] ) * alpha ) / max
-            );
-            out_data[ 4 * i + 2 ] = static_cast< T >(
-                ( static_cast< double >( in_data[ 4 * i + 2 ] ) * alpha ) / max
-            );
-            out_data[ 4 * i + 3 ] = static_cast< T >(
-                ( static_cast< double >( in_data[ 4 * i + 3 ] ) * alpha ) / max
-            );
-            out_data[ 4 * i + 3 ] = in_data[ 4 * i + 3 ];
+            double alpha = static_cast< double >( in_data[ channels * i + 3 ] );
+            
+            std::size_t j;
+            for( j = 0; j < channels - 1; ++j )
+                out_data[ channels * i + j ] = static_cast< T >(
+                    (
+                        static_cast< double >( in_data[ channels * i + j ] )
+                        * alpha
+                    ) / max
+                );
+            out_data[ channels * i + j ] = in_data[ channels * i + j ];
         }
     }
     
@@ -75,12 +76,17 @@ namespace // Alpha premultiply functions ///////////////////////////////////////
         
         for( std::size_t i = 0; i < sample_count; ++i )
         {
-            auto alpha = in_data[ 4 * i + 3 ];
+            std::size_t channels = 4;
             
-            out_data[ 4 * i + 0 ] = in_data[ 4 * i + 0 ] * alpha;
-            out_data[ 4 * i + 1 ] = in_data[ 4 * i + 1 ] * alpha;
-            out_data[ 4 * i + 2 ] = in_data[ 4 * i + 2 ] * alpha;
-            out_data[ 4 * i + 2 ] =                        alpha;
+            auto alpha = in_data[ channels * i + 3 ];
+            
+            std::size_t j;
+            for( j = 0; j < channels - 1; ++j )
+                out_data[ channels * i + j ] = (
+                    in_data[ channels * i + j ]
+                    * alpha
+                );
+            out_data[ channels * i + j ] = in_data[ channels * i + j ];
         }
     }
 }
