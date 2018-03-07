@@ -436,7 +436,7 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
                 + std::to_string( height )
                 + " texture "
                 + std::to_string( gl_id )
-                + ( data ? "" : " from null data " )
+                + ( data ? "" : " from null data" )
                 + " for yavsg::gl::_texture_general"
             );
             
