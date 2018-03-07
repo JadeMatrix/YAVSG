@@ -78,6 +78,14 @@ namespace yavsg { namespace gl
         } mipmaps;
     };
     
+    enum texture_flags
+    {
+        NONE                        = 0x00,
+        // If alpha channel exists, don't premultiply alpha
+        DISABLE_PREMULTIPLIED_ALPHA = 0x01 << 0,
+        ALLOCATE_ONLY               = 0x01 << 1
+    };
+    
     // A base class to hold all the stuff that doesn't need to be templated
     class _texture_general
     {
@@ -85,18 +93,22 @@ namespace yavsg { namespace gl
         GLuint gl_id = default_texture_gl_id;
         
         _texture_general();
-        _texture_general(
+        ~_texture_general();
+        
+        void upload(
             std::size_t width,
             std::size_t height,
             const void* data,
             const texture_filter_settings& settings,
+            texture_flags flags,
             GLint gl_internal_format, // Target OpenGL format after upload
             GLenum gl_format,         // Incoming data format
             GLenum gl_type            // Incoming data type
         );
-        _texture_general(
+        void upload(
             SDL_Surface* sdl_surface, // Not `const` due to the SDL API
             const texture_filter_settings& settings,
+            texture_flags flags,
             GLint gl_internal_format  // Target OpenGL format after upload
         );
         
@@ -123,11 +135,13 @@ namespace yavsg { namespace gl
             std::size_t width,
             std::size_t height,
             const std::array< DataType, Channels >* data,
-            const texture_filter_settings& settings
+            const texture_filter_settings& settings,
+            texture_flags flags = texture_flags::NONE
         );
         texture(
-            SDL_Surface*, // Not `const` due to the SDL API
-            const texture_filter_settings&
+            SDL_Surface* sdl_surface, // Not `const` due to the SDL API
+            const texture_filter_settings& settings,
+            texture_flags flags = texture_flags::NONE
         );
         texture( texture&& );
         
@@ -137,14 +151,13 @@ namespace yavsg { namespace gl
         
         static texture from_file(
             const std::string& filename,
-            const texture_filter_settings& settings
+            const texture_filter_settings& settings,
+            texture_flags flags = texture_flags::NONE
         );
         
         // For use by stuff like framebuffers that need to control texture
         // allocation
         static texture make_empty();
-        
-        ~texture();
         
         template<
             std::size_t ActiveTexture,
@@ -210,40 +223,41 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
         std::size_t width,
         std::size_t height,
         const std::array< DataType, Channels >* data,
-        const texture_filter_settings& settings
-    ) : _texture_general(
-        width,
-        height,
-        data,
-        settings,
-        format_traits::gl_internal_format,
-        format_traits::gl_format,
-        format_traits::gl_type
-    )
-    {}
+        const texture_filter_settings& settings,
+        texture_flags flags
+    ) : _texture_general()
+    {
+        upload(
+            width,
+            height,
+            data,
+            settings,
+            flags,
+            format_traits::gl_internal_format,
+            format_traits::gl_format,
+            format_traits::gl_type
+        );
+    }
     
     template< typename DataType, std::size_t Channels >
     texture< DataType, Channels >::texture(
         SDL_Surface* sdl_surface,
-        const texture_filter_settings& settings
-    ) : _texture_general(
-        sdl_surface,
-        settings,
-        format_traits::gl_internal_format
-    )
-    {}
+        const texture_filter_settings& settings,
+        texture_flags flags
+    ) : _texture_general()
+    {
+        upload(
+            sdl_surface,
+            settings,
+            flags,
+            format_traits::gl_internal_format
+        );
+    }
     
     template< typename DataType, std::size_t Channels >
     texture< DataType, Channels >::texture( texture< DataType, Channels >&& o )
     {
         std::swap( gl_id, o.gl_id );
-    }
-    
-    template< typename DataType, std::size_t Channels >
-    texture< DataType, Channels >::~texture()
-    {
-        if( gl_id != default_texture_gl_id )
-            glDeleteTextures( 1, &gl_id );
     }
 } }
 
@@ -253,7 +267,8 @@ namespace yavsg { namespace gl // Texture static method implementations ////////
     template< typename DataType, std::size_t Channels >
     texture< DataType, Channels > texture< DataType, Channels >::from_file(
         const std::string& filename,
-        const texture_filter_settings& settings
+        const texture_filter_settings& settings,
+        texture_flags flags
     )
     {
         SDL_Surface* sdl_surface = IMG_Load(
@@ -267,8 +282,16 @@ namespace yavsg { namespace gl // Texture static method implementations ////////
                 + IMG_GetError()
             );
         
-        texture created_texture = texture( sdl_surface, settings );
+        texture created_texture = texture::make_empty();
+        created_texture.upload(
+            sdl_surface,
+            settings,
+            flags,
+            format_traits::gl_internal_format
+        );
+        
         SDL_FreeSurface( sdl_surface );
+        
         return created_texture;
     }
     

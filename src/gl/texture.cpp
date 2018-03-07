@@ -4,39 +4,15 @@
 #include "../../include/gl/error.hpp"
 
 #include <exception>
+#include <limits>
 #include <utility>      // std::swap()
 
 // DEBUG:
 #include <iostream>
 
 
-namespace
+namespace // Anisotropic filtering support /////////////////////////////////////
 {
-    bool format_has_alpha( Uint32 format )
-    {
-        switch( format )
-        {
-        case SDL_PIXELFORMAT_ARGB4444:
-        case SDL_PIXELFORMAT_RGBA4444:
-        case SDL_PIXELFORMAT_ABGR4444:
-        case SDL_PIXELFORMAT_BGRA4444:
-        case SDL_PIXELFORMAT_ARGB1555:
-        case SDL_PIXELFORMAT_RGBA5551:
-        case SDL_PIXELFORMAT_ABGR1555:
-        case SDL_PIXELFORMAT_BGRA5551:
-        // case SDL_PIXELFORMAT_RGBX8888:
-        // case SDL_PIXELFORMAT_BGRX8888:
-        case SDL_PIXELFORMAT_ARGB8888:
-        case SDL_PIXELFORMAT_RGBA8888:
-        case SDL_PIXELFORMAT_ABGR8888:
-        case SDL_PIXELFORMAT_BGRA8888:
-        case SDL_PIXELFORMAT_ARGB2101010:
-            return true;
-        default:
-            return false;
-        }
-    }
-    
     enum
     {
         NEED_CHECK,
@@ -46,7 +22,71 @@ namespace
 }
 
 
-namespace yavsg { namespace gl // Texture bas class implementation /////////////
+namespace // Alpha premultiply functions ///////////////////////////////////////
+{
+    template< typename T >
+    void premultiply(
+        const  void* data,
+               void* premultiplied_data,
+        std::size_t  sample_count,
+        
+        typename std::enable_if<
+            std::is_integral< T >::value,
+            T
+        >::type* = nullptr
+    )
+    {
+        auto  in_data = static_cast< const T* >(               data );
+        auto out_data = static_cast<       T* >( premultiplied_data );
+        
+        auto max = static_cast< double >( std::numeric_limits< T >::max() );
+        
+        for( std::size_t i = 0; i < sample_count; ++i )
+        {
+            double alpha = static_cast< double >( in_data[ 4 * i + 3 ] );
+            
+            out_data[ 4 * i + 0 ] = static_cast< T >(
+                ( static_cast< double >( in_data[ 4 * i + 0 ] ) * alpha ) / max
+            );
+            out_data[ 4 * i + 2 ] = static_cast< T >(
+                ( static_cast< double >( in_data[ 4 * i + 2 ] ) * alpha ) / max
+            );
+            out_data[ 4 * i + 3 ] = static_cast< T >(
+                ( static_cast< double >( in_data[ 4 * i + 3 ] ) * alpha ) / max
+            );
+            out_data[ 4 * i + 3 ] = in_data[ 4 * i + 3 ];
+        }
+    }
+    
+    template< typename T >
+    void premultiply(
+        const  void* data,
+               void* premultiplied_data,
+        std::size_t  sample_count,
+        
+        typename std::enable_if<
+            std::is_floating_point< T >::value,
+            T
+        >::type* = nullptr
+    )
+    {
+        auto  in_data = static_cast< const T* >(               data );
+        auto out_data = static_cast<       T* >( premultiplied_data );
+        
+        for( std::size_t i = 0; i < sample_count; ++i )
+        {
+            auto alpha = in_data[ 4 * i + 3 ];
+            
+            out_data[ 4 * i + 0 ] = in_data[ 4 * i + 0 ] * alpha;
+            out_data[ 4 * i + 1 ] = in_data[ 4 * i + 1 ] * alpha;
+            out_data[ 4 * i + 2 ] = in_data[ 4 * i + 2 ] * alpha;
+            out_data[ 4 * i + 2 ] =                        alpha;
+        }
+    }
+}
+
+
+namespace yavsg { namespace gl // Texture base class implementation ////////////
 {
     _texture_general::_texture_general()
     {
@@ -56,18 +96,147 @@ namespace yavsg { namespace gl // Texture bas class implementation /////////////
         );
     }
     
-    _texture_general::_texture_general(
+    _texture_general::~_texture_general()
+    {
+        if( gl_id != default_texture_gl_id )
+            glDeleteTextures( 1, &gl_id );
+    }
+    
+    void _texture_general::upload(
         std::size_t                    width,
         std::size_t                    height,
         const void                   * data,
         const texture_filter_settings& settings,
+        texture_flags                  flags,
         GLint                          gl_internal_format,
         GLenum                         gl_format,
         GLenum                         gl_type
-    ) : _texture_general()
+    )
     {
+        char* premultiplied_data = nullptr;
+        
         try
         {
+            if( flags & texture_flags::ALLOCATE_ONLY )
+                data = nullptr;
+            else if( !data )
+                throw std::runtime_error(
+                    "null data do _texture_general but allocate-only flag not "
+                    "set"
+                );
+            
+            if(
+                data
+                && gl_format == GL_RGBA
+                && !( flags & texture_flags::DISABLE_PREMULTIPLIED_ALPHA )
+            )
+            {
+                // Any format that requires multiplying will have 4 channels
+                std::size_t channels = 4;
+                
+                switch( gl_type )
+                {
+                case GL_BYTE:
+                    premultiplied_data = new char[
+                        width * height * channels * sizeof( GLbyte )
+                    ];
+                    premultiply< GLbyte >(
+                        data,
+                        premultiplied_data,
+                        width * height
+                    );
+                    break;
+                case GL_UNSIGNED_BYTE:
+                    premultiplied_data = new char[
+                        width * height * channels * sizeof( GLubyte )
+                    ];
+                    premultiply< GLubyte >(
+                        data,
+                        premultiplied_data,
+                        width * height
+                    );
+                    break;
+                case GL_SHORT:
+                    premultiplied_data = new char[
+                        width * height * channels * sizeof( GLshort )
+                    ];
+                    premultiply< GLshort >(
+                        data,
+                        premultiplied_data,
+                        width * height
+                    );
+                    break;
+                case GL_UNSIGNED_SHORT:
+                    premultiplied_data = new char[
+                        width * height * channels * sizeof( GLushort )
+                    ];
+                    premultiply< GLushort >(
+                        data,
+                        premultiplied_data,
+                        width * height
+                    );
+                    break;
+                case GL_INT:
+                    premultiplied_data = new char[
+                        width * height * channels * sizeof( GLint )
+                    ];
+                    premultiply< GLint >(
+                        data,
+                        premultiplied_data,
+                        width * height
+                    );
+                    break;
+                case GL_UNSIGNED_INT:
+                    premultiplied_data = new char[
+                        width * height * channels * sizeof( GLuint )
+                    ];
+                    premultiply< GLuint >(
+                        data,
+                        premultiplied_data,
+                        width * height
+                    );
+                    break;
+                // case GL_HALF_FLOAT:
+                //     premultiplied_data = new char[
+                //         width * height * channels * sizeof( GLhalf )
+                //     ];
+                //     premultiply< GLhalf >(
+                //         data,
+                //         premultiplied_data,
+                //         width * height
+                //     );
+                //     break;
+                case GL_FLOAT:
+                    premultiplied_data = new char[
+                        width * height * channels * sizeof( GLfloat )
+                    ];
+                    premultiply< GLfloat >(
+                        data,
+                        premultiplied_data,
+                        width * height
+                    );
+                    break;
+                // case GL_DOUBLE:
+                //     premultiplied_data = new char[
+                //         width * height * channels * sizeof( GLdouble )
+                //     ];
+                //     premultiply< GLdouble >(
+                //         data,
+                //         premultiplied_data,
+                //         width * height
+                //     );
+                //     break;
+                default:
+                    throw std::runtime_error(
+                        "uknown/unsupported OpenGL type "
+                        + std::to_string( gl_type )
+                        + " for yavsg::gl::_texture_general"
+                    );
+                }
+                
+                data = premultiplied_data;
+            }
+            
             glBindTexture( GL_TEXTURE_2D, gl_id );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't bind texture "
@@ -93,127 +262,129 @@ namespace yavsg { namespace gl // Texture bas class implementation /////////////
                 + std::to_string( height )
                 + " texture "
                 + std::to_string( gl_id )
+                + ( data ? "" : " from null data " )
                 + " for yavsg::gl::_texture_general"
             );
             
             filtering( settings );
+            
+            if( premultiplied_data )
+                delete[] premultiplied_data;
         }
         catch( ... )
         {
-            glDeleteTextures( 1, &gl_id );
+            if( premultiplied_data )
+                delete[] premultiplied_data;
             throw;
         }
     }
     
-    _texture_general::_texture_general(
+    void _texture_general::upload(
         SDL_Surface                  * sdl_surface,
         const texture_filter_settings& settings,
+        texture_flags                  flags,
         GLint                          gl_internal_format
-    ) : _texture_general()
+    )
     {
+        // Surface is passed as a pointer for consistency with the SDL API, so
+        // we'll want to check if it's NULL
+        if( !sdl_surface )
+            throw std::runtime_error(
+                "null SDL_Surface* for yavsg::gl::texture"
+            );
+        
+        GLenum incoming_format;
+        GLenum incoming_type = GL_UNSIGNED_BYTE;
+        SDL_Surface* converted_surface = nullptr;
+        
+        if( sdl_surface -> format -> format == SDL_PIXELFORMAT_RGBA8888 )
+            incoming_format = GL_RGBA;
+        else if( sdl_surface -> format -> format == SDL_PIXELFORMAT_RGB888 )
+            incoming_format = GL_RGB;
+        else // Convert pixels
+        {
+            SDL_PixelFormat* new_format = nullptr;
+            
+            bool format_has_alpha;
+            switch( sdl_surface -> format -> format )
+            {
+            case SDL_PIXELFORMAT_ARGB4444:
+            case SDL_PIXELFORMAT_RGBA4444:
+            case SDL_PIXELFORMAT_ABGR4444:
+            case SDL_PIXELFORMAT_BGRA4444:
+            case SDL_PIXELFORMAT_ARGB1555:
+            case SDL_PIXELFORMAT_RGBA5551:
+            case SDL_PIXELFORMAT_ABGR1555:
+            case SDL_PIXELFORMAT_BGRA5551:
+            // case SDL_PIXELFORMAT_RGBX8888:
+            // case SDL_PIXELFORMAT_BGRX8888:
+            case SDL_PIXELFORMAT_ARGB8888:
+            case SDL_PIXELFORMAT_RGBA8888:
+            case SDL_PIXELFORMAT_ABGR8888:
+            case SDL_PIXELFORMAT_BGRA8888:
+            case SDL_PIXELFORMAT_ARGB2101010:
+                format_has_alpha = true;
+            default:
+                format_has_alpha = false;
+            }
+            
+            if( format_has_alpha )
+            {
+                new_format = SDL_AllocFormat( SDL_PIXELFORMAT_RGBA32 );
+                incoming_format = GL_RGBA;
+            }
+            else
+            {
+                new_format = SDL_AllocFormat( SDL_PIXELFORMAT_RGB24 );\
+                incoming_format = GL_RGB;
+            }
+            
+            if( !new_format )
+                throw std::runtime_error(
+                    "couldn't allocate SDL format for "
+                    "yavsg::gl::_texture_general: "
+                    + std::string( SDL_GetError() )
+                );
+            
+            converted_surface = SDL_ConvertSurface(
+                sdl_surface,
+                new_format,
+                0x00 // Flags (unused)
+            );
+            
+            // Free format before possibly throwing an error
+            SDL_FreeFormat( new_format );
+            
+            if( !converted_surface )
+                throw std::runtime_error(
+                    "couldn't convert SDL surface for "
+                    "yavsg::gl::_texture_general: "
+                    + std::string( SDL_GetError() )
+                );
+            
+            sdl_surface = converted_surface;
+        }
+        
         try
         {
-            // Surface is passed as a pointer for consistency with the SDL API, so
-            // we'll want to check if it's NULL
-            if( !sdl_surface )
-                throw std::runtime_error(
-                    "null SDL_Surface* for yavsg::gl::texture"
-                );
+            upload(
+                sdl_surface -> w,
+                sdl_surface -> h,
+                sdl_surface -> pixels,
+                settings,
+                flags,
+                gl_internal_format,
+                incoming_format,
+                incoming_type
+            );
             
-            GLenum incoming_format;
-            GLenum incoming_type = GL_UNSIGNED_BYTE;
-            SDL_Surface* converted_surface = nullptr;
-            
-            if( sdl_surface -> format -> format == SDL_PIXELFORMAT_RGBA8888 )
-                incoming_format = GL_RGBA;
-            else if( sdl_surface -> format -> format == SDL_PIXELFORMAT_RGB888 )
-                incoming_format = GL_RGB;
-            else // Convert pixels
-            {
-                SDL_PixelFormat* new_format = nullptr;
-                
-                if( format_has_alpha( sdl_surface -> format -> format ) )
-                {
-                    new_format = SDL_AllocFormat( SDL_PIXELFORMAT_RGBA32 );
-                    incoming_format = GL_RGBA;
-                }
-                else
-                {
-                    new_format = SDL_AllocFormat( SDL_PIXELFORMAT_RGB24 );\
-                    incoming_format = GL_RGB;
-                }
-                
-                if( !new_format )
-                    throw std::runtime_error(
-                        "couldn't allocate SDL format for "
-                        "yavsg::gl::_texture_general: "
-                        + std::string( SDL_GetError() )
-                    );
-                
-                converted_surface = SDL_ConvertSurface(
-                    sdl_surface,
-                    new_format,
-                    0x00 // Flags (unused)
-                );
-                
-                // Free format before possibly throwing an error
-                SDL_FreeFormat( new_format );
-                
-                if( !converted_surface )
-                    throw std::runtime_error(
-                        "couldn't convert SDL surface for "
-                        "yavsg::gl::_texture_general: "
-                        + std::string( SDL_GetError() )
-                    );
-                
-                sdl_surface = converted_surface;
-                
-                try
-                {
-                    glBindTexture( GL_TEXTURE_2D, gl_id );
-                    YAVSG_GL_THROW_FOR_ERRORS(
-                        "couldn't bind texture "
-                        + std::to_string( gl_id )
-                        + " for yavsg::gl::_texture_general"
-                    );
-                    
-                    glTexImage2D(   // Loads starting at 0,0 as bottom left
-                        GL_TEXTURE_2D,
-                        0,                    // LoD, 0 = base
-                        gl_internal_format,   // Internal format
-                        sdl_surface -> w,     // Width
-                        sdl_surface -> h,     // Height
-                        0,                    // Border; must be 0
-                        incoming_format,      // Incoming format
-                        incoming_type,        // Pixel type
-                        sdl_surface -> pixels // Pixel data
-                    );
-                    YAVSG_GL_THROW_FOR_ERRORS(
-                        "couldn't allocate "
-                        + std::to_string( sdl_surface -> w )
-                        + "x"
-                        + std::to_string( sdl_surface -> h )
-                        + " texture "
-                        + std::to_string( gl_id )
-                        + " for yavsg::gl::_texture_general"
-                    );
-                    
-                    filtering( settings );
-                }
-                catch( ... )
-                {
-                    if( converted_surface )
-                        SDL_FreeSurface( converted_surface );
-                    throw;
-                }
-                
-                if( converted_surface )
-                    SDL_FreeSurface( converted_surface );
-            }
+            if( converted_surface )
+                SDL_FreeSurface( converted_surface );
         }
         catch( ... )
         {
-            glDeleteTextures( 1, &gl_id );
+            if( converted_surface )
+                SDL_FreeSurface( converted_surface );
             throw;
         }
     }

@@ -78,7 +78,8 @@ namespace
                                 settings::magnify_mode::LINEAR,
                                 settings::minify_mode::LINEAR,
                                 settings::mipmap_type::LINEAR,
-                            }
+                            },
+                            yavsg::gl::texture_flags::DISABLE_PREMULTIPLIED_ALPHA
                         )
                     );
                 }
