@@ -22,12 +22,55 @@ namespace // Anisotropic filtering support /////////////////////////////////////
 }
 
 
+namespace // Alpha detection functions /////////////////////////////////////////
+{
+    template< typename T >
+    bool has_varying_alpha(
+        const  void* data,
+        std::size_t  sample_count,
+        typename std::enable_if<
+            std::is_integral< T >::value,
+            T
+        >::type* = nullptr
+    )
+    {
+        auto in_data = static_cast< const T* >( data );
+        auto max = std::numeric_limits< T >::max();
+        
+        for( std::size_t i = 0; i < sample_count; ++i )
+            if( in_data[ 4 * i + 3 ] != max )
+                return true;
+        
+        return false;
+    }
+    
+    template< typename T >
+    bool has_varying_alpha(
+        const  void* data,
+        std::size_t  sample_count,
+        typename std::enable_if<
+            std::is_floating_point< T >::value,
+            T
+        >::type* = nullptr
+    )
+    {
+        auto in_data = static_cast< const T* >( data );
+        
+        for( std::size_t i = 0; i < sample_count; ++i )
+            if( in_data[ 4 * i + 3 ] != 1.0f )
+                return true;
+        
+        return false;
+    }
+}
+
+
 namespace // Alpha premultiply functions ///////////////////////////////////////
 {
     template< typename T >
     void premultiply(
         const  void* data,
-               void* premultiplied_data,
+               void* preprocessed_data,
         std::size_t  sample_count,
         
         typename std::enable_if<
@@ -36,8 +79,8 @@ namespace // Alpha premultiply functions ///////////////////////////////////////
         >::type* = nullptr
     )
     {
-        auto  in_data = static_cast< const T* >(               data );
-        auto out_data = static_cast<       T* >( premultiplied_data );
+        auto  in_data = static_cast< const T* >(              data );
+        auto out_data = static_cast<       T* >( preprocessed_data );
         
         auto max = static_cast< double >( std::numeric_limits< T >::max() );
         
@@ -62,7 +105,7 @@ namespace // Alpha premultiply functions ///////////////////////////////////////
     template< typename T >
     void premultiply(
         const  void* data,
-               void* premultiplied_data,
+               void* preprocessed_data,
         std::size_t  sample_count,
         
         typename std::enable_if<
@@ -71,8 +114,8 @@ namespace // Alpha premultiply functions ///////////////////////////////////////
         >::type* = nullptr
     )
     {
-        auto  in_data = static_cast< const T* >(               data );
-        auto out_data = static_cast<       T* >( premultiplied_data );
+        auto  in_data = static_cast< const T* >(              data );
+        auto out_data = static_cast<       T* >( preprocessed_data );
         
         for( std::size_t i = 0; i < sample_count; ++i )
         {
@@ -119,7 +162,7 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
         GLenum                         gl_type
     )
     {
-        char* premultiplied_data = nullptr;
+        char* preprocessed_data = nullptr;
         
         try
         {
@@ -131,8 +174,133 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
                     "set"
                 );
             
+            // We can skip a whole bunch of potential preprocessing if we're
+            // just going to end up discarding the alpha anyways
+            bool internal_has_alpha;
+            switch( gl_internal_format )
+            {
+            case GL_RGBA:
+            case GL_RGBA8I:
+            case GL_RGBA8UI:
+            case GL_RGBA16I:
+            case GL_RGBA16UI:
+            case GL_RGBA32I:
+            case GL_RGBA32UI:
+            case GL_RGBA16F:
+            case GL_RGBA32F:
+                internal_has_alpha = true;
+            default:
+                internal_has_alpha = false;
+            }
+            
+            auto sample_count = width * height;
+            
+            // Don't bother storing alpha channel in OpenGL memory if it's all
+            // 100%
+            // TODO: Make this abstract to G = 0%, B = 0%, A = 100%
+            if( data && internal_has_alpha && gl_format == GL_RGBA )
+            {
+                switch( gl_type )
+                {
+                case GL_BYTE:
+                    internal_has_alpha = has_varying_alpha< GLbyte >(
+                        data,
+                        sample_count
+                    );
+                    break;
+                case GL_UNSIGNED_BYTE:
+                    internal_has_alpha = has_varying_alpha< GLubyte >(
+                        data,
+                        sample_count
+                    );
+                    break;
+                case GL_SHORT:
+                    internal_has_alpha = has_varying_alpha< GLshort >(
+                        data,
+                        sample_count
+                    );
+                    break;
+                case GL_UNSIGNED_SHORT:
+                    internal_has_alpha = has_varying_alpha< GLushort >(
+                        data,
+                        sample_count
+                    );
+                    break;
+                case GL_INT:
+                    internal_has_alpha = has_varying_alpha< GLint >(
+                        data,
+                        sample_count
+                    );
+                    break;
+                case GL_UNSIGNED_INT:
+                    internal_has_alpha = has_varying_alpha< GLuint >(
+                        data,
+                        sample_count
+                    );
+                    break;
+                case GL_HALF_FLOAT:
+                    internal_has_alpha = has_varying_alpha< GLhalf >(
+                        data,
+                        sample_count
+                    );
+                    break;
+                case GL_FLOAT:
+                    internal_has_alpha = has_varying_alpha< GLfloat >(
+                        data,
+                        sample_count
+                    );
+                    break;
+                case GL_DOUBLE:
+                    internal_has_alpha = has_varying_alpha< GLdouble >(
+                        data,
+                        sample_count
+                    );
+                    break;
+                default:
+                    throw std::runtime_error(
+                        "uknown/unsupported OpenGL type "
+                        + std::to_string( gl_type )
+                        + " for yavsg::gl::_texture_general"
+                    );
+                }
+                
+                if( !internal_has_alpha )
+                    switch( gl_internal_format )
+                    {
+                    case GL_RGBA:
+                        gl_internal_format = GL_RGB;
+                        break;
+                    case GL_RGBA8I:
+                        gl_internal_format = GL_RGB8I;
+                        break;
+                    case GL_RGBA8UI:
+                        gl_internal_format = GL_RGB8UI;
+                        break;
+                    case GL_RGBA16I:
+                        gl_internal_format = GL_RGB16I;
+                        break;
+                    case GL_RGBA16UI:
+                        gl_internal_format = GL_RGB16UI;
+                        break;
+                    case GL_RGBA32I:
+                        gl_internal_format = GL_RGB32I;
+                        break;
+                    case GL_RGBA32UI:
+                        gl_internal_format = GL_RGB32UI;
+                        break;
+                    case GL_RGBA16F:
+                        gl_internal_format = GL_RGB16F;
+                        break;
+                    case GL_RGBA32F:
+                        gl_internal_format = GL_RGB32F;
+                        break;
+                    }
+            }
+            
+            // Premultiply colors by alpha
             if(
                 data
+                && internal_has_alpha
                 && gl_format == GL_RGBA
                 && !( flags & texture_flags::DISABLE_PREMULTIPLIED_ALPHA )
             )
@@ -143,93 +311,93 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
                 switch( gl_type )
                 {
                 case GL_BYTE:
-                    premultiplied_data = new char[
-                        width * height * channels * sizeof( GLbyte )
+                    preprocessed_data = new char[
+                        sample_count * channels * sizeof( GLbyte )
                     ];
                     premultiply< GLbyte >(
                         data,
-                        premultiplied_data,
-                        width * height
+                        preprocessed_data,
+                        sample_count
                     );
                     break;
                 case GL_UNSIGNED_BYTE:
-                    premultiplied_data = new char[
-                        width * height * channels * sizeof( GLubyte )
+                    preprocessed_data = new char[
+                        sample_count * channels * sizeof( GLubyte )
                     ];
                     premultiply< GLubyte >(
                         data,
-                        premultiplied_data,
-                        width * height
+                        preprocessed_data,
+                        sample_count
                     );
                     break;
                 case GL_SHORT:
-                    premultiplied_data = new char[
-                        width * height * channels * sizeof( GLshort )
+                    preprocessed_data = new char[
+                        sample_count * channels * sizeof( GLshort )
                     ];
                     premultiply< GLshort >(
                         data,
-                        premultiplied_data,
-                        width * height
+                        preprocessed_data,
+                        sample_count
                     );
                     break;
                 case GL_UNSIGNED_SHORT:
-                    premultiplied_data = new char[
-                        width * height * channels * sizeof( GLushort )
+                    preprocessed_data = new char[
+                        sample_count * channels * sizeof( GLushort )
                     ];
                     premultiply< GLushort >(
                         data,
-                        premultiplied_data,
-                        width * height
+                        preprocessed_data,
+                        sample_count
                     );
                     break;
                 case GL_INT:
-                    premultiplied_data = new char[
-                        width * height * channels * sizeof( GLint )
+                    preprocessed_data = new char[
+                        sample_count * channels * sizeof( GLint )
                     ];
                     premultiply< GLint >(
                         data,
-                        premultiplied_data,
-                        width * height
+                        preprocessed_data,
+                        sample_count
                     );
                     break;
                 case GL_UNSIGNED_INT:
-                    premultiplied_data = new char[
-                        width * height * channels * sizeof( GLuint )
+                    preprocessed_data = new char[
+                        sample_count * channels * sizeof( GLuint )
                     ];
                     premultiply< GLuint >(
                         data,
-                        premultiplied_data,
-                        width * height
+                        preprocessed_data,
+                        sample_count
                     );
                     break;
                 // case GL_HALF_FLOAT:
-                //     premultiplied_data = new char[
-                //         width * height * channels * sizeof( GLhalf )
+                //     preprocessed_data = new char[
+                //         sample_count * channels * sizeof( GLhalf )
                 //     ];
                 //     premultiply< GLhalf >(
                 //         data,
-                //         premultiplied_data,
-                //         width * height
+                //         preprocessed_data,
+                //         sample_count
                 //     );
                 //     break;
                 case GL_FLOAT:
-                    premultiplied_data = new char[
-                        width * height * channels * sizeof( GLfloat )
+                    preprocessed_data = new char[
+                        sample_count * channels * sizeof( GLfloat )
                     ];
                     premultiply< GLfloat >(
                         data,
-                        premultiplied_data,
-                        width * height
+                        preprocessed_data,
+                        sample_count
                     );
                     break;
                 // case GL_DOUBLE:
-                //     premultiplied_data = new char[
-                //         width * height * channels * sizeof( GLdouble )
+                //     preprocessed_data = new char[
+                //         sample_count * channels * sizeof( GLdouble )
                 //     ];
                 //     premultiply< GLdouble >(
                 //         data,
-                //         premultiplied_data,
-                //         width * height
+                //         preprocessed_data,
+                //         sample_count
                 //     );
                 //     break;
                 default:
@@ -240,7 +408,7 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
                     );
                 }
                 
-                data = premultiplied_data;
+                data = preprocessed_data;
             }
             
             glBindTexture( GL_TEXTURE_2D, gl_id );
@@ -274,13 +442,13 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
             
             filtering( settings );
             
-            if( premultiplied_data )
-                delete[] premultiplied_data;
+            if( preprocessed_data )
+                delete[] preprocessed_data;
         }
         catch( ... )
         {
-            if( premultiplied_data )
-                delete[] premultiplied_data;
+            if( preprocessed_data )
+                delete[] preprocessed_data;
             throw;
         }
     }
