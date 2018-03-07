@@ -132,6 +132,9 @@ namespace yavsg { namespace gl
     public:
         using format_traits = texture_format_traits< DataType, Channels >;
         
+        using             sample_type = DataType;
+        static const auto channels    = Channels;
+        
         template<
             typename    InDataType = DataType,
             std::size_t InChannels = Channels

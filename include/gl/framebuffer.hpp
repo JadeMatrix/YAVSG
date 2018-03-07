@@ -7,6 +7,7 @@
 #include "texture.hpp"
 
 #include <array>
+#include <cstdint>      // std::int_least16_t, std::int_least32_t
 #include <utility>      // std::size_t
 #include <type_traits>  // std::enable_if
 
@@ -17,7 +18,61 @@ namespace yavsg
 }
 
 
-namespace yavsg { namespace gl
+namespace yavsg { namespace gl // Depth/stencil texture attributes /////////////
+{
+    template< typename DepthType > struct depth_stecil_dummy
+    {
+        using sample_type = DepthType;
+    };
+    
+    // There's no `int24`, so just use `int_least32_t`; also, just use
+    // `GL_UNSIGNED_INT_24_8` as the incoming type, as (for now) depth/stencil
+    // buffers will only be created with `texture_flags::ALLOCATE_ONLY`
+    
+    template<> struct texture_format_traits< depth_stecil_dummy<
+        std::int_least16_t
+    >, 1 >
+    {
+        static const GLint  gl_internal_format = GL_DEPTH_COMPONENT16;
+        static const GLenum gl_format          = GL_DEPTH_COMPONENT;
+        static const GLenum gl_type            = GL_UNSIGNED_INT_24_8;
+    };
+    
+    template<> struct texture_format_traits< depth_stecil_dummy<
+        std::int_least32_t
+    >, 1 >
+    {
+        static const GLint  gl_internal_format = GL_DEPTH_COMPONENT24;
+        static const GLenum gl_format          = GL_DEPTH_COMPONENT;
+        static const GLenum gl_type            = GL_UNSIGNED_INT_24_8;
+    };
+    
+    template<> struct texture_format_traits< depth_stecil_dummy< GLfloat >, 1 >
+    {
+        static const GLint  gl_internal_format = GL_DEPTH_COMPONENT32F;
+        static const GLenum gl_format          = GL_DEPTH_COMPONENT;
+        static const GLenum gl_type            = GL_UNSIGNED_INT_24_8;
+    };
+    
+    template<> struct texture_format_traits< depth_stecil_dummy<
+        std::int_least32_t
+    >, 2 >
+    {
+        static const GLint  gl_internal_format = GL_DEPTH24_STENCIL8;
+        static const GLenum gl_format          = GL_DEPTH_STENCIL;
+        static const GLenum gl_type            = GL_UNSIGNED_INT_24_8;
+    };
+    
+    template<> struct texture_format_traits< depth_stecil_dummy< GLfloat >, 2 >
+    {
+        static const GLint  gl_internal_format = GL_DEPTH32F_STENCIL8;
+        static const GLenum gl_format          = GL_DEPTH_STENCIL;
+        static const GLenum gl_type            = GL_UNSIGNED_INT_24_8;
+    };
+} }
+
+
+namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
 {
     class base_framebuffer
     {
@@ -60,7 +115,7 @@ namespace yavsg { namespace gl
         public base_framebuffer
     {
     protected:
-        texture<> _depth_stencil_buffer;
+        texture< depth_stecil_dummy< GLfloat >, 2 > _depth_stencil_buffer;
         
         // Eh, I'll improve it later
         alignas( alignof( std::array< texture<>, ColorTargets > ) )
@@ -72,9 +127,9 @@ namespace yavsg { namespace gl
         ];
         
         GLuint             framebuffer_init();
-        texture<> depth_stencil_buffer_init();
+        texture< depth_stecil_dummy< GLfloat >, 2 > depth_stencil_buffer_init();
         // Recursive initializer to help with cleanup on errors
-        void             color_buffers_init( std::size_t i = 0 );
+        void color_buffers_init( std::size_t i = 0 );
         void check_finalized();
         
     public:
@@ -86,7 +141,7 @@ namespace yavsg { namespace gl
         );
         ~framebuffer();
         
-        texture<>& depth_stencil_buffer();
+        texture< depth_stecil_dummy< GLfloat >, 2 >& depth_stencil_buffer();
         template< std::size_t N > texture<>& color_buffer();
     };
 } }
@@ -107,73 +162,37 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
     }
     
     template< std::size_t ColorTargets >
-    texture<> framebuffer< ColorTargets >::depth_stencil_buffer_init()
+    texture<
+        depth_stecil_dummy< GLfloat >,
+        2
+    > framebuffer< ColorTargets >::depth_stencil_buffer_init()
     {
-        // glGenRenderbuffers( 1, &id );
-        // glBindRenderbuffer( GL_RENDERBUFFER, id );
-        // glRenderbufferStorage(
-        //     GL_RENDERBUFFER,
-        //     GL_DEPTH24_STENCIL8,
-        //     _width, _height
-        // );
-        // glFramebufferRenderbuffer(
-        //     GL_FRAMEBUFFER,
-        //     GL_DEPTH_STENCIL_ATTACHMENT,
-        //     GL_RENDERBUFFER,
-        //     id
-        // );
-        
-        auto t = texture<>::make_empty();
-        auto t_id = t.gl_texture_id();
-        
-        glBindTexture( GL_TEXTURE_2D, t_id );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't bind depth buffer texture "
-            + std::to_string( t_id )
-            + " for framebuffer "
-            + std::to_string( gl_id )
-            + " for yavsg::gl::framebuffer::depth_buffer_init()"
+        auto t = texture< depth_stecil_dummy< GLfloat >, 2 >(
+            _width,
+            _height,
+            static_cast< std::array<
+                texture< depth_stecil_dummy< GLfloat >, 2 >::sample_type,
+                texture< depth_stecil_dummy< GLfloat >, 2 >::channels
+            >* >( nullptr ),
+            {
+                texture_filter_settings::magnify_mode::LINEAR,
+                texture_filter_settings::minify_mode::LINEAR,
+                texture_filter_settings::mipmap_type::NONE,
+            },
+            texture_flags::ALLOCATE_ONLY
         );
-        
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_DEPTH24_STENCIL8,
-            _width, _height,
-            0,
-            GL_DEPTH_STENCIL,
-            GL_UNSIGNED_INT_24_8,
-            nullptr
-        );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't allocate "
-            + std::to_string( _width )
-            + "x"
-            + std::to_string( _height )
-            + " depth buffer texture "
-            + std::to_string( t_id )
-            + " for framebuffer "
-            + std::to_string( gl_id )
-            + " for yavsg::gl::framebuffer::depth_buffer_init()"
-        );
-        
-        t.filtering( {
-            texture_filter_settings::magnify_mode::LINEAR,
-            texture_filter_settings::minify_mode::LINEAR,
-            texture_filter_settings::mipmap_type::NONE,
-        } );
         
         glFramebufferTexture2D(
             GL_FRAMEBUFFER,
             GL_DEPTH_STENCIL_ATTACHMENT,
             GL_TEXTURE_2D,
-            t_id,
+            t.gl_texture_id(),
             0   // Mipmap level (not useful)
         );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't attach depth buffer texture "
-            + std::to_string( t_id )
-            + " for framebuffer "
+            + std::to_string( t.gl_texture_id() )
+            + " to framebuffer "
             + std::to_string( gl_id )
             + " for yavsg::gl::framebuffer::depth_buffer_init()"
         );
@@ -190,69 +209,58 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
                 std::array< texture<>, ColorTargets >*
             >( color_buffers );
             
-            new( &( *color_buffer_array )[ i ] ) texture<>(
-                texture<>::make_empty()
+            auto texture_ptr = &( *color_buffer_array )[ i ];
+            
+            new( texture_ptr ) texture<>(
+                _width,
+                _height,
+                static_cast< std::array<
+                    texture<>::sample_type,
+                    texture<>::channels
+                >* >( nullptr ),
+                {
+                    texture_filter_settings::magnify_mode::LINEAR,
+                    texture_filter_settings::minify_mode::LINEAR,
+                    texture_filter_settings::mipmap_type::NONE,
+                },
+                texture_flags::ALLOCATE_ONLY
             );
             
             try
             {
-                auto texture_id = ( *color_buffer_array )[ i ].gl_texture_id();
-                
-                glBindTexture( GL_TEXTURE_2D, texture_id );
-                YAVSG_GL_THROW_FOR_ERRORS(
-                    "couldn't bind texture "
-                    + std::to_string( texture_id )
-                    + " for color buffer "
-                    + std::to_string( i )
-                    + " for framebuffer "
-                    + std::to_string( gl_id )
-                    + " for yavsg::gl::framebuffer::color_buffers_init()"
-                );
-                
-                // TODO: some way to configure alpha for each color target
-                glTexImage2D(
-                    GL_TEXTURE_2D,
-                    0,
-                    GL_RGBA, // GL_RGB,
-                    _width, _height,
-                    0,
-                    GL_RGBA, // GL_RGB,
-                    GL_FLOAT,
-                    nullptr
-                );
-                YAVSG_GL_THROW_FOR_ERRORS(
-                    "couldn't allocate "
-                    + std::to_string( _width )
-                    + "x"
-                    + std::to_string( _height )
-                    + " texture "
-                    + std::to_string( texture_id )
-                    + " for color buffer "
-                    + std::to_string( i )
-                    + " for framebuffer "
-                    + std::to_string( gl_id )
-                    + " for yavsg::gl::framebuffer::color_buffers_init()"
-                );
-                
-                ( *color_buffer_array )[ i ].filtering( {
-                    texture_filter_settings::magnify_mode::LINEAR,
-                    texture_filter_settings::minify_mode::LINEAR,
-                    texture_filter_settings::mipmap_type::NONE,
-                } );
-                
                 glFramebufferTexture2D(
                     GL_FRAMEBUFFER,
                     GL_COLOR_ATTACHMENT0 + i,
                     GL_TEXTURE_2D,
-                    texture_id,
+                    texture_ptr -> gl_texture_id(),
                     0   // Mipmap level (unused for now)
+                );
+                YAVSG_GL_THROW_FOR_ERRORS(
+                    "couldn't attach texture "
+                    + std::to_string( texture_ptr -> gl_texture_id() )
+                    + " as color buffer "
+                    + std::to_string( i )
+                    + " to framebuffer "
+                    + std::to_string( gl_id )
+                    + " for yavsg::gl::framebuffer::framebuffer_init()"
                 );
                 
                 color_buffers_init( i + 1 );
             }
+            // TODO: one this isn't recursive, add on thsi " for ..."
+            // catch( const summary_error& e )
+            // {
+            //     texture_ptr -> ~texture<>();
+            //     throw summary_error(
+            //         e.what() + std::string(
+            //             " for yavsg::gl::framebuffer::framebuffer_init()"
+            //         ),
+            //         e.error_codes
+            //     );
+            // }
             catch( ... )
             {
-                ( *color_buffer_array )[ i ].~texture<>();
+                texture_ptr -> ~texture<>();
                 throw;
             }
         }
@@ -300,12 +308,13 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
             t.~texture<>();
         
         glDeleteFramebuffers( 1, &gl_id );
-        
-        // glDeleteRenderbuffers( 1, &depth_stencil_buffer );
     }
     
     template< std::size_t ColorTargets >
-    texture<>& framebuffer< ColorTargets >::depth_stencil_buffer()
+    texture<
+        depth_stecil_dummy< GLfloat >,
+        2
+    >& framebuffer< ColorTargets >::depth_stencil_buffer()
     {
         return _depth_stencil_buffer;
     }
