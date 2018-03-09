@@ -25,7 +25,7 @@ int main( int argc, char* argv[] )
         yavsg::SDL_manager sdl;
         
         yavsg::SDL_window_manager window(
-            "OpenGL",
+            "YAVSG",
             SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED,
             gl_tut::window_width,
