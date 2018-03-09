@@ -320,7 +320,7 @@ namespace yavsg
                 std::chrono::duration_cast<
                     std::chrono::duration< float >
                 >( current_time - start_time ).count()
-                * 10
+                * 3 + 45
             );
             
             auto sin_val = static_cast< GLfloat >( sin( rotate_by ) );
