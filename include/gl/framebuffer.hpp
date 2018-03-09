@@ -8,8 +8,9 @@
 
 #include <array>
 #include <cstdint>      // std::int_least16_t, std::int_least32_t
-#include <utility>      // std::size_t
+#include <string>
 #include <type_traits>  // std::enable_if
+#include <utility>      // std::size_t
 
 
 namespace yavsg
@@ -80,10 +81,25 @@ namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
         // framebuffer
         friend class yavsg::SDL_window_manager;
         
+    public:
+        enum class alpha_blend_mode
+        {
+            DISABLED,
+            PREMULTIPLIED,
+            PREMULTIPLIED_DROP_ALPHA,
+            // Premultiplied alpha blending should generally be preferred over
+            // these two if alpha blending is enabled
+            BASIC,       // Source & target alpha blended
+            PASSTHROUGH, // Source alpha written
+            DROP_ALPHA   // Target alpha kept
+        };
+        
     protected:
         std::size_t _width;
         std::size_t _height;
+        alpha_blend_mode _alpha_blending;
         
+        // `base_framebuffer` does not own the actual OpenGL framebuffer
         GLuint gl_id;
         
         base_framebuffer(
@@ -98,17 +114,10 @@ namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
         
         void bind();
         
-        enum class alpha_blend_mode
-        {
-            DISABLED,
-            PREMULTIPLIED,
-            // Premultiplied alpha blending should generally be preferred over
-            // these two if alpha blending is enabled
-            BASIC,      // Source & target alpha blended
-            PASSTHROUGH // Source alpha written
-        };
+        alpha_blend_mode alpha_blending( alpha_blend_mode );
+        alpha_blend_mode alpha_blending() const;
         
-        void alpha_blending( alpha_blend_mode );
+        void dump_BMP( const std::string& descriptive_name );
     };
     
     template< std::size_t ColorTargets > class framebuffer :
@@ -126,7 +135,7 @@ namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
             sizeof( std::array< texture<>, ColorTargets > )
         ];
         
-        GLuint             framebuffer_init();
+        GLuint framebuffer_init();
         texture< depth_stecil_dummy< GLfloat >, 2 > depth_stencil_buffer_init();
         // Recursive initializer to help with cleanup on errors
         void color_buffers_init( std::size_t i = 0 );
@@ -157,7 +166,20 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
             "couldn't generate framebuffer for "
             "yavsg::gl::framebuffer::framebuffer_init()"
         );
-        bind();
+        
+        try
+        {
+            // Calling bind() should be OK as long as framebuffers continue to
+            // be initialized with alpha blend mode = DISABLED (so bind() won't
+            // set a blending mode during construction)
+            bind();
+        }
+        catch( ... )
+        {
+            glDeleteFramebuffers( 1, &gl_id );
+            throw;
+        }
+        
         return gl_id;
     }
     

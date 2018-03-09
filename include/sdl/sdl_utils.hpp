@@ -7,6 +7,7 @@
 #include "../gl/framebuffer.hpp"
 
 #include <string>
+#include <utility>  // std::size_t
 
 
 namespace yavsg
@@ -20,21 +21,24 @@ namespace yavsg
     
     class SDL_window_manager
     {
+    protected:
+        yavsg::gl::base_framebuffer* _default_framebuffer;
+        
     public:
         SDL_Window*   sdl_window;
         SDL_GLContext gl_context;
         
-        yavsg::gl::base_framebuffer default_framebuffer;
-        
         SDL_window_manager(
             const std::string& title,
-            int x,
-            int y,
-            int w,
-            int h,
+            std::size_t x,
+            std::size_t y,
+            std::size_t w,
+            std::size_t h,
             Uint32 flags
         );
         ~SDL_window_manager();
+        
+        yavsg::gl::base_framebuffer& default_framebuffer();
     };
 }
 

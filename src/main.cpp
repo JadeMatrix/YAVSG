@@ -50,13 +50,13 @@ int main( int argc, char* argv[] )
             new yavsg::debug_4up_postprocess_step(
                 nullptr,
                 new yavsg::basic_postprocess_step(
+                    "../src/shaders/postprocess/circular_gradient.frag"
+                ),
+                new yavsg::basic_postprocess_step(
                     "../src/shaders/postprocess/dof.frag"
                 ),
                 new yavsg::basic_postprocess_step(
-                    "../src/shaders/postprocess/depth.frag"
-                ),
-                new yavsg::basic_postprocess_step(
-                    "../src/shaders/postprocess/sobel.frag"
+                    "../src/shaders/postprocess/buffer_analysis.frag"
                 )
             )
         };
@@ -69,9 +69,6 @@ int main( int argc, char* argv[] )
             gl_tut::window_width,
             gl_tut::window_height
         );
-        
-        yavsg::gl::framebuffer< 1 >* source_buffer = &buffer_A;
-        yavsg::gl::framebuffer< 1 >* target_buffer = &buffer_B;
         
         SDL_Event window_event;
         while( true )
@@ -91,27 +88,48 @@ int main( int argc, char* argv[] )
                     break;
             }
             
+            using blend_mode = yavsg::gl::framebuffer< 1 >::alpha_blend_mode;
+            
+            yavsg::gl::base_framebuffer* source_buffer;
+            yavsg::gl::base_framebuffer* target_buffer;
+            
             // Run all scene render steps against the same framebuffer
             if( postprocess_steps.size() )
-                target_buffer -> bind();
+                target_buffer = &buffer_A;
             else
-                window.default_framebuffer.bind();
+                target_buffer = &window.default_framebuffer();
+            source_buffer = &buffer_B;
+            
+            target_buffer -> alpha_blending(
+                blend_mode::PREMULTIPLIED_DROP_ALPHA
+            );
+            target_buffer -> bind();
+            
             for( auto step : scene_steps )
                 step -> run();
             
             auto postprocess_step_iter = postprocess_steps.begin();
             while( postprocess_step_iter != postprocess_steps.end() )
             {
-                std::swap( source_buffer, target_buffer );
+                std::swap( source_buffer, target_buffer);
+                
+                bool is_first_step =
+                    postprocess_step_iter == postprocess_steps.begin();
                 
                 // Get the current step before advancing the iterator
                 auto step = *postprocess_step_iter;
+                // The last postprocess step should target the window's default
+                // framebuffer
                 if( ++postprocess_step_iter == postprocess_steps.end() )
-                    window.default_framebuffer.bind();
-                else
-                    target_buffer -> bind();
+                    target_buffer = &window.default_framebuffer();
                 
-                step -> run( *source_buffer );
+                target_buffer -> alpha_blending( blend_mode::DISABLED );
+                
+                target_buffer -> bind();
+                
+                step -> run( *static_cast< yavsg::gl::framebuffer< 1 >* >(
+                    source_buffer
+                ) );
             }
             
             SDL_GL_SwapWindow( window.sdl_window );

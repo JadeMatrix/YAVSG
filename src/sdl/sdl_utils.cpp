@@ -55,16 +55,19 @@ namespace yavsg // SDL_window_manager //////////////////////////////////////////
 {
     SDL_window_manager::SDL_window_manager(
         const std::string& title,
-        int x, int y,
-        int w, int h,
+        std::size_t x,
+        std::size_t y,
+        std::size_t w,
+        std::size_t h,
         Uint32 flags
-    ) :
-        default_framebuffer( 0, w, h )
+    )
     {
         sdl_window = SDL_CreateWindow(
             title.c_str(),
-            x, y,
-            w, h,
+            x,
+            y,
+            w,
+            h,
             flags
         );
         if( sdl_window == nullptr )
@@ -82,11 +85,19 @@ namespace yavsg // SDL_window_manager //////////////////////////////////////////
             SDL_DestroyWindow( sdl_window );
             throw std::runtime_error( context_error_string );
         }
+        
+        // Create wrapper for default framebuffer after context
+        _default_framebuffer = new yavsg::gl::base_framebuffer( 0, w, h );
     }
     
     SDL_window_manager::~SDL_window_manager()
     {
         SDL_GL_DeleteContext( gl_context );
         SDL_DestroyWindow( sdl_window );
+    }
+    
+    yavsg::gl::base_framebuffer& SDL_window_manager::default_framebuffer()
+    {
+        return *_default_framebuffer;
     }
 }

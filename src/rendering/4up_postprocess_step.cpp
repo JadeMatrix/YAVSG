@@ -172,6 +172,7 @@ namespace yavsg
     {
         // TODO: error handling
         
+        glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
         glClear(
               GL_COLOR_BUFFER_BIT
             | GL_DEPTH_BUFFER_BIT
@@ -187,6 +188,9 @@ namespace yavsg
         };
         
         yavsg::gl::framebuffer< 1 >* source_buffer;
+        
+        using blend_mode = yavsg::gl::framebuffer< 1 >::alpha_blend_mode;
+        sub_buffer.alpha_blending( blend_mode::DISABLED );
         
         for( auto substep : {
             substep_info{     top_left,     top_left_indices },
