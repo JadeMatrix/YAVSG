@@ -14,12 +14,12 @@ out vec4 fragment_out_color;
 ////////////////////////////////////////////////////////////////////////////////
 
 uniform sampler2D framebuffer_source_color;
-uniform sampler2D framebuffer_source_depth_stencil;
+uniform sampler2D framebuffer_source_depth;
 
 void main()
 {
     float depth = texture(
-        framebuffer_source_depth_stencil,
+        framebuffer_source_depth,
         fragment_in.texture
     ).r;
     
@@ -45,7 +45,7 @@ void main()
         for( int y = -radius; y <= radius; ++y )
         {
             float sample_depth = texture(
-                framebuffer_source_depth_stencil,
+                framebuffer_source_depth,
                 vec2(
                     fragment_in.texture.x + x * blur_size_h,
                     fragment_in.texture.y + y * blur_size_v
@@ -71,7 +71,7 @@ void main()
 // void main()
 // {
 //     float depth = texture(
-//         framebuffer_source_depth_stencil,
+//         framebuffer_source_depth,
 //         fragment_in.texture
 //     ).r;
     

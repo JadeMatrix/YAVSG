@@ -66,7 +66,7 @@ namespace yavsg
         // Depth buffer
         source.depth_stencil_buffer().bind_as< 1 >();
         postprocess_program.set_uniform(
-            shader_string_id::FRAMEBUFFER_SOURCE_DEPTH_STENCIL,
+            shader_string_id::FRAMEBUFFER_SOURCE_DEPTH,
             1
         );
         

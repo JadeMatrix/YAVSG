@@ -35,8 +35,7 @@ namespace
     std::string camera_point_far_str          = "camera_point.far";
     
     std::string framebuffer_source_color_str  = "framebuffer_source_color";
-    std::string framebuffer_source_depth_stencil_str
-        = "framebuffer_source_depth_stencil";
+    std::string framebuffer_source_depth_str  = "framebuffer_source_depth";
     std::string framebuffer_target_width_str  = "framebuffer_target.width";
     std::string framebuffer_target_height_str = "framebuffer_target.height";
     
@@ -101,12 +100,12 @@ namespace yavsg
         
         case shader_string_id::FRAMEBUFFER_SOURCE_COLOR:
             return framebuffer_source_color_str;
-        case shader_string_id::FRAMEBUFFER_SOURCE_DEPTH_STENCIL:
-            return framebuffer_source_depth_stencil_str;
+        case shader_string_id::FRAMEBUFFER_SOURCE_DEPTH:
+            return framebuffer_source_depth_str;
         case shader_string_id::FRAMEBUFFER_TARGET_WIDTH:
             return framebuffer_target_width_str;
         case shader_string_id::FRAMEBUFFER_TARGET_HEIGHT:
-            return framebuffer_target_width_str;
+            return framebuffer_target_height_str;
         
         case shader_string_id::FRAGMENT_OUT_COLOR:
             return fragment_out_color_str;

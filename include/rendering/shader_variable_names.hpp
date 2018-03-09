@@ -54,7 +54,7 @@ namespace yavsg
     } camera_point;
     
     uniform sampler2D framebuffer_source_color;
-    uniform sampler2D framebuffer_source_depth_stencil;
+    uniform sampler2D framebuffer_source_depth;
     uniform struct
     {
         float width;
@@ -94,7 +94,7 @@ namespace yavsg
         CAMERA_POINT_FAR,
         
         FRAMEBUFFER_SOURCE_COLOR,
-        FRAMEBUFFER_SOURCE_DEPTH_STENCIL,
+        FRAMEBUFFER_SOURCE_DEPTH,
         FRAMEBUFFER_TARGET_WIDTH,
         FRAMEBUFFER_TARGET_HEIGHT,
         

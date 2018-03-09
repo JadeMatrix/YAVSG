@@ -14,12 +14,12 @@ out vec4 fragment_out_color;
 ////////////////////////////////////////////////////////////////////////////////
 
 // uniform sampler2D framebuffer_source_color;
-uniform sampler2D framebuffer_source_depth_stencil;
+uniform sampler2D framebuffer_source_depth;
 
 void main()
 {
     float depth = texture(
-        framebuffer_source_depth_stencil,
+        framebuffer_source_depth,
         fragment_in.texture
     ).r;
     
@@ -27,8 +27,8 @@ void main()
     fragment_out_color = vec4( depth, depth, depth, 1.0 );
     
     // fragment_out_color = vec4(
-    //     1.0, // texture( framebuffer_source_depth_stencil, fragment_in.texture ).r,
-    //     texture( framebuffer_source_depth_stencil, fragment_in.texture ).a,
+    //     1.0, // texture( framebuffer_source_depth, fragment_in.texture ).r,
+    //     texture( framebuffer_source_depth, fragment_in.texture ).a,
     //     1.0,
     //     1.0
     // );
