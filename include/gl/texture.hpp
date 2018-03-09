@@ -296,12 +296,10 @@ namespace yavsg { namespace gl // Texture static method implementations ////////
         
         try
         {
-            texture created_texture = texture::make_empty();
-            created_texture.upload(
+            texture created_texture(
                 sdl_surface,
                 settings,
-                flags,
-                format_traits::gl_internal_format
+                flags
             );
             
             SDL_FreeSurface( sdl_surface );

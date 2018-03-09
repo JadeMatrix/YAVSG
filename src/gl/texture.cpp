@@ -7,9 +7,6 @@
 #include <limits>
 #include <utility>      // std::swap()
 
-// DEBUG:
-#include <iostream>
-
 
 namespace // Anisotropic filtering support /////////////////////////////////////
 {
@@ -188,9 +185,12 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
             case GL_RGBA32UI:
             case GL_RGBA16F:
             case GL_RGBA32F:
+            // case GL_RGBA64F:
                 internal_has_alpha = true;
+                break;
             default:
                 internal_has_alpha = false;
+                break;
             }
             
             auto sample_count = width * height;
@@ -472,9 +472,13 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
         SDL_Surface* converted_surface = nullptr;
         
         if( sdl_surface -> format -> format == SDL_PIXELFORMAT_RGBA8888 )
-            incoming_format = GL_RGBA;
+            incoming_format = GL_RGBA; // Rgb + A
+        else if( sdl_surface -> format -> format == SDL_PIXELFORMAT_BGRA8888 )
+            incoming_format = GL_BGRA; // Bgr + A
         else if( sdl_surface -> format -> format == SDL_PIXELFORMAT_RGB888 )
-            incoming_format = GL_RGB;
+            incoming_format = GL_RGB;  // Rgb
+        else if( sdl_surface -> format -> format == SDL_PIXELFORMAT_BGR888 )
+            incoming_format = GL_BGR;  // Bgr
         else // Convert pixels
         {
             SDL_PixelFormat* new_format = nullptr;
@@ -498,8 +502,10 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
             case SDL_PIXELFORMAT_BGRA8888:
             case SDL_PIXELFORMAT_ARGB2101010:
                 format_has_alpha = true;
+                break;
             default:
                 format_has_alpha = false;
+                break;
             }
             
             if( format_has_alpha )
