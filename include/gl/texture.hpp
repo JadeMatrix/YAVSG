@@ -17,7 +17,7 @@
 #include <exception>
 
 
-namespace yavsg { namespace gl
+namespace yavsg { namespace gl // Texture format traits ////////////////////////
 {
     template< typename DataType, std::size_t Channels >
     struct texture_format_traits {};
@@ -58,7 +58,7 @@ namespace yavsg { namespace gl
 } }
 
 
-namespace yavsg { namespace gl
+namespace yavsg { namespace gl // Texture configuration types //////////////////
 {
     static const GLuint default_texture_gl_id = 0x00;
     
@@ -86,7 +86,11 @@ namespace yavsg { namespace gl
         // Ignore any input data and just tell OpenGL to allocate texture space
         ALLOCATE_ONLY               = 0x01 << 1
     };
-    
+} }
+
+
+namespace yavsg { namespace gl
+{
     // A base class to hold all the stuff that doesn't need to be templated
     class _texture_general
     {
@@ -206,14 +210,14 @@ namespace yavsg { namespace gl
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't activate GL_TEXTURE"
             + std::to_string( ActiveTexture )
-            + " to bind default texture for yavsg::gl::unbind_texture<>()"
+            + " to bind default texture for yavsg::gl::unbind_texture()"
         );
         
         glBindTexture( GL_TEXTURE_2D, 0 );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't bind default texture as GL_TEXTURE"
             + std::to_string( ActiveTexture )
-            + " for yavsg::gl::unbind_texture<>()"
+            + " for yavsg::gl::unbind_texture()"
         );
     }
 } }
