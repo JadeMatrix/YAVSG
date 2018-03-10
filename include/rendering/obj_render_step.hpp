@@ -94,7 +94,7 @@ namespace yavsg
             const std::string& obj_mtl_directory
         );
         // ~obj_render_step();
-        virtual void run();
+        virtual void run( gl::write_only_framebuffer& target );
     };
 }
 

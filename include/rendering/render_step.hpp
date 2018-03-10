@@ -14,14 +14,17 @@ namespace yavsg
     {
     public:
         virtual ~render_step() {}
-        virtual void run() = 0;
+        virtual void run( gl::write_only_framebuffer& target ) = 0;
     };
     
     template< class... ColorTargetTypes > class postprocess_step
     {
     public:
         virtual ~postprocess_step() {}
-        virtual void run( gl::framebuffer< ColorTargetTypes... >& source ) = 0;
+        virtual void run(
+            gl::framebuffer< ColorTargetTypes... >& source,
+            gl::write_only_framebuffer            & target
+        ) = 0;
     };
 }
 

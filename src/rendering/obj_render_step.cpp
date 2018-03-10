@@ -270,7 +270,7 @@ namespace yavsg
         
     // }
     
-    void obj_render_step::run()
+    void obj_render_step::run( gl::write_only_framebuffer& target )
     {
         auto current_time = std::chrono::high_resolution_clock::now();
         

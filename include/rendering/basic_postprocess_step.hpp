@@ -24,12 +24,12 @@ namespace yavsg
             yavsg::vector< GLfloat, 2 >,
             yavsg::vector< GLfloat, 2 >
         >;
-        using framebuffer_type = yavsg::gl::framebuffer<
+        using source_type = yavsg::gl::framebuffer<
             yavsg::gl::texture< GLfloat, 3 >
         >;
         using program_type = yavsg::gl::shader_program<
             attribute_buffer_type,
-            framebuffer_type
+            source_type
         >;
         
         program_type            postprocess_program;
@@ -39,7 +39,10 @@ namespace yavsg
         basic_postprocess_step(
             const std::string& fragment_shader_filename
         );
-        virtual void run( framebuffer_type& source );
+        virtual void run(
+            source_type               & source,
+            gl::write_only_framebuffer& target
+        );
     };
 }
 

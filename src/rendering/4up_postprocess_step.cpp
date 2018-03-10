@@ -168,7 +168,10 @@ namespace yavsg
             delete bottom_right;
     }
     
-    void debug_4up_postprocess_step::run( framebuffer_type& source )
+    void debug_4up_postprocess_step::run(
+        source_type               & source,
+        gl::write_only_framebuffer& target
+    )
     {
         // TODO: error handling
         
@@ -187,7 +190,7 @@ namespace yavsg
             gl::index_buffer& indices;
         };
         
-        framebuffer_type* source_buffer;
+        source_type* source_buffer;
         
         sub_buffer.alpha_blending( gl::alpha_blend_mode::DISABLED );
         
@@ -203,7 +206,7 @@ namespace yavsg
                 push_framebuffer pushed_framebuffer;
                 
                 sub_buffer.bind();
-                substep.step -> run( source );
+                substep.step -> run( source, sub_buffer );
                 
                 source_buffer = &sub_buffer;
             }

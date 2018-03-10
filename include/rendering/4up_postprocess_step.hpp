@@ -25,10 +25,10 @@ namespace yavsg
             yavsg::vector< GLfloat, 2 >,
             yavsg::vector< GLfloat, 2 >
         >;
-        using framebuffer_type = gl::framebuffer< gl::texture< GLfloat, 3 > >;
+        using source_type = gl::framebuffer< gl::texture< GLfloat, 3 > >;
         using program_type = gl::shader_program<
             attribute_buffer_type,
-            framebuffer_type
+            source_type
         >;
         
         using child_type = postprocess_step<
@@ -48,7 +48,7 @@ namespace yavsg
         gl::index_buffer bottom_left_indices;
         gl::index_buffer bottom_right_indices;
         
-        framebuffer_type sub_buffer;
+        source_type sub_buffer;
         
         debug_4up_postprocess_step(
             child_type* top_left,
@@ -57,7 +57,10 @@ namespace yavsg
             child_type* bottom_right
         );
         ~debug_4up_postprocess_step();
-        virtual void run( framebuffer_type& source );
+        virtual void run(
+            source_type               & source,
+            gl::write_only_framebuffer& target
+        );
     };
 }
 

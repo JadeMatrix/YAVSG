@@ -96,6 +96,8 @@ int main( int argc, char* argv[] )
                     break;
             }
             
+            // Even though only target_buffer needs to be a write-only buffer,
+            // they both need to be the same type for std::swap()
             wo_fb_type* source_buffer;
             wo_fb_type* target_buffer;
             
@@ -112,7 +114,7 @@ int main( int argc, char* argv[] )
             target_buffer -> bind();
             
             for( auto step : scene_steps )
-                step -> run();
+                step -> run( *target_buffer );
             
             auto postprocess_step_iter = postprocess_steps.begin();
             while( postprocess_step_iter != postprocess_steps.end() )
@@ -135,7 +137,10 @@ int main( int argc, char* argv[] )
                 
                 target_buffer -> bind();
                 
-                step -> run( *static_cast< fb_type* >( source_buffer ) );
+                step -> run(
+                    *static_cast< fb_type* >( source_buffer ),
+                    *                         target_buffer
+                );
             }
             
             SDL_GL_SwapWindow( window.sdl_window );
