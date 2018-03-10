@@ -53,19 +53,30 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
     };
     
     // TODO: std::optional< gl::texture >, or just texture ref type
-    template< class AttributeBuffer, class Framebuffer >
-    struct bind_attributes< gl::texture<>, AttributeBuffer, Framebuffer >
+    template<
+        class AttributeBuffer,
+        class Framebuffer ,
+        typename DataType,
+        std::size_t Channels
+    >
+    struct bind_attributes<
+        gl::texture< DataType, Channels >,
+        AttributeBuffer,
+        Framebuffer
+    >
     {
         static const std::size_t increment_active_texture = 1;
+        
+        using texture_type = gl::texture< DataType, Channels >;
         
         template< std::size_t ActiveTexture >
         static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
             const std::string& name,
-            const gl::texture<>& texture
+            const texture_type& texture_to_bind
         )
         {
-            texture.bind_as< ActiveTexture >();
+            texture_to_bind. template bind_as< ActiveTexture >();
             program.template set_uniform< GLint >( name, ActiveTexture );
         }
         
@@ -73,32 +84,43 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
             shader_string_id name_id,
-            const gl::texture<>& texture
+            const texture_type& texture_to_bind
         )
         {
             bind_one< ActiveTexture >(
                 program,
                 shader_string( name_id ),
-                texture
+                texture_to_bind
             );
         }
     };
     
-    template< class AttributeBuffer, class Framebuffer >
-    struct bind_attributes< gl::texture<>*, AttributeBuffer, Framebuffer >
+    template<
+        class AttributeBuffer,
+        class Framebuffer ,
+        typename DataType,
+        std::size_t Channels
+    >
+    struct bind_attributes<
+        gl::texture< DataType, Channels >*,
+        AttributeBuffer,
+        Framebuffer
+    >
     {
         static const std::size_t increment_active_texture = 1;
+        
+        using texture_type = gl::texture< DataType, Channels >;
         
         template< std::size_t ActiveTexture >
         static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
             const std::string& name,
-            const gl::texture<>* texture
+            const texture_type* texture_to_bind
         )
         {
-            if( texture )
+            if( texture_to_bind )
             {
-                texture -> bind_as< ActiveTexture >();
+                texture_to_bind -> template bind_as< ActiveTexture >();
                 program.template set_uniform< GLint >( name, ActiveTexture );
             }
             else
@@ -109,13 +131,13 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
             shader_string_id name_id,
-            const gl::texture<>* texture
+            const texture_type* texture_to_bind
         )
         {
             bind_one< ActiveTexture >(
                 program,
                 shader_string( name_id ),
-                texture
+                texture_to_bind
             );
         }
     };

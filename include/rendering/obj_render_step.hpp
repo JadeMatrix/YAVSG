@@ -18,21 +18,22 @@
 
 namespace yavsg
 {
+    using material_texture_type = gl::texture< GLfloat, 4 >;
     // TODO: std::optional<gl::texture>
     using material_description_base = material<
-        gl::texture<>*,
-        gl::texture<>*,
-        gl::texture<>*
+        material_texture_type*,
+        material_texture_type*,
+        material_texture_type*
     >;
     class material_description : public material_description_base
     {
     public:
-              gl::texture<>*    color_map()       { return std::get< 0 >( values ); }
-              gl::texture<>*   normal_map()       { return std::get< 1 >( values ); }
-              gl::texture<>* specular_map()       { return std::get< 2 >( values ); }
-        const gl::texture<>*    color_map() const { return std::get< 0 >( values ); }
-        const gl::texture<>*   normal_map() const { return std::get< 1 >( values ); }
-        const gl::texture<>* specular_map() const { return std::get< 2 >( values ); }
+              material_texture_type*    color_map()       { return std::get< 0 >( values ); }
+              material_texture_type*   normal_map()       { return std::get< 1 >( values ); }
+              material_texture_type* specular_map()       { return std::get< 2 >( values ); }
+        const material_texture_type*    color_map() const { return std::get< 0 >( values ); }
+        const material_texture_type*   normal_map() const { return std::get< 1 >( values ); }
+        const material_texture_type* specular_map() const { return std::get< 2 >( values ); }
         
         using material_description_base::material;
         

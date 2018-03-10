@@ -122,8 +122,8 @@ namespace yavsg { namespace gl
     };
     
     template<
-        typename    DataType = GLfloat,
-        std::size_t Channels = 4
+        typename DataType,
+        std::size_t Channels
     > class texture : public _texture_general
     {
     protected:
