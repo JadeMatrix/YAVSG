@@ -8,29 +8,6 @@
 
 namespace
 {
-    class push_framebuffer
-    {
-    protected:
-        GLint pushed;
-    public:
-        push_framebuffer()
-        {
-            glGetIntegerv( GL_DRAW_FRAMEBUFFER_BINDING, &pushed );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't get current draw framebuffer for push_framebuffer"
-            );
-        };
-        ~push_framebuffer()
-        {
-            glBindFramebuffer( GL_FRAMEBUFFER, pushed );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't re-bind framebuffer "
-                + std::to_string( pushed )
-                + " for push_framebuffer"
-            );
-        }
-    };
-    
     const std::string vertex_shader = R"<<<(
 #version 150 core
 in vec3 vertex_in_position;
@@ -203,8 +180,6 @@ namespace yavsg
         {
             if( substep.step )
             {
-                push_framebuffer pushed_framebuffer;
-                
                 sub_buffer.bind();
                 substep.step -> run( source, sub_buffer );
                 
@@ -212,6 +187,8 @@ namespace yavsg
             }
             else
                 source_buffer = &source;
+            
+            target.bind();
             
             source_buffer -> color_buffer< 0 >().bind_as< 0 >();
             postprocess_program.set_uniform(
