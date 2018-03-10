@@ -46,9 +46,7 @@ int main( int argc, char* argv[] )
         using fb_type = yavsg::gl::framebuffer<
             yavsg::gl::texture< GLfloat, 3 >
         >;
-        using wo_fb_type = yavsg::gl::write_only_framebuffer<
-            yavsg::gl::texture< GLfloat, 3 >
-        >;
+        using wo_fb_type = yavsg::gl::write_only_framebuffer;
         
         std::vector< yavsg::render_step* > scene_steps = {
             new yavsg::obj_render_step(

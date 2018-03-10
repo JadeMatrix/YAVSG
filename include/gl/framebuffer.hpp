@@ -14,13 +14,6 @@
 #include <tuple>
 #include <utility>      // std::size_t
 
-// For yavsg::gl::write_only_framebuffer::dump_BMP()
-#include "../sdl/_sdl_base.hpp"
-#include <fstream>
-#include <iomanip>  // std::setw(), std::setfill()
-#include <limits>   // std::numeric_limits
-#include <sstream>
-
 
 namespace yavsg
 {
@@ -96,7 +89,7 @@ namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
         DROP_ALPHA   // Target alpha kept
     };
     
-    template< class... ColorTargetTypes > class write_only_framebuffer
+    class write_only_framebuffer
     {
         // This is so the window can create a base_framebuffer for the default
         // framebuffer
@@ -110,13 +103,13 @@ namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
         
         write_only_framebuffer(
             GLuint,
+            std::size_t num_color_targets,
             std::size_t,
             std::size_t
         );
         
     public:
-        static const std::size_t num_color_targets
-            = sizeof...( ColorTargetTypes );
+        const std::size_t num_color_targets;
         
         std::size_t  width() const;
         std::size_t height() const;
@@ -130,7 +123,7 @@ namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
     };
     
     template< class... ColorTargetTypes > class framebuffer :
-        public write_only_framebuffer< ColorTargetTypes... >
+        public write_only_framebuffer
     {
     public:
         static const std::size_t num_color_targets
@@ -167,242 +160,6 @@ namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
             color_buffers_type
         >::type& color_buffer();
     };
-} }
-
-
-namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
-{
-    template< class... ColorTargetTypes >
-    write_only_framebuffer< ColorTargetTypes... >::write_only_framebuffer(
-        GLuint gl_id,
-        std::size_t width,
-        std::size_t height
-    ) :
-        gl_id(   gl_id  ),
-        _width(  width  ),
-        _height( height )
-    {
-        alpha_blending( alpha_blend_mode::DISABLED );
-    }
-    
-    template< class... ColorTargetTypes >
-    std::size_t write_only_framebuffer< ColorTargetTypes... >::width() const
-    {
-        return _width;
-    }
-    
-    template< class... ColorTargetTypes >
-    std::size_t write_only_framebuffer< ColorTargetTypes... >::height() const
-    {
-        return _height;
-    }
-    
-    template< class... ColorTargetTypes >
-    void write_only_framebuffer< ColorTargetTypes... >::bind()
-    {
-        glBindFramebuffer( GL_FRAMEBUFFER, gl_id );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't bind framebuffer "
-            + std::to_string( gl_id )
-            + std::string( gl_id == 0 ? " (default)" : "" )
-            + " for yavsg::gl::base_framebuffer::bind()"
-        );
-        
-        if( _alpha_blending == alpha_blend_mode::DISABLED )
-        {
-            glDisablei( GL_BLEND, 0 );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't disable blending for framebuffer "
-                + std::to_string( gl_id )
-                + std::string( gl_id == 0 ? " (default)" : "" )
-                + " for yavsg::gl::base_framebuffer::alpha_blending()"
-            );
-        }
-        else
-        {
-            glEnablei( GL_BLEND, 0 );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't enable blending for framebuffer "
-                + std::to_string( gl_id )
-                + std::string( gl_id == 0 ? " (default)" : "" )
-                + " for yavsg::gl::base_framebuffer::alpha_blending()"
-            );
-        }
-        
-        if( _alpha_blending != alpha_blend_mode::DISABLED )
-        {
-            // TODO: glBlendEquationSeparatei( 0, GL_FUNC_ADD, GL_FUNC_ADD );
-            glBlendEquationSeparate( GL_FUNC_ADD, GL_FUNC_ADD );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't set separate blending equations for framebuffer "
-                + std::to_string( gl_id )
-                + std::string( gl_id == 0 ? " (default)" : "" )
-                + " for yavsg::gl::base_framebuffer::alpha_blending()"
-            );
-            
-            // Use a switch to get warnings about possible unhandled cases in
-            // the future
-            switch( _alpha_blending )
-            {
-            case alpha_blend_mode::DISABLED:
-                // Shouldn't really be possible, but makes the compiler shut
-                // up without disabling the warning for this code
-                throw std::logic_error(
-                    "impossible blending state reached in "
-                    "yavsg::gl::base_framebuffer::alpha_blending()"
-                );
-            case alpha_blend_mode::PREMULTIPLIED:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
-                //     0,
-                    GL_ONE,
-                    GL_ONE_MINUS_SRC_ALPHA,
-                    GL_ONE,
-                    GL_ONE_MINUS_SRC_ALPHA
-                );
-                break;
-            case alpha_blend_mode::PREMULTIPLIED_DROP_ALPHA:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
-                //     0,
-                    GL_ONE,
-                    GL_ONE_MINUS_SRC_ALPHA,
-                    GL_ZERO,
-                    GL_ONE
-                );
-                break;
-            case alpha_blend_mode::BASIC:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
-                //     0,
-                    GL_SRC_ALPHA,
-                    GL_ONE_MINUS_SRC_ALPHA,
-                    GL_ONE,
-                    GL_ONE_MINUS_SRC_ALPHA
-                );
-                break;
-            case alpha_blend_mode::PASSTHROUGH:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
-                //     0,
-                    GL_SRC_ALPHA,
-                    GL_ONE_MINUS_SRC_ALPHA,
-                    GL_ONE,
-                    GL_ZERO
-                );
-                break;
-            case alpha_blend_mode::DROP_ALPHA:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
-                //     0,
-                    GL_SRC_ALPHA,
-                    GL_ONE_MINUS_SRC_ALPHA,
-                    GL_ZERO,
-                    GL_ONE
-                );
-                break;
-            }
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't set separate blending functions for framebuffer "
-                + std::to_string( gl_id )
-                + std::string( gl_id == 0 ? " (default)" : "" )
-                + " for yavsg::gl::base_framebuffer::alpha_blending()"
-            );
-        }
-    }
-    
-    template< class... ColorTargetTypes >
-    alpha_blend_mode write_only_framebuffer<
-        ColorTargetTypes...
-    >::alpha_blending( alpha_blend_mode mode )
-    {
-        _alpha_blending = mode;
-        return _alpha_blending;
-    }
-    
-    template< class... ColorTargetTypes >
-    alpha_blend_mode write_only_framebuffer<
-        ColorTargetTypes...
-    >::alpha_blending() const
-    {
-        return _alpha_blending;
-    }
-    
-    template< class... ColorTargetTypes >
-    void write_only_framebuffer< ColorTargetTypes... >::dump_BMP(
-        const std::string& descriptive_name
-    )
-    {
-        char* pixel_data = new char[ _width * _height * 4 ];
-        
-        try
-        {
-            glReadPixels(
-                0,
-                0,
-                _width,
-                _height,
-                GL_RGBA,
-                GL_UNSIGNED_INT_8_8_8_8,
-                pixel_data
-            );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't read framebuffer pixels for"
-                " yavsg::gl::base_framebuffer::dump_BMP()"
-            );
-            
-            auto surface = SDL_CreateRGBSurfaceFrom(
-                pixel_data,
-                _width,
-                _height,
-                4 * 8,
-                4 * _width,
-                0xFF << ( 3 * 8 ),
-                0xFF << ( 2 * 8 ),
-                0xFF << ( 1 * 8 ),
-                0xFF << ( 0 * 8 )
-            );
-            
-            if( !surface )
-                throw std::runtime_error(
-                    "couldn't create SDL surface from pixels for"
-                    " yavsg::gl::base_framebuffer::dump_BMP(): "
-                    + std::string( SDL_GetError() )
-                );
-            
-            static std::size_t nth = 0;
-            
-            std::stringstream filename;
-            filename
-                << std::setw( std::numeric_limits< std::size_t >::digits10 + 1 )
-                << std::setfill( '0' )
-                << nth
-                << " - "
-                << descriptive_name
-                << ".bmp"
-            ;
-            
-            ++nth;
-            
-            auto save_error = SDL_SaveBMP( surface, filename.str().c_str() );
-            SDL_FreeSurface( surface );
-            
-            if( save_error )
-                throw std::runtime_error(
-                    "couldn't open file `"
-                    + filename.str()
-                    + "` for yavsg::gl::base_framebuffer::dump_BMP(): "
-                    + std::string( SDL_GetError() )
-                );
-            
-            delete[] pixel_data;
-        }
-        catch( ... )
-        {
-            delete[] pixel_data;
-            throw;
-        }
-    }
 } }
 
 
@@ -637,8 +394,9 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
         std::size_t width,
         std::size_t height
     ) :
-        write_only_framebuffer< ColorTargetTypes... >(
+        write_only_framebuffer(
             framebuffer_init(),
+            sizeof...( ColorTargetTypes ),
             width,
             height
         ),

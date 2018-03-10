@@ -53,6 +53,7 @@ ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
     src/sdl/sdl_utils.cpp
     src/gl/texture.cpp
     src/gl/shader.cpp
+    src/gl/framebuffer.cpp
     # src/rendering/gl_tut_scene_render_step.cpp
     src/rendering/basic_postprocess_step.cpp
     src/rendering/4up_postprocess_step.cpp

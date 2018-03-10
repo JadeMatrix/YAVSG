@@ -5,7 +5,6 @@
 
 #include "_sdl_base.hpp"
 #include "../gl/framebuffer.hpp"
-#include "../gl/texture.hpp"
 
 #include <string>
 #include <utility>  // std::size_t
@@ -22,12 +21,8 @@ namespace yavsg
     
     class SDL_window_manager
     {
-        using default_framebuffer_type = yavsg::gl::write_only_framebuffer<
-            yavsg::gl::texture< GLfloat, 3 >
-        >;
-        
     protected:
-        default_framebuffer_type* _default_framebuffer;
+        yavsg::gl::write_only_framebuffer* _default_framebuffer;
         
     public:
         SDL_Window*   sdl_window;
@@ -43,7 +38,7 @@ namespace yavsg
         );
         ~SDL_window_manager();
         
-        default_framebuffer_type& default_framebuffer();
+        yavsg::gl::write_only_framebuffer& default_framebuffer();
     };
 }
 
