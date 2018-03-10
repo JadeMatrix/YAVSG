@@ -72,14 +72,12 @@ namespace
                     using settings = yavsg::gl::texture_filter_settings;
                     
                     info.texture = new yavsg::material_texture_type(
-                        yavsg::material_texture_type::from_file(
-                            texture_filename,
-                            {
-                                settings::magnify_mode::LINEAR,
-                                settings::minify_mode::LINEAR,
-                                settings::mipmap_type::LINEAR,
-                            }
-                        )
+                        texture_filename,
+                        {
+                            settings::magnify_mode::LINEAR,
+                            settings::minify_mode::LINEAR,
+                            settings::mipmap_type::LINEAR,
+                        }
                     );
                 }
             }

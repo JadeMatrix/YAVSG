@@ -4,6 +4,7 @@
 
 
 #include "shader_variable_names.hpp"
+#include "texture_reference.hpp"
 #include "../gl/shader_program.hpp"
 #include "../gl/texture.hpp"
 
@@ -55,7 +56,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
     // TODO: std::optional< gl::texture >, or just texture ref type
     template<
         class AttributeBuffer,
-        class Framebuffer ,
+        class Framebuffer,
         typename DataType,
         std::size_t Channels
     >
@@ -77,7 +78,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
         )
         {
             texture_to_bind. template bind_as< ActiveTexture >();
-            program.template set_uniform< GLint >( name, ActiveTexture );
+            program. template set_uniform< GLint >( name, ActiveTexture );
         }
         
         template< std::size_t ActiveTexture >
@@ -97,7 +98,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
     
     template<
         class AttributeBuffer,
-        class Framebuffer ,
+        class Framebuffer,
         typename DataType,
         std::size_t Channels
     >
@@ -121,7 +122,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
             if( texture_to_bind )
             {
                 texture_to_bind -> template bind_as< ActiveTexture >();
-                program.template set_uniform< GLint >( name, ActiveTexture );
+                program. template set_uniform< GLint >( name, ActiveTexture );
             }
             else
                 gl::unbind_texture< ActiveTexture >();
@@ -138,6 +139,97 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
                 program,
                 shader_string( name_id ),
                 texture_to_bind
+            );
+        }
+    };
+    
+    template<
+        class AttributeBuffer,
+        class Framebuffer,
+        typename DataType,
+        std::size_t Channels
+    >
+    struct bind_attributes<
+        texture_reference< DataType, Channels >,
+        AttributeBuffer,
+        Framebuffer
+    >
+    {
+        static const std::size_t increment_active_texture = 1;
+        
+        using tex_ref_type = texture_reference< DataType, Channels >;
+        
+        template< std::size_t ActiveTexture >
+        static void bind_one(
+            gl::shader_program< AttributeBuffer, Framebuffer >& program,
+            const std::string& name,
+            const tex_ref_type& reference_to_bind
+        )
+        {
+            reference_to_bind.texture(). template bind_as< ActiveTexture >();
+            program. template set_uniform< GLint >( name, ActiveTexture );
+        }
+        
+        template< std::size_t ActiveTexture >
+        static void bind_one(
+            gl::shader_program< AttributeBuffer, Framebuffer >& program,
+            shader_string_id name_id,
+            const tex_ref_type& reference_to_bind
+        )
+        {
+            bind_one< ActiveTexture >(
+                program,
+                shader_string( name_id ),
+                reference_to_bind
+            );
+        }
+    };
+    
+    template<
+        class AttributeBuffer,
+        class Framebuffer,
+        typename DataType,
+        std::size_t Channels
+    >
+    struct bind_attributes<
+        texture_reference< DataType, Channels >*,
+        AttributeBuffer,
+        Framebuffer
+    >
+    {
+        static const std::size_t increment_active_texture = 1;
+        
+        using tex_ref_type = texture_reference< DataType, Channels >;
+        
+        template< std::size_t ActiveTexture >
+        static void bind_one(
+            gl::shader_program< AttributeBuffer, Framebuffer >& program,
+            const std::string& name,
+            const tex_ref_type* reference_to_bind
+        )
+        {
+            if( reference_to_bind )
+            {
+                reference_to_bind -> texture(). template bind_as<
+                    ActiveTexture
+                >();
+                program. template set_uniform< GLint >( name, ActiveTexture );
+            }
+            else
+                gl::unbind_texture< ActiveTexture >();
+        }
+        
+        template< std::size_t ActiveTexture >
+        static void bind_one(
+            gl::shader_program< AttributeBuffer, Framebuffer >& program,
+            shader_string_id name_id,
+            const tex_ref_type* reference_to_bind
+        )
+        {
+            bind_one< ActiveTexture >(
+                program,
+                shader_string( name_id ),
+                reference_to_bind
             );
         }
     };

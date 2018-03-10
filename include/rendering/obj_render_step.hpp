@@ -6,6 +6,7 @@
 #include "render_step.hpp"
 #include "render_object_manager.hpp"
 #include "material.hpp"
+#include "texture_reference.hpp"
 #include "../gl/attribute_buffer.hpp"
 #include "../gl/shader_program.hpp"
 #include "../gl/texture.hpp"
@@ -18,7 +19,7 @@
 
 namespace yavsg
 {
-    using material_texture_type = gl::texture< GLfloat, 4 >;
+    using material_texture_type = texture_reference< GLfloat, 4 >;
     // TODO: std::optional<gl::texture>
     using material_description_base = material<
         material_texture_type*,
