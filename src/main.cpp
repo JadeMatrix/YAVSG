@@ -40,13 +40,23 @@ int main( int argc, char* argv[] )
             throw std::runtime_error( "failed to initialize GLEW" );
     #endif
         
+        using postprocess_step_type = yavsg::postprocess_step<
+            yavsg::gl::texture< GLfloat, 3 >
+        >;
+        using fb_type = yavsg::gl::framebuffer<
+            yavsg::gl::texture< GLfloat, 3 >
+        >;
+        using wo_fb_type = yavsg::gl::write_only_framebuffer<
+            yavsg::gl::texture< GLfloat, 3 >
+        >;
+        
         std::vector< yavsg::render_step* > scene_steps = {
             new yavsg::obj_render_step(
                 "../local/Crytek Sponza Atrium/sponza.obj",
                 "../local/Crytek Sponza Atrium/"
             )
         };
-        std::vector< yavsg::postprocess_step< 1 >* > postprocess_steps = {
+        std::vector< postprocess_step_type* > postprocess_steps = {
             new yavsg::debug_4up_postprocess_step(
                 nullptr,
                 new yavsg::basic_postprocess_step(
@@ -61,11 +71,11 @@ int main( int argc, char* argv[] )
             )
         };
         
-        yavsg::gl::framebuffer< 1 > buffer_A(
+        fb_type buffer_A(
             gl_tut::window_width,
             gl_tut::window_height
         );
-        yavsg::gl::framebuffer< 1 > buffer_B(
+        fb_type buffer_B(
             gl_tut::window_width,
             gl_tut::window_height
         );
@@ -88,10 +98,8 @@ int main( int argc, char* argv[] )
                     break;
             }
             
-            using blend_mode = yavsg::gl::framebuffer< 1 >::alpha_blend_mode;
-            
-            yavsg::gl::base_framebuffer* source_buffer;
-            yavsg::gl::base_framebuffer* target_buffer;
+            wo_fb_type* source_buffer;
+            wo_fb_type* target_buffer;
             
             // Run all scene render steps against the same framebuffer
             if( postprocess_steps.size() )
@@ -101,7 +109,7 @@ int main( int argc, char* argv[] )
             source_buffer = &buffer_B;
             
             target_buffer -> alpha_blending(
-                blend_mode::PREMULTIPLIED_DROP_ALPHA
+                yavsg::gl::alpha_blend_mode::PREMULTIPLIED_DROP_ALPHA
             );
             target_buffer -> bind();
             
@@ -123,13 +131,13 @@ int main( int argc, char* argv[] )
                 if( ++postprocess_step_iter == postprocess_steps.end() )
                     target_buffer = &window.default_framebuffer();
                 
-                target_buffer -> alpha_blending( blend_mode::DISABLED );
+                target_buffer -> alpha_blending(
+                    yavsg::gl::alpha_blend_mode::DISABLED
+                );
                 
                 target_buffer -> bind();
                 
-                step -> run( *static_cast< yavsg::gl::framebuffer< 1 >* >(
-                    source_buffer
-                ) );
+                step -> run( *static_cast< fb_type* >( source_buffer ) );
             }
             
             SDL_GL_SwapWindow( window.sdl_window );

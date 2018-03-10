@@ -6,8 +6,8 @@
 #include "render_step.hpp"
 #include "render_object_manager.hpp"
 #include "material.hpp"
-#include "../gl/shader_program.hpp"
 #include "../gl/attribute_buffer.hpp"
+#include "../gl/shader_program.hpp"
 #include "../gl/texture.hpp"
 #include "../math/vector.hpp"
 
@@ -69,7 +69,9 @@ namespace yavsg
             yavsg::vector< GLfloat, 3 >,    // color
             yavsg::vector< GLfloat, 2 >     // texture
         >;
-        using framebuffer_type = yavsg::gl::framebuffer< 1 >;
+        using framebuffer_type = yavsg::gl::framebuffer<
+            gl::texture< GLfloat, 3 >
+        >;
         using program_type = yavsg::gl::shader_program<
             attribute_buffer_type,
             framebuffer_type

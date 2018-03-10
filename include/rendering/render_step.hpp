@@ -17,11 +17,11 @@ namespace yavsg
         virtual void run() = 0;
     };
     
-    template< std::size_t ColorTargets > class postprocess_step
+    template< class... ColorTargetTypes > class postprocess_step
     {
     public:
         virtual ~postprocess_step() {}
-        virtual void run( gl::framebuffer< ColorTargets >& source ) = 0;
+        virtual void run( gl::framebuffer< ColorTargetTypes... >& source ) = 0;
     };
 }
 

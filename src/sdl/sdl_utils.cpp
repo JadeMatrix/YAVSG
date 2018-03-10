@@ -87,7 +87,7 @@ namespace yavsg // SDL_window_manager //////////////////////////////////////////
         }
         
         // Create wrapper for default framebuffer after context
-        _default_framebuffer = new yavsg::gl::base_framebuffer( 0, w, h );
+        _default_framebuffer = new default_framebuffer_type( 0, w, h );
     }
     
     SDL_window_manager::~SDL_window_manager()
@@ -96,7 +96,8 @@ namespace yavsg // SDL_window_manager //////////////////////////////////////////
         SDL_DestroyWindow( sdl_window );
     }
     
-    yavsg::gl::base_framebuffer& SDL_window_manager::default_framebuffer()
+    SDL_window_manager::default_framebuffer_type&
+    SDL_window_manager::default_framebuffer()
     {
         return *_default_framebuffer;
     }

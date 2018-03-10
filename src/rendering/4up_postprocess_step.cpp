@@ -76,10 +76,10 @@ void main()
 namespace yavsg
 {
     debug_4up_postprocess_step::debug_4up_postprocess_step(
-        postprocess_step< 1 >* top_left,
-        postprocess_step< 1 >* top_right,
-        postprocess_step< 1 >* bottom_left,
-        postprocess_step< 1 >* bottom_right
+        child_type* top_left,
+        child_type* top_right,
+        child_type* bottom_left,
+        child_type* bottom_right
     ) :
         top_left(     top_left     ),
         top_right(    top_right    ),
@@ -183,14 +183,13 @@ namespace yavsg
         
         struct substep_info
         {
-            postprocess_step< 1 >* step;
+            child_type* step;
             gl::index_buffer& indices;
         };
         
-        yavsg::gl::framebuffer< 1 >* source_buffer;
+        framebuffer_type* source_buffer;
         
-        using blend_mode = yavsg::gl::framebuffer< 1 >::alpha_blend_mode;
-        sub_buffer.alpha_blending( blend_mode::DISABLED );
+        sub_buffer.alpha_blending( gl::alpha_blend_mode::DISABLED );
         
         for( auto substep : {
             substep_info{     top_left,     top_left_indices },
