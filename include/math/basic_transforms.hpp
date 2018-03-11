@@ -1,6 +1,6 @@
 #pragma once
-#ifndef YAVSG_MATH_TRANSFORMS_HPP
-#define YAVSG_MATH_TRANSFORMS_HPP
+#ifndef YAVSG_MATH_BASIC_TRANSFORMS_HPP
+#define YAVSG_MATH_BASIC_TRANSFORMS_HPP
 
 
 #include "matrix.hpp"
