@@ -3,7 +3,11 @@
 #define YAVSG_MATH_COMMON_TRANSFORMS_HPP
 
 
-#include "transforms.hpp"
+#include "matrix.hpp"
+#include "quaternion.hpp"
+#include "trigonometry.hpp"
+#include "vector.hpp"
+#include "../units/angular.hpp"
 
 
 namespace yavsg // Views ///////////////////////////////////////////////////////
