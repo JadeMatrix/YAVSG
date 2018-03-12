@@ -51,7 +51,6 @@ namespace yavsg
         } )
         {}
         
-        // TODO: template< typename... O > ... std::initializer_list< O > ...
         constexpr quaternion( std::initializer_list< T > il ) :
             values( vector< T, 4 >::make_uninitialized() )
         {
@@ -119,36 +118,34 @@ namespace yavsg
         
         template< typename R, typename A >
         static constexpr versor< T > from_euler(
-            // const radians< R >& r,
-            const R& r,
+            const R& v,
             const vector< A, 3 >& axis
         )
         {
-            auto rads = radians< T >{ r };
+            auto r = static_cast< radians< T > >( v );
             return {
-                // static_cast< T >( axis[ 0 ] * sin( r / 2 ) ),
-                // static_cast< T >( axis[ 1 ] * sin( r / 2 ) ),
-                // static_cast< T >( axis[ 2 ] * sin( r / 2 ) ),
-                // static_cast< T >(             cos( r / 2 ) )
-                static_cast< T >(             cos( rads / 2 ) ),
-                static_cast< T >( axis[ 0 ] * sin( rads / 2 ) ),
-                static_cast< T >( axis[ 1 ] * sin( rads / 2 ) ),
-                static_cast< T >( axis[ 2 ] * sin( rads / 2 ) )
+                static_cast< T >(             cos( r / 2 ) ),
+                static_cast< T >( axis[ 0 ] * sin( r / 2 ) ),
+                static_cast< T >( axis[ 1 ] * sin( r / 2 ) ),
+                static_cast< T >( axis[ 2 ] * sin( r / 2 ) )
             };
         }
         
         template< typename R, typename P, typename Y >
         static constexpr versor< T > from_rpy(
-            const radians< R >& roll,
-            const radians< P >& pitch,
-            const radians< Y >& yaw
+            const R& roll,
+            const P& pitch,
+            const Y& yaw
         )
         {
+            auto r = static_cast< radians< T > >( roll  );
+            auto p = static_cast< radians< T > >( pitch );
+            auto y = static_cast< radians< T > >( yaw   );
             return {
-                static_cast< T >( cos( roll / 2 ) * cos( pitch / 2 ) * cos( yaw / 2 ) + sin( roll / 2 ) * sin( pitch / 2 ) * sin( yaw / 2 ) ),
-                static_cast< T >( sin( roll / 2 ) * cos( pitch / 2 ) * cos( yaw / 2 ) - cos( roll / 2 ) * sin( pitch / 2 ) * sin( yaw / 2 ) ),
-                static_cast< T >( cos( roll / 2 ) * sin( pitch / 2 ) * cos( yaw / 2 ) + sin( roll / 2 ) * cos( pitch / 2 ) * sin( yaw / 2 ) ),
-                static_cast< T >( cos( roll / 2 ) * cos( pitch / 2 ) * sin( yaw / 2 ) - sin( roll / 2 ) * sin( pitch / 2 ) * cos( yaw / 2 ) )
+                static_cast< T >( cos( r / 2 ) * cos( p / 2 ) * cos( y / 2 ) + sin( r / 2 ) * sin( p / 2 ) * sin( y / 2 ) ),
+                static_cast< T >( sin( r / 2 ) * cos( p / 2 ) * cos( y / 2 ) - cos( r / 2 ) * sin( p / 2 ) * sin( y / 2 ) ),
+                static_cast< T >( cos( r / 2 ) * sin( p / 2 ) * cos( y / 2 ) + sin( r / 2 ) * cos( p / 2 ) * sin( y / 2 ) ),
+                static_cast< T >( cos( r / 2 ) * cos( p / 2 ) * sin( y / 2 ) - sin( r / 2 ) * sin( p / 2 ) * cos( y / 2 ) )
             };
         }
         

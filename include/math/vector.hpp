@@ -45,7 +45,6 @@ namespace yavsg
         ) : values( { args... } )
         {}
         
-        // TODO: template< typename... O > ... std::initializer_list< O > ...
         constexpr vector( std::initializer_list< T > il )
         {
             // Implements same semantics as partial array initialization via

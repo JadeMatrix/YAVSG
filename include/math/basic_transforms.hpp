@@ -40,19 +40,19 @@ namespace yavsg // Rotation operations /////////////////////////////////////////
     template< typename M, typename R, typename A >
     constexpr
     square_matrix< M, 4 > rotation(
-        const radians< R >& r,
+        const R& r,
         const vector< A, 3 >& axis
     )
     {
         return rotation< M >( versor< M >::from_euler( r, axis ) );
     }
     
-    template< typename M, typename R_Roll, typename R_Pitch, typename R_Yaw >
+    template< typename M, typename R, typename P, typename Y >
     constexpr
     square_matrix< M, 4 > rotation(
-        const radians< R_Roll  >& roll,
-        const radians< R_Pitch >& pitch,
-        const radians< R_Yaw   >& yaw
+        const R& roll,
+        const P& pitch,
+        const Y& yaw
     )
     {
         return rotation< M >( versor< M >::from_rpy( roll, pitch, yaw ) );
@@ -77,9 +77,9 @@ namespace yavsg // Scaling operations //////////////////////////////////////////
     square_matrix< M, 4 > scaling( const vector< V, 3 >& v )
     {
         auto m = identity_matrix< M, 4 >();
-        m[ 0 ][ 0 ] = static_cast< V >( v[ 0 ] );
-        m[ 1 ][ 1 ] = static_cast< V >( v[ 1 ] );
-        m[ 2 ][ 2 ] = static_cast< V >( v[ 2 ] );
+        m[ 0 ][ 0 ] = static_cast< M >( v[ 0 ] );
+        m[ 1 ][ 1 ] = static_cast< M >( v[ 1 ] );
+        m[ 2 ][ 2 ] = static_cast< M >( v[ 2 ] );
         return m;
     }
     
@@ -88,7 +88,7 @@ namespace yavsg // Scaling operations //////////////////////////////////////////
     square_matrix< M, 4 > scaling( const V& v )
     {
         auto m = identity_matrix< M, 4 >();
-        m[ 3 ][ 3 ] = v;
+        m[ 3 ][ 3 ] = static_cast< M >( v );
         return m;
     }
 }
@@ -101,9 +101,9 @@ namespace yavsg // Translation operations //////////////////////////////////////
     square_matrix< M, 4 > translation( const vector< V, 3 >& v )
     {
         auto m = identity_matrix< M, 4 >();
-        m[ 3 ][ 0 ] = static_cast< V >( v[ 0 ] );
-        m[ 3 ][ 1 ] = static_cast< V >( v[ 1 ] );
-        m[ 3 ][ 2 ] = static_cast< V >( v[ 2 ] );
+        m[ 3 ][ 0 ] = static_cast< M >( v[ 0 ] );
+        m[ 3 ][ 1 ] = static_cast< M >( v[ 1 ] );
+        m[ 3 ][ 2 ] = static_cast< M >( v[ 2 ] );
         return m;
     }
 }

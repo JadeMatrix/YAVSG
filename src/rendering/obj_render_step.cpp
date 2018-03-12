@@ -313,22 +313,17 @@ namespace yavsg
         
         for( auto& object : *objects_ref )
         {
-            radians< GLfloat > rotate_by = degrees< GLfloat >(
+            auto rotate_by = degrees< GLfloat >(
                 std::chrono::duration_cast<
                     std::chrono::duration< float >
                 >( current_time - start_time ).count()
                 * 3 + 45
             );
             
-            auto sin_val = static_cast< GLfloat >( sin( rotate_by ) );
-            auto cos_val = static_cast< GLfloat >( cos( rotate_by ) );
-            
-            auto rotation_matrix = square_matrix< GLfloat, 4 >{
-                {  cos_val, sin_val, 0.0f, 0.0f },
-                { -sin_val, cos_val, 0.0f, 0.0f },
-                {     0.0f,    0.0f, 1.0f, 0.0f },
-                {     0.0f,    0.0f, 0.0f, 1.0f }
-            };
+            auto rotation_matrix = rotation< GLfloat >(
+                rotate_by,
+                vector< GLfloat, 3 >{ 0.0f, 0.0f, 1.0f }
+            );
             
             scene_program.set_uniform(
                 shader_string_id::TRANSFORM_MODEL,

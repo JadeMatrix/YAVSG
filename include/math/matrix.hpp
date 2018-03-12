@@ -48,7 +48,6 @@ namespace yavsg
                     values[ j ][ i ] = static_cast< T >( o[ j ][ i ] );
         }
         
-        // TODO: template< typename... O > ... std::initializer_list< O > ...
         constexpr matrix(
             const std::initializer_list< std::initializer_list< T > > il
         )

@@ -71,12 +71,13 @@ namespace yavsg // Projections /////////////////////////////////////////////////
     >
     constexpr
     square_matrix< M, 4 > orthographic(
-        const ratio< R >& aspect_ratio,
-        const      TNear& near,
-        const       TFar& far
+        const     R& aspect_ratio,
+        const TNear& near,
+        const  TFar& far
     )
     {
-        auto w = 1 / aspect_ratio;
+        auto a = static_cast< ratio< M > >( aspect_ratio );
+        auto w = 1 / a;
         auto d = -2 / ( far - near );
         auto r = -( ( far + near ) / ( far - near ) );
         return {
