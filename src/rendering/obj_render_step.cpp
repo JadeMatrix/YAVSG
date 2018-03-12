@@ -194,7 +194,7 @@ namespace
                 vertices,
                 yavsg::vector< GLfloat, 3 >{ 0.0f, 0.0f, 0.0f },
                 yavsg::vector< GLfloat, 3 >{ scale, scale, scale },
-                yavsg::versor_from_euler< GLfloat >(
+                yavsg::versor< GLfloat >::from_euler(
                     yavsg::radians< GLfloat >( 0.0f ),
                     yavsg::vector< GLfloat, 3 >{ 0.0f, 0.0f, 1.0f }
                 )

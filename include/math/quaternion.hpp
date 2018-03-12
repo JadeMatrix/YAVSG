@@ -5,6 +5,8 @@
 
 #include "vector.hpp"
 #include "scalar_operations.hpp"
+#include "trigonometry.hpp"
+#include "../units/angular.hpp"
 
 #include <initializer_list>
 #include <ostream>
@@ -113,6 +115,41 @@ namespace yavsg
             q_type( il )
         {
             q_type::values = q_type::values.unit();
+        }
+        
+        template< typename R, typename A >
+        static constexpr versor< T > from_euler(
+            // const radians< R >& r,
+            const R& r,
+            const vector< A, 3 >& axis
+        )
+        {
+            auto rads = radians< T >{ r };
+            return {
+                // static_cast< T >( axis[ 0 ] * sin( r / 2 ) ),
+                // static_cast< T >( axis[ 1 ] * sin( r / 2 ) ),
+                // static_cast< T >( axis[ 2 ] * sin( r / 2 ) ),
+                // static_cast< T >(             cos( r / 2 ) )
+                static_cast< T >(             cos( rads / 2 ) ),
+                static_cast< T >( axis[ 0 ] * sin( rads / 2 ) ),
+                static_cast< T >( axis[ 1 ] * sin( rads / 2 ) ),
+                static_cast< T >( axis[ 2 ] * sin( rads / 2 ) )
+            };
+        }
+        
+        template< typename R, typename P, typename Y >
+        static constexpr versor< T > from_rpy(
+            const radians< R >& roll,
+            const radians< P >& pitch,
+            const radians< Y >& yaw
+        )
+        {
+            return {
+                static_cast< T >( cos( roll / 2 ) * cos( pitch / 2 ) * cos( yaw / 2 ) + sin( roll / 2 ) * sin( pitch / 2 ) * sin( yaw / 2 ) ),
+                static_cast< T >( sin( roll / 2 ) * cos( pitch / 2 ) * cos( yaw / 2 ) - cos( roll / 2 ) * sin( pitch / 2 ) * sin( yaw / 2 ) ),
+                static_cast< T >( cos( roll / 2 ) * sin( pitch / 2 ) * cos( yaw / 2 ) + sin( roll / 2 ) * cos( pitch / 2 ) * sin( yaw / 2 ) ),
+                static_cast< T >( cos( roll / 2 ) * cos( pitch / 2 ) * sin( yaw / 2 ) - sin( roll / 2 ) * sin( pitch / 2 ) * cos( yaw / 2 ) )
+            };
         }
         
         constexpr auto norm() -> decltype( sqrt(

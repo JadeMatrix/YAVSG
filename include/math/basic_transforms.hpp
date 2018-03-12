@@ -13,42 +13,6 @@
 // TODO: Return values decltype()ed once unit implementation is finished
 
 
-namespace yavsg // Rotation models to matrix conversions ///////////////////////
-{
-    // Assumes axis is already a unit vector for performance
-    template< typename V, typename R, typename A >
-    constexpr
-    versor< V > versor_from_euler(
-        const radians< R >& r,
-        const vector< A, 3 >& axis
-    )
-    {
-        return {
-            static_cast< V >( axis[ 0 ] * sin( r / 2 ) ),
-            static_cast< V >( axis[ 1 ] * sin( r / 2 ) ),
-            static_cast< V >( axis[ 2 ] * sin( r / 2 ) ),
-            static_cast< V >(             cos( r / 2 ) )
-        };
-    }
-    
-    template< typename V, typename R_Roll, typename R_Pitch, typename R_Yaw >
-    constexpr
-    versor< V > versor_from_rpy(
-        const radians< R_Roll  >& roll,
-        const radians< R_Pitch >& pitch,
-        const radians< R_Yaw   >& yaw
-    )
-    {
-        return {
-            static_cast< V >( cos( roll / 2 ) * cos( pitch / 2 ) * cos( yaw / 2 ) + sin( roll / 2 ) * sin( pitch / 2 ) * sin( yaw / 2 ) ),
-            static_cast< V >( sin( roll / 2 ) * cos( pitch / 2 ) * cos( yaw / 2 ) - cos( roll / 2 ) * sin( pitch / 2 ) * sin( yaw / 2 ) ),
-            static_cast< V >( cos( roll / 2 ) * sin( pitch / 2 ) * cos( yaw / 2 ) + sin( roll / 2 ) * cos( pitch / 2 ) * sin( yaw / 2 ) ),
-            static_cast< V >( cos( roll / 2 ) * cos( pitch / 2 ) * sin( yaw / 2 ) - sin( roll / 2 ) * sin( pitch / 2 ) * cos( yaw / 2 ) )
-        };
-    }
-}
-
-
 namespace yavsg // Rotation operations /////////////////////////////////////////
 {
     template< typename M, typename V >
@@ -80,7 +44,7 @@ namespace yavsg // Rotation operations /////////////////////////////////////////
         const vector< A, 3 >& axis
     )
     {
-        return rotation< M, M >( versor_from_euler( r, axis ) );
+        return rotation< M >( versor< M >::from_euler( r, axis ) );
     }
     
     template< typename M, typename R_Roll, typename R_Pitch, typename R_Yaw >
@@ -91,7 +55,7 @@ namespace yavsg // Rotation operations /////////////////////////////////////////
         const radians< R_Yaw   >& yaw
     )
     {
-        return rotation< M, M >( versor_from_rpy< M >( roll, pitch, yaw ) );
+        return rotation< M >( versor< M >::from_rpy( roll, pitch, yaw ) );
     }
     
     // // NOTE: Doesn't work yet because units implementation is incomplete
