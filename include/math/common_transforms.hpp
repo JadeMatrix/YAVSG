@@ -122,34 +122,6 @@ namespace yavsg // Projections /////////////////////////////////////////////////
         };
     }
     
-    // Perspective with independent vertical & horizontal FoV 
-    template<
-        typename M,
-        typename Vx,
-        typename Vy,
-        typename TNear,
-        typename TFar
-    >
-    constexpr
-    square_matrix< M, 4 > perspective(
-        const radians< Vx >& fov_horizontal,
-        const radians< Vy >& fov_vertical,
-        const         TNear& near,
-        const          TFar& far
-    )
-    {
-        auto fx = 1 / tan( fov_horizontal / 2 );
-        auto fy = 1 / tan( fov_vertical   / 2 );
-        auto z1 = (     near + far ) / ( near - far );
-        auto z2 = ( 2 * near * far ) / ( near - far );
-        return {
-            { static_cast< M >( fx ),                      0,                      0,  0 },
-            {                      0, static_cast< M >( fy ),                      0,  0 },
-            {                      0,                      0, static_cast< M >( z1 ), -1 },
-            {                      0,                      0, static_cast< M >( z2 ),  0 }
-        };
-    }
-    
     // Similar to gluPerspective(), but with horizontal (x) FoV instead of y
     template<
         typename M,
@@ -160,20 +132,21 @@ namespace yavsg // Projections /////////////////////////////////////////////////
     >
     constexpr
     square_matrix< M, 4 > perspective(
-        const radians< VX >& fov_horizontal,
-        const    ratio< R >& aspect_ratio,
-        const         TNear& near,
-        const          TFar& far
+        const    VX& fov_horizontal,
+        const     R& aspect_ratio,
+        const TNear& near,
+        const  TFar& far
     )
     {
-        auto f  = 1 / tan( fov_horizontal / 2 );
+        auto ar = static_cast< ratio< M > >( aspect_ratio );
+        auto f  = 1 / tan< M >( fov_horizontal / 2 );
         auto z1 = (     near + far ) / ( near - far );
         auto z2 = ( 2 * near * far ) / ( near - far );
         return {
-            { static_cast< M >( f ),                                   0,                      0,  0 },
-            {                     0, static_cast< M >( f * aspect_ratio),                      0,  0 },
-            {                     0,                                   0, static_cast< M >( z1 ), -1 },
-            {                     0,                                   0, static_cast< M >( z2 ),  0 }
+            { static_cast< M >( f ),                          0,                      0,  0 },
+            {                     0, static_cast< M >( f * ar ),                      0,  0 },
+            {                     0,                          0, static_cast< M >( z1 ), -1 },
+            {                     0,                          0, static_cast< M >( z2 ),  0 }
         };
     }
 }
