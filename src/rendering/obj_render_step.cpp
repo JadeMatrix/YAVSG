@@ -282,12 +282,18 @@ namespace yavsg
             | GL_STENCIL_BUFFER_BIT
         );
         
+        auto    base_fov = yavsg::radians< GLfloat >{ 45 }; // 58.31f°
+        auto desired_fov = yavsg::radians< GLfloat >{
+            yavsg::degrees< GLfloat >{ 90 }
+        };
+        auto move = -2.2f - ( cos( desired_fov ) - cos( base_fov ) ) / 2;
+        
         auto transform_view = (
             yavsg::look_at< GLfloat >(
-                yavsg::vector< GLfloat, 3 >( -2.2f, -2.2f, -2.2f ), // Look-at point
+                yavsg::vector< GLfloat, 3 >( move, move, move ),    // Look-at point
                 yavsg::vector< GLfloat, 3 >(  0.0f,  0.0f,  1.0f )  // Up vector
             ) * yavsg::translation< GLfloat >(
-                yavsg::vector< GLfloat, 3 >( -2.2f, -2.2f, -2.2f )  // Move scene
+                yavsg::vector< GLfloat, 3 >( move, move, move )     // Move scene
             )
         );
         scene_program.set_uniform(
@@ -296,12 +302,12 @@ namespace yavsg
         );
         
         auto transform_projection = yavsg::perspective< GLfloat >(
-            yavsg::radians< GLfloat >( 45 ),
-            yavsg::  ratio< GLfloat >(
+            desired_fov,
+            yavsg::ratio< GLfloat >(
                   static_cast< GLfloat >( gl_tut::window_width )
                 / static_cast< GLfloat >( gl_tut::window_height )
             ),
-            1.0f,
+            0.1f,
             10.0f
         );
         scene_program.set_uniform(
@@ -317,7 +323,7 @@ namespace yavsg
                 std::chrono::duration_cast<
                     std::chrono::duration< float >
                 >( current_time - start_time ).count()
-                * 3 + 45
+                * 3 + 23
             );
             
             auto rotation_matrix = rotation< GLfloat >(
