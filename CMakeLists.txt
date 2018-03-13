@@ -40,6 +40,7 @@ ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
     src/gl/framebuffer.cpp
     src/rendering/basic_postprocess_step.cpp
     src/rendering/4up_postprocess_step.cpp
+    src/rendering/dof_postprocess_step.cpp
     src/rendering/obj_render_step.cpp
     src/rendering/shader_variable_names.cpp
     src/rendering/camera.cpp

@@ -10,6 +10,7 @@
 #include "../include/rendering/obj_render_step.hpp"
 #include "../include/rendering/basic_postprocess_step.hpp"
 #include "../include/rendering/4up_postprocess_step.hpp"
+#include "../include/rendering/dof_postprocess_step.hpp"
 
 #include <exception>
 #include <iostream>
@@ -48,11 +49,12 @@ int main( int argc, char* argv[] )
         >;
         using wo_fb_type = yavsg::gl::write_only_framebuffer;
         
+        auto ors = new yavsg::obj_render_step(
+            "../local/Crytek Sponza Atrium/sponza.obj",
+            "../local/Crytek Sponza Atrium/"
+        );
         std::vector< yavsg::render_step* > scene_steps = {
-            new yavsg::obj_render_step(
-                "../local/Crytek Sponza Atrium/sponza.obj",
-                "../local/Crytek Sponza Atrium/"
-            )
+            ors
         };
         std::vector< postprocess_step_type* > postprocess_steps = {
             new yavsg::debug_4up_postprocess_step(
@@ -60,8 +62,8 @@ int main( int argc, char* argv[] )
                 new yavsg::basic_postprocess_step(
                     "../src/shaders/postprocess/circular_gradient.frag"
                 ),
-                new yavsg::basic_postprocess_step(
-                    "../src/shaders/postprocess/dof.frag"
+                new yavsg::dof_postprocess_step(
+                    ors -> main_camera
                 ),
                 new yavsg::basic_postprocess_step(
                     "../src/shaders/postprocess/buffer_analysis.frag"
