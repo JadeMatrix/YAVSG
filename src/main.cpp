@@ -97,7 +97,7 @@ int main( int argc, char* argv[] )
             }
             
             // Even though only target_buffer needs to be a write-only buffer,
-            // they both need to be the same type for std::swap()
+            // these both need to be the same type for std::swap()
             wo_fb_type* source_buffer;
             wo_fb_type* target_buffer;
             
