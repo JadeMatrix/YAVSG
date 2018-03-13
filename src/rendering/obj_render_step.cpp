@@ -227,7 +227,13 @@ namespace yavsg
                 GL_FRAGMENT_SHADER,
                 "../src/shaders/obj_scene.frag"
             ).id
-        } )
+        } ),
+        main_camera(
+            { 2.2, 2.2, 2.2 },
+            0.1f,
+            1.0f,
+            10.0f
+        )
     {
         start_time = std::chrono::high_resolution_clock::now();
         previous_time = start_time;
@@ -261,6 +267,14 @@ namespace yavsg
         scene_program.bind_target< 0 >(
             shader_string_id::FRAGMENT_OUT_COLOR
         );
+        
+        auto    base_fov = yavsg::radians< GLfloat >{ 45 }; // 58.31f°
+        auto desired_fov = yavsg::radians< GLfloat >{
+            yavsg::degrees< GLfloat >{ 90 }
+        };
+        main_camera.look_at( { 0, 0, 0 } );
+        main_camera.move( -( cos( desired_fov ) - cos( base_fov ) ) / 2 );
+        main_camera.fov( desired_fov );
     }
     
     // obj_render_step::~obj_render_step()
@@ -282,37 +296,17 @@ namespace yavsg
             | GL_STENCIL_BUFFER_BIT
         );
         
-        auto    base_fov = yavsg::radians< GLfloat >{ 45 }; // 58.31f°
-        auto desired_fov = yavsg::radians< GLfloat >{
-            yavsg::degrees< GLfloat >{ 90 }
-        };
-        auto move = -2.2f - ( cos( desired_fov ) - cos( base_fov ) ) / 2;
-        
-        auto transform_view = (
-            yavsg::look_at< GLfloat >(
-                yavsg::vector< GLfloat, 3 >( move, move, move ),    // Look-at point
-                yavsg::vector< GLfloat, 3 >(  0.0f,  0.0f,  1.0f )  // Up vector
-            ) * yavsg::translation< GLfloat >(
-                yavsg::vector< GLfloat, 3 >( move, move, move )     // Move scene
-            )
-        );
         scene_program.set_uniform(
             shader_string_id::TRANSFORM_VIEW,
-            transform_view
+            main_camera.view< GLfloat >()
         );
         
-        auto transform_projection = yavsg::perspective< GLfloat >(
-            desired_fov,
-            yavsg::ratio< GLfloat >(
-                  static_cast< GLfloat >( gl_tut::window_width )
-                / static_cast< GLfloat >( gl_tut::window_height )
-            ),
-            0.1f,
-            10.0f
-        );
         scene_program.set_uniform(
             shader_string_id::TRANSFORM_PROJECTION,
-            transform_projection
+            main_camera.projection< GLfloat >(
+                  static_cast< GLfloat >( gl_tut::window_width  )
+                / static_cast< GLfloat >( gl_tut::window_height )
+            )
         );
         
         auto objects_ref = object_manager.read();
@@ -335,6 +329,19 @@ namespace yavsg
                 shader_string_id::TRANSFORM_MODEL,
                 rotation_matrix
                 * object.transform_model()
+            );
+            
+            scene_program.set_uniform(
+                shader_string_id::CAMERA_POINT_NEAR,
+                main_camera.near_point()
+            );
+            scene_program.set_uniform(
+                shader_string_id::CAMERA_POINT_FOCAL,
+                main_camera.focal_point()
+            );
+            scene_program.set_uniform(
+                shader_string_id::CAMERA_POINT_FAR,
+                main_camera.far_point()
             );
             
             for( auto& group : object.render_groups )

@@ -60,6 +60,7 @@ ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
     src/rendering/obj_render_step.cpp
     # src/rendering/scene_render_step.cpp
     src/rendering/shader_variable_names.cpp
+    src/rendering/camera.cpp
 )
 SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_INFO_PLIST           "Info.plist.in"

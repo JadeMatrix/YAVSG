@@ -7,6 +7,7 @@
 #include "render_object_manager.hpp"
 #include "material.hpp"
 #include "texture_reference.hpp"
+#include "camera.hpp"
 #include "../gl/attribute_buffer.hpp"
 #include "../gl/shader_program.hpp"
 #include "../gl/texture.hpp"
@@ -89,6 +90,8 @@ namespace yavsg
         std::chrono::high_resolution_clock::time_point start_time;
         std::chrono::high_resolution_clock::time_point previous_time;
         program_type scene_program;
+        
+        camera main_camera;
         
         obj_render_step(
             const std::string& obj_filename,
