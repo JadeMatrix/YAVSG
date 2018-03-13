@@ -33,7 +33,14 @@ namespace yavsg
     }
     template< typename T > radians< T > arctan( const ratio< T >& r )
     {
-        return std::atan2( static_cast< T >( r ) );
+        return std::atan( static_cast< T >( r ) );
+    }
+    template< typename T > radians< T > arctan(
+        const ratio< T >& r1,
+        const ratio< T >& r2
+    )
+    {
+        return std::atan2( static_cast< T >( r1 ), static_cast< T >( r2 ) );
     }
 }
 
