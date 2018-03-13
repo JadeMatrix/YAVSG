@@ -110,6 +110,9 @@ namespace yavsg
         bool adjust_focal
     )
     {
+        auto fp = focal_point();
         _focus = point;
+        if( !adjust_focal )
+            focal_point( fp );
     }
 }
