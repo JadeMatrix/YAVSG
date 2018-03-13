@@ -16,9 +16,35 @@ out vec4 fragment_out_color;
 uniform sampler2D framebuffer_source_color;
 uniform sampler2D framebuffer_source_depth;
 
+uniform struct
+{
+    float near;
+    float focal;
+    float far;
+} camera_point;
+
+////////////////////////////////////////////////////////////////////////////////
+
+float linear_depth( float depth )
+{
+    depth = 2 * depth - 1;
+    return (
+        2 * camera_point.near * camera_point.far / (
+              camera_point.far
+            + camera_point.near
+            - depth * ( camera_point.far - camera_point.near )
+        )
+    );
+}
+
 void main()
 {
     float depth = texture( framebuffer_source_depth, fragment_in.texture ).r;
+    
+    float linearized_depth = linear_depth( depth );
+    depth -= camera_point.focal / linearized_depth;
+    if( depth < 0 )
+        depth = 0;
     
     float blur_size_h = depth / 300.0;
     float blur_size_v = depth / 200.0;
