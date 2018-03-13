@@ -52,6 +52,7 @@ namespace
             {
                 yavsg::material_texture_type*& texture;
                 const std::string& filename;
+                yavsg::gl::texture_flags_type flags;
             };
             
             yavsg::material_texture_type*    color_map = nullptr;
@@ -59,9 +60,9 @@ namespace
             yavsg::material_texture_type* specular_map = nullptr;
             
             for( auto& info : {
-                texture_info{    color_map, material.diffuse_texname  },
-                texture_info{   normal_map, material.bump_texname     },
-                texture_info{ specular_map, material.specular_texname }
+                texture_info{    color_map, material.diffuse_texname , yavsg::gl::texture_flags::NONE         },
+                texture_info{   normal_map, material.bump_texname    , yavsg::gl::texture_flags::LINEAR_INPUT },
+                texture_info{ specular_map, material.specular_texname, yavsg::gl::texture_flags::LINEAR_INPUT }
             } )
             {
                 if( info.filename.size() )
@@ -77,7 +78,8 @@ namespace
                             settings::magnify_mode::LINEAR,
                             settings::minify_mode::LINEAR,
                             settings::mipmap_type::LINEAR,
-                        }
+                        },
+                        info.flags
                     );
                 }
             }
@@ -272,9 +274,10 @@ namespace yavsg
         auto desired_fov = yavsg::radians< GLfloat >{
             yavsg::degrees< GLfloat >{ 90 }
         };
-        main_camera.look_at( { 0, 0, 0 } );
         main_camera.move( -( cos( desired_fov ) - cos( base_fov ) ) / 2 );
         main_camera.fov( desired_fov );
+        main_camera.look_at( { 0, 0, 0 } ); // Set focal point to 0,0,0 too
+        main_camera.focal_point( 1.0f );
     }
     
     // obj_render_step::~obj_render_step()
@@ -309,6 +312,19 @@ namespace yavsg
             )
         );
         
+        scene_program.set_uniform(
+            shader_string_id::CAMERA_POINT_NEAR,
+            main_camera.near_point()
+        );
+        scene_program.set_uniform(
+            shader_string_id::CAMERA_POINT_FOCAL,
+            main_camera.focal_point()
+        );
+        scene_program.set_uniform(
+            shader_string_id::CAMERA_POINT_FAR,
+            main_camera.far_point()
+        );
+        
         auto objects_ref = object_manager.read();
         
         for( auto& object : *objects_ref )
@@ -317,7 +333,7 @@ namespace yavsg
                 std::chrono::duration_cast<
                     std::chrono::duration< float >
                 >( current_time - start_time ).count()
-                * 3 + 23
+                * 3 //+ 23
             );
             
             auto rotation_matrix = rotation< GLfloat >(
@@ -329,19 +345,6 @@ namespace yavsg
                 shader_string_id::TRANSFORM_MODEL,
                 rotation_matrix
                 * object.transform_model()
-            );
-            
-            scene_program.set_uniform(
-                shader_string_id::CAMERA_POINT_NEAR,
-                main_camera.near_point()
-            );
-            scene_program.set_uniform(
-                shader_string_id::CAMERA_POINT_FOCAL,
-                main_camera.focal_point()
-            );
-            scene_program.set_uniform(
-                shader_string_id::CAMERA_POINT_FAR,
-                main_camera.far_point()
             );
             
             for( auto& group : object.render_groups )

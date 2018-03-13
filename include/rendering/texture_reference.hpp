@@ -22,14 +22,14 @@ namespace yavsg
         texture_type*               _texture;
         std::string                 _filename;
         gl::texture_filter_settings _settings;
-        gl::texture_flags           _flags;
+        gl::texture_flags_type      _flags;
         
     public:
         // This is very simple for now
         texture_reference(
             const std::string                & filename,
             const gl::texture_filter_settings& settings,
-            gl::texture_flags                  flags = gl::texture_flags::NONE
+            gl::texture_flags_type             flags = gl::texture_flags::NONE
         );
         
         ~texture_reference();
@@ -48,7 +48,7 @@ namespace yavsg // Texture reference implementation ////////////////////////////
     texture_reference< DataType, Channels >::texture_reference(
         const std::string                & filename,
         const gl::texture_filter_settings& settings,
-        gl::texture_flags                  flags
+        gl::texture_flags_type             flags
     ) :
         _texture(  nullptr  ),
         _filename( filename ),

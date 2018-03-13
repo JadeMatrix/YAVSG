@@ -78,13 +78,16 @@ namespace yavsg { namespace gl // Texture configuration types //////////////////
         } mipmaps;
     };
     
+    using texture_flags_type = std::size_t;
     enum texture_flags
     {
         NONE                        = 0x00,
         // If alpha channel exists, don't premultiply alpha
         DISABLE_PREMULTIPLIED_ALPHA = 0x01 << 0,
         // Ignore any input data and just tell OpenGL to allocate texture space
-        ALLOCATE_ONLY               = 0x01 << 1
+        ALLOCATE_ONLY               = 0x01 << 1,
+        // Skip conversion to sRGB for gamma-correctness
+        LINEAR_INPUT                = 0x01 << 2
     };
 } }
 
@@ -105,7 +108,7 @@ namespace yavsg { namespace gl
             std::size_t height,
             const void* data,
             const texture_filter_settings& settings,
-            texture_flags flags,
+            texture_flags_type flags,
             GLint gl_internal_format, // Target OpenGL format after upload
             GLenum gl_format,         // Incoming data format
             GLenum gl_type            // Incoming data type
@@ -113,7 +116,7 @@ namespace yavsg { namespace gl
         void upload(
             SDL_Surface* sdl_surface, // Not `const` due to the SDL API
             const texture_filter_settings& settings,
-            texture_flags flags,
+            texture_flags_type flags,
             GLint gl_internal_format  // Target OpenGL format after upload
         );
         
@@ -147,12 +150,12 @@ namespace yavsg { namespace gl
             std::size_t height,
             const std::array< DataType, Channels >* data,
             const texture_filter_settings& settings,
-            texture_flags flags = texture_flags::NONE
+            texture_flags_type flags = texture_flags::NONE
         );
         texture(
             SDL_Surface* sdl_surface, // Not `const` due to the SDL API
             const texture_filter_settings& settings,
-            texture_flags flags = texture_flags::NONE
+            texture_flags_type flags = texture_flags::NONE
         );
         texture( texture&& );
         
@@ -163,7 +166,7 @@ namespace yavsg { namespace gl
         static texture from_file(
             const std::string& filename,
             const texture_filter_settings& settings,
-            texture_flags flags = texture_flags::NONE
+            texture_flags_type flags = texture_flags::NONE
         );
         
         // For use by stuff like framebuffers that need to control texture
@@ -236,7 +239,7 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
         std::size_t height,
         const std::array< DataType, Channels >* data,
         const texture_filter_settings& settings,
-        texture_flags flags
+        texture_flags_type flags
     ) : _texture_general()
     {
         using in_format_traits = texture_format_traits<
@@ -259,7 +262,7 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
     texture< DataType, Channels >::texture(
         SDL_Surface* sdl_surface,
         const texture_filter_settings& settings,
-        texture_flags flags
+        texture_flags_type flags
     ) : _texture_general()
     {
         upload(
@@ -284,7 +287,7 @@ namespace yavsg { namespace gl // Texture static method implementations ////////
     texture< DataType, Channels > texture< DataType, Channels >::from_file(
         const std::string& filename,
         const texture_filter_settings& settings,
-        texture_flags flags
+        texture_flags_type flags
     )
     {
         SDL_Surface* sdl_surface = IMG_Load(

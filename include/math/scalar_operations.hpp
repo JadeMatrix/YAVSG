@@ -16,6 +16,14 @@ namespace yavsg // Power functions /////////////////////////////////////////////
         return std::sqrt( value );
     }
     
+    template< typename B, typename E > B power(
+        const B& base,
+        const E& exponent
+    )
+    {
+        return std::pow( base, exponent );
+    }
+    
     
     
     

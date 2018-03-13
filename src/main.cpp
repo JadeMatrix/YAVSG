@@ -60,7 +60,7 @@ int main( int argc, char* argv[] )
             new yavsg::debug_4up_postprocess_step(
                 nullptr,
                 new yavsg::basic_postprocess_step(
-                    "../src/shaders/postprocess/circular_gradient.frag"
+                    "../src/shaders/postprocess/linear_to_sRGB.frag"
                 ),
                 new yavsg::dof_postprocess_step(
                     ors -> main_camera
