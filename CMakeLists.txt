@@ -6,6 +6,7 @@ SET( CMAKE_BUILD_TYPE Debug )
 SET( CMAKE_CXX_STANDARD          14 )
 SET( CMAKE_CXX_STANDARD_REQUIRED ON )
 # SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic" )
+# SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wweak-vtables -Wno-c++98-compat -Wno-c++98-compat-pedantic" )
 
 
 PROJECT( "YetAnotherVoxelSpessGame" )
@@ -18,12 +19,7 @@ SET( BUNDLE_VER_NAME  "alpha"                        )
 SET( BUNDLE_COPYRIGHT "© 2018 ${AUTHOR_NAME}"        )
 
 
-# FIND_LIBRARY(    SDL_LIBRARY sdl2 )
-# FIND_LIBRARY( OPENGL_LIBRARY gl   )
-# FIND_LIBRARY(   GLEW_LIBRARY glew )
-# FIND_LIBRARY(   GLEW_LIBRARY glm  )
 FIND_PACKAGE( SDL2 REQUIRED )
-# FIND_PACKAGE( SDL2_image REQUIRED )
 FIND_PACKAGE( glew REQUIRED )
 FIND_PACKAGE( tinyobjloader REQUIRED )
 
@@ -31,34 +27,20 @@ FIND_LIBRARY( SDL2_IMAGE_LIBRARY SDL2_image )
 
 INCLUDE_DIRECTORIES(
     ${SDL2_INCLUDE_DIR}
-    # ${SDL2_IMAGE_INCLUDE_DIR}
     # ${SDL2_TTF_INCLUDE_DIR}
     ${GLEW_INCLUDE_DIRS}
 )
 
-# # DEBUG:
-# MESSAGE( ${SDL2_INCLUDE_DIRS} )
-# MESSAGE( ${SDL2_LIBRARIES} )
-# MESSAGE( ${OPENGL_LIBRARY} )
-# MESSAGE( ${GLEW_LIBRARY} )
-
-
 
 ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
-    # src/gl/main.cpp
-    # src/gl/sdl_utils.cpp
-    # src/gl/gl_utils.cpp
-    # src/gl/render_steps.cpp
     src/main.cpp
     src/sdl/sdl_utils.cpp
     src/gl/texture.cpp
     src/gl/shader.cpp
     src/gl/framebuffer.cpp
-    # src/rendering/gl_tut_scene_render_step.cpp
     src/rendering/basic_postprocess_step.cpp
     src/rendering/4up_postprocess_step.cpp
     src/rendering/obj_render_step.cpp
-    # src/rendering/scene_render_step.cpp
     src/rendering/shader_variable_names.cpp
     src/rendering/camera.cpp
 )
@@ -82,14 +64,6 @@ TARGET_LINK_LIBRARIES( ${PROJECT_NAME}
     ${TINYOBJLOADER_LIBRARIES}
     "-framework OpenGL"
 )
-
-# clang++ -std=c++11 -L/Users/JadeMatrix/Developer/SDL/make -lSDL2 -I/Users/JadeMatrix/Developer/SDL/make/include -I/Users/JadeMatrix/Developer/SDL/include ../src/main.cpp -o main
-# TARGET_LINK_LIBRARIES( ${PROJECT_NAME}
-#     ${SDL_LIBRARY}
-#     ${OPENGL_LIBRARY}
-#     ${GLEW_LIBRARY}
-#     "-L/usr/local/Cellar/llvm/5.0.1/lib"
-# )
 
 
 CONFIGURE_FILE(
