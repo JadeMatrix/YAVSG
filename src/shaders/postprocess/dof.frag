@@ -29,16 +29,26 @@ void main()
     for( int x = -4; x <= 4; ++x )
         for( int y = -4; y <= 4; ++y )
         {
+            float sample_depth = texture(
+                framebuffer_source_depth,
+                vec2(
+                    fragment_in.texture.x + x * blur_size_h,
+                    fragment_in.texture.y + y * blur_size_v
+                )
+            ).r;
+            
+            float weight = 1.0 + ( sample_depth - depth );
+            
             fragment_out_color += texture(
                 framebuffer_source_color,
                 vec2(
                     fragment_in.texture.x + x * blur_size_h,
                     fragment_in.texture.y + y * blur_size_v
                 )
-            );
-            divisor += 1.0;
+            ) * weight;
+            
+            divisor += weight;
         }
     
     fragment_out_color = fragment_out_color / divisor;
 }
-
