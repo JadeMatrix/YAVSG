@@ -10,10 +10,12 @@ namespace yavsg
         float   far_point
     ) :
           _position(    position ),
-             _focus( focal_point * vector< float, 3 >{ 1, 0, 0 } ),
         _near_point(  near_point ),
          _far_point(   far_point ),
-               _fov(          90 )
+               _fov(          90 ),
+        _focus( focal_point * (
+            _position + vector< float, 3 >{ 1, 0, 0 }
+        ) )
     {}
     
     vector< float, 3 > camera::position() const
@@ -58,7 +60,7 @@ namespace yavsg
     
     float camera::focal_point( float p )
     {
-        _focus = direction().unit() * p;
+        _focus = _position + ( direction().unit() * p );
         return direction().magnitude();
     }
     
@@ -87,6 +89,7 @@ namespace yavsg
         bool focal_relative
     )
     {
+        // TODO: focal_relative
         return ( _fov = angle );
     }
     
