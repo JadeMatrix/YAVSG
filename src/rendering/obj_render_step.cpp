@@ -231,7 +231,7 @@ namespace yavsg
             ).id
         } ),
         main_camera(
-            { 2.2, 2.2, 2.2 },
+            { 2.2f, 0.0f, 2.2f },
             0.1f,
             1.0f,
             10.0f
@@ -289,6 +289,15 @@ namespace yavsg
     {
         auto current_time = std::chrono::high_resolution_clock::now();
         
+        auto rotate_by = degrees< GLfloat >(
+            std::chrono::duration_cast<
+                std::chrono::duration< float >
+            >( current_time - start_time ).count()
+            * 3
+        );
+        main_camera.yaw( rotate_by + 90 );
+        main_camera.pitch( rotate_by - 90 );
+        
         // TODO: error checking
         
         glEnable( GL_DEPTH_TEST );
@@ -329,22 +338,9 @@ namespace yavsg
         
         for( auto& object : *objects_ref )
         {
-            auto rotate_by = degrees< GLfloat >(
-                std::chrono::duration_cast<
-                    std::chrono::duration< float >
-                >( current_time - start_time ).count()
-                * 3 //+ 23
-            );
-            
-            auto rotation_matrix = rotation< GLfloat >(
-                rotate_by,
-                vector< GLfloat, 3 >{ 0.0f, 0.0f, 1.0f }
-            );
-            
             scene_program.set_uniform(
                 shader_string_id::TRANSFORM_MODEL,
-                rotation_matrix
-                * object.transform_model()
+                object.transform_model()
             );
             
             for( auto& group : object.render_groups )
@@ -367,5 +363,7 @@ namespace yavsg
                 );
             }
         }
+        
+        previous_time = current_time;
     }
 }
