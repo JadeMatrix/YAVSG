@@ -80,6 +80,9 @@ namespace yavsg // Template member function implementations ////////////////////
 {
     template< typename T > vector< T, 3 > camera::points() const
     {
+        std::lock_guard< std::recursive_mutex > _lock(
+            const_cast< std::recursive_mutex& >( _mutex )
+        );
         return {
              near_point(),
             focal_point(),
@@ -89,6 +92,9 @@ namespace yavsg // Template member function implementations ////////////////////
     
     template< typename T > square_matrix< T, 4 > camera::view() const
     {
+        std::lock_guard< std::recursive_mutex > _lock(
+            const_cast< std::recursive_mutex& >( _mutex )
+        );
         return yavsg::look_at< T >(
             _position,
             _position + _relative_focus,
@@ -101,6 +107,9 @@ namespace yavsg // Template member function implementations ////////////////////
         typename R
     > square_matrix< T, 4 > camera::projection( const R& aspect_ratio ) const
     {
+        std::lock_guard< std::recursive_mutex > _lock(
+            const_cast< std::recursive_mutex& >( _mutex )
+        );
         auto ar = static_cast< ratio< T > >( aspect_ratio );
         return perspective< T >(
             _fov,
