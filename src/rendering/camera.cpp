@@ -3,6 +3,12 @@
 #include "../../include/math/trigonometry.hpp"
 
 
+namespace
+{
+    static const auto max_biaxis_pitch = yavsg::degrees< float >{ 89.999f };
+}
+
+
 namespace yavsg
 {
     camera::camera(
@@ -130,15 +136,53 @@ namespace yavsg
         return ( _fov = angle );
     }
     
-    // degrees< float > camera::pitch( degrees< float > p )
-    // {
-    //     return ( _pitch = p );
-    // }
+    degrees< float > camera::pitch( degrees< float > a )
+    {
+        std::lock_guard< std::recursive_mutex > _lock( _mutex );
+        
+        if( a > max_biaxis_pitch )
+            pitch_yaw( max_biaxis_pitch, yaw() );
+        else if( a < -max_biaxis_pitch )
+            pitch_yaw( -max_biaxis_pitch, yaw() );
+        else
+            pitch_yaw( a, yaw() );
+        
+        return yaw();
+    }
     
-    // degrees< float > camera::yaw( degrees< float > y )
-    // {
-    //     return ( _yaw = y );
-    // }
+    degrees< float > camera::yaw( degrees< float > a )
+    {
+        std::lock_guard< std::recursive_mutex > _lock( _mutex );
+        pitch_yaw( pitch(), a );
+        return yaw();
+    }
+    
+    void camera::pitch_yaw(
+        degrees< float > pitch_angle,
+        degrees< float > yaw_angle
+    )
+    {
+        std::lock_guard< std::recursive_mutex > _lock( _mutex );
+        
+        auto new_focus = rotation< float >(
+            pitch_angle,
+            vector< float, 3 >{ 0.0f, 1.0f, 0.0f }
+        ) * rotation< float >(
+            yaw_angle,
+            vector< float, 3 >{ 0.0f, 0.0f, 1.0f }
+        ) * vector< float, 4 >{
+            focal_point(),
+            0.0f,
+            0.0f,
+            0.0f
+        };
+        
+        _relative_focus = vector< float, 3 >{
+            new_focus[ 0 ],
+            new_focus[ 1 ],
+            new_focus[ 2 ]
+        };
+    }
     
     vector< float, 3 > camera::direction() const
     {

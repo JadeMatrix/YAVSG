@@ -56,8 +56,9 @@ namespace yavsg
         degrees< float > pitch(                  ) const;
         degrees< float >   yaw(                  ) const;
         degrees< float >   fov( degrees< float >, bool focal_relative = false );
-        // degrees< float > pitch( degrees< float > )      ;
-        // degrees< float >   yaw( degrees< float > )      ;
+        degrees< float > pitch( degrees< float > )      ;
+        degrees< float >   yaw( degrees< float > )      ;
+        void pitch_yaw( degrees< float >, degrees< float > );
         
         // Does not return a unit vector; use direction().unit() if needed
         vector< float, 3 > direction() const;
