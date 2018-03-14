@@ -115,8 +115,8 @@ namespace yavsg
             const_cast< std::recursive_mutex& >( _mutex )
         );
         return arctan< float >(
-            _relative_focus[ 0 ],
-            _relative_focus[ 1 ]
+            _relative_focus[ 1 ],
+            _relative_focus[ 0 ]
         );
     }
     
