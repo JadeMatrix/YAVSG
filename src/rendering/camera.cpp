@@ -95,17 +95,6 @@ namespace yavsg
         return _fov;
     }
     
-    degrees< float > camera::yaw() const
-    {
-        std::lock_guard< std::recursive_mutex > _lock(
-            const_cast< std::recursive_mutex& >( _mutex )
-        );
-        return arctan< float >(
-            _relative_focus[ 0 ],
-            _relative_focus[ 1 ]
-        );
-    }
-    
     degrees< float > camera::pitch() const
     {
         std::lock_guard< std::recursive_mutex > _lock(
@@ -120,6 +109,17 @@ namespace yavsg
         );
     }
     
+    degrees< float > camera::yaw() const
+    {
+        std::lock_guard< std::recursive_mutex > _lock(
+            const_cast< std::recursive_mutex& >( _mutex )
+        );
+        return arctan< float >(
+            _relative_focus[ 0 ],
+            _relative_focus[ 1 ]
+        );
+    }
+    
     degrees< float > camera::fov(
         degrees< float > angle,
         bool focal_relative
@@ -130,14 +130,14 @@ namespace yavsg
         return ( _fov = angle );
     }
     
-    // degrees< float > camera::yaw( degrees< float > y )
-    // {
-    //     return ( _yaw = y );
-    // }
-    
     // degrees< float > camera::pitch( degrees< float > p )
     // {
     //     return ( _pitch = p );
+    // }
+    
+    // degrees< float > camera::yaw( degrees< float > y )
+    // {
+    //     return ( _yaw = y );
     // }
     
     vector< float, 3 > camera::direction() const
