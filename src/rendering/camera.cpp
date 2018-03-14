@@ -13,9 +13,7 @@ namespace yavsg
         _near_point(  near_point ),
          _far_point(   far_point ),
                _fov(          90 ),
-        _focus( focal_point * (
-            _position + vector< float, 3 >{ 1, 0, 0 }
-        ) )
+        _relative_focus( focal_point * vector< float, 3 >{ 1, 0, 0 } )
     {}
     
     vector< float, 3 > camera::position() const
@@ -41,7 +39,7 @@ namespace yavsg
     vector< float, 3 > camera::move( float by )
     {
         std::lock_guard< std::recursive_mutex > _lock( _mutex );
-        return ( _position += ( by * direction().unit() ) );
+        return ( _position += ( by * _relative_focus.unit() ) );
     }
     
     float camera::near_point() const
@@ -57,7 +55,7 @@ namespace yavsg
         std::lock_guard< std::recursive_mutex > _lock(
             const_cast< std::recursive_mutex& >( _mutex )
         );
-        return direction().magnitude();
+        return _relative_focus.magnitude();
     }
     
     float camera::far_point() const
@@ -76,8 +74,9 @@ namespace yavsg
     
     float camera::focal_point( float p )
     {
-        _focus = _position + ( direction().unit() * p );
-        return direction().magnitude();
+        std::lock_guard< std::recursive_mutex > _lock( _mutex );
+        _relative_focus = _relative_focus.unit() * p;
+        return _relative_focus.magnitude();
     }
     
     float camera::far_point( float p )
@@ -129,7 +128,7 @@ namespace yavsg
         std::lock_guard< std::recursive_mutex > _lock(
             const_cast< std::recursive_mutex& >( _mutex )
         );
-        return _focus - _position;
+        return _relative_focus;
     }
     
     void camera::look_at(
@@ -139,7 +138,7 @@ namespace yavsg
     {
         std::lock_guard< std::recursive_mutex > _lock( _mutex );
         auto fp = focal_point();
-        _focus = point;
+        _relative_focus = point - _position;
         if( !adjust_focal )
             focal_point( fp );
     }

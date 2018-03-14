@@ -19,7 +19,7 @@ namespace yavsg
     {
     protected:
         vector< float, 3 > _position;
-        vector< float, 3 > _focus;
+        vector< float, 3 > _relative_focus;
         float _near_point;
         float  _far_point;
         degrees< float > _fov;
@@ -91,7 +91,7 @@ namespace yavsg // Template member function implementations ////////////////////
     {
         return yavsg::look_at< T >(
             _position,
-            _focus,
+            _position + _relative_focus,
             yavsg::vector< T, 3 >(  0.0f,  0.0f,  1.0f )
         );
     }
