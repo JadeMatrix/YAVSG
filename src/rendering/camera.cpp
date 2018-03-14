@@ -1,5 +1,7 @@
 #include "../../include/rendering/camera.hpp"
 
+#include "../../include/math/trigonometry.hpp"
+
 
 namespace yavsg
 {
@@ -93,15 +95,30 @@ namespace yavsg
         return _fov;
     }
     
-    // degrees< float > camera::yaw() const
-    // {
-    //     return _yaw;
-    // }
+    degrees< float > camera::yaw() const
+    {
+        std::lock_guard< std::recursive_mutex > _lock(
+            const_cast< std::recursive_mutex& >( _mutex )
+        );
+        return arctan< float >(
+            _relative_focus[ 0 ],
+            _relative_focus[ 1 ]
+        );
+    }
     
-    // degrees< float > camera::pitch() const
-    // {
-    //     return _pitch;
-    // }
+    degrees< float > camera::pitch() const
+    {
+        std::lock_guard< std::recursive_mutex > _lock(
+            const_cast< std::recursive_mutex& >( _mutex )
+        );
+        return arctan< float >(
+            _relative_focus[ 2 ],
+            vector< float, 2 >{
+                _relative_focus[ 0 ],
+                _relative_focus[ 1 ]
+            }.magnitude()
+        );
+    }
     
     degrees< float > camera::fov(
         degrees< float > angle,

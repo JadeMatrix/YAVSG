@@ -53,8 +53,8 @@ namespace yavsg
         float   far_point( float )      ;
         
         degrees< float >   fov(                  ) const;
-        // degrees< float > pitch(                  ) const;
-        // degrees< float >   yaw(                  ) const;
+        degrees< float > pitch(                  ) const;
+        degrees< float >   yaw(                  ) const;
         degrees< float >   fov( degrees< float >, bool focal_relative = false );
         // degrees< float > pitch( degrees< float > )      ;
         // degrees< float >   yaw( degrees< float > )      ;
