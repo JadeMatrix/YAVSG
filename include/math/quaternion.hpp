@@ -124,10 +124,10 @@ namespace yavsg
         {
             auto r = static_cast< radians< T > >( v );
             return {
-                static_cast< T >(             cos( r / 2 ) ),
-                static_cast< T >( axis[ 0 ] * sin( r / 2 ) ),
-                static_cast< T >( axis[ 1 ] * sin( r / 2 ) ),
-                static_cast< T >( axis[ 2 ] * sin( r / 2 ) )
+                static_cast< T >(              cos( r / 2 ) ),
+                static_cast< T >( axis[ 0 ] *  sin( r / 2 ) ),
+                static_cast< T >( axis[ 1 ] *  sin( r / 2 ) ),
+                static_cast< T >( axis[ 2 ] * -sin( r / 2 ) )
             };
         }
         
@@ -138,9 +138,9 @@ namespace yavsg
             const Y& yaw
         )
         {
-            auto r = static_cast< radians< T > >( roll  );
-            auto p = static_cast< radians< T > >( pitch );
-            auto y = static_cast< radians< T > >( yaw   );
+            auto r = static_cast< radians< T > >(  roll  );
+            auto p = static_cast< radians< T > >(  pitch );
+            auto y = static_cast< radians< T > >( -yaw   );
             return {
                 static_cast< T >( cos( r / 2 ) * cos( p / 2 ) * cos( y / 2 ) + sin( r / 2 ) * sin( p / 2 ) * sin( y / 2 ) ),
                 static_cast< T >( sin( r / 2 ) * cos( p / 2 ) * cos( y / 2 ) - cos( r / 2 ) * sin( p / 2 ) * sin( y / 2 ) ),
