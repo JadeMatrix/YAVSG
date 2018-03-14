@@ -6,17 +6,34 @@
 
 #include <exception>
 #include <limits>
+#include <mutex>
 #include <utility>  // std::swap()
 
 
 namespace // Anisotropic filtering support /////////////////////////////////////
 {
-    enum
+    std::once_flag aniso_filter_flag;
+    bool           aniso_filter_value;
+    
+    bool anisotropic_filtering_supported()
     {
-        NEED_CHECK,
-        SUPPORTED,
-        UNSUPPORTED
-    } anisotropic_filtering_supported = NEED_CHECK;
+        std::call_once(
+            aniso_filter_flag,
+            [](){
+            #ifdef __APPLE__
+                // For now, assume this won't be compiled on one version of
+                // macOS and expected to run on an older one
+                aniso_filter_value = true;
+            #else
+                aniso_filter_value = static_cast< bool >(
+                    GLEW_EXT_texture_filter_anisotropic
+                );
+            #endif
+            }
+        );
+        
+        return aniso_filter_value;
+    }
 }
 
 
@@ -585,19 +602,6 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
         using  minify_mode = texture_filter_settings::minify_mode;
         using  mipmap_type = texture_filter_settings::mipmap_type;
         
-        if( anisotropic_filtering_supported == NEED_CHECK )
-        #ifdef __APPLE__
-            // For now, assume this won't be compiled on one version of macOS
-            // and expected to run on an older one
-            anisotropic_filtering_supported = SUPPORTED;
-        #else
-            anisotropic_filtering_supported = (
-                GLEW_EXT_texture_filter_anisotropic
-                ? SUPPORTED
-                : UNSUPPORTED
-            );
-        #endif
-        
         glBindTexture( GL_TEXTURE_2D, gl_id );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't bind texture "
@@ -677,7 +681,7 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
                 + " for yavsg::gl::texture::filtering()"
             );
             
-            if( anisotropic_filtering_supported == SUPPORTED )
+            if( anisotropic_filtering_supported() )
             {
                 GLfloat max_anisotropic_level;
                 glGetFloatv(
