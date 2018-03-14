@@ -10,6 +10,8 @@
 #include "../math/quaternion.hpp"
 #include "../units/angular.hpp"
 
+#include <mutex>
+
 
 namespace yavsg
 {
@@ -21,6 +23,9 @@ namespace yavsg
         float _near_point;
         float  _far_point;
         degrees< float > _fov;
+        
+        // Simpler to use a recursive mutex as some functions call others here
+        std::recursive_mutex _mutex;
         
     public:
         camera(
