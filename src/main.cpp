@@ -80,13 +80,17 @@ int main( int argc, char* argv[] )
             gl_tut::window_height
         );
         
+        bool running = true;
         SDL_Event window_event;
-        while( true )
+        while( running )
         {
-            if( SDL_PollEvent( &window_event ) )
+            while( SDL_PollEvent( &window_event ) )
             {
                 if( window_event.type == SDL_QUIT )
+                {
+                    running = false;
                     break;
+                }
                 else if(
                     window_event.type == SDL_KEYUP
                     && window_event.key.keysym.sym == SDLK_ESCAPE
@@ -95,8 +99,14 @@ int main( int argc, char* argv[] )
                         | SDL_WINDOW_FULLSCREEN_DESKTOP
                     )
                 )
+                {
+                    running = false;
                     break;
+                }
             }
+            
+            if( !running )
+                std::cout << "quitting..." << std::endl;
             
             // Even though only target_buffer needs to be a write-only buffer,
             // these both need to be the same type for std::swap()
