@@ -184,6 +184,18 @@ namespace yavsg
         };
     }
     
+    degrees< float > camera::increment_yaw( degrees< float > a )
+    {
+        std::lock_guard< std::recursive_mutex > _lock( _mutex );
+        return yaw( a + yaw() );
+    }
+    
+    degrees< float > camera::increment_pitch( degrees< float > a )
+    {
+        std::lock_guard< std::recursive_mutex > _lock( _mutex );
+        return pitch( a + pitch() );
+    }
+    
     vector< float, 3 > camera::direction() const
     {
         std::lock_guard< std::recursive_mutex > _lock(

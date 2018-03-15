@@ -292,11 +292,10 @@ namespace yavsg
         auto rotate_by = degrees< GLfloat >(
             std::chrono::duration_cast<
                 std::chrono::duration< float >
-            >( current_time - start_time ).count()
+            >( current_time - previous_time ).count()
             * 3
         );
-        main_camera.yaw( rotate_by + 90 );
-        main_camera.pitch( rotate_by - 90 );
+        main_camera.increment_yaw( rotate_by );
         
         // TODO: error checking
         
