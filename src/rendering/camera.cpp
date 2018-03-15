@@ -132,7 +132,20 @@ namespace yavsg
     )
     {
         std::lock_guard< std::recursive_mutex > _lock( _mutex );
-        // TODO: focal_relative
+        
+        if( focal_relative )
+        {
+            auto old_focus_abs = _relative_focus + _position;
+            move(
+                focal_point()
+                * ( 1 - (
+                      tan< float >(  _fov / 2 )
+                    / tan< float >( angle / 2 )
+                ) )
+            );
+            look_at( old_focus_abs );
+        }
+        
         return ( _fov = angle );
     }
     
