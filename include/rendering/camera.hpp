@@ -63,6 +63,10 @@ namespace yavsg
         // Thread-safe incremental pitch & yaw
         degrees< float > increment_pitch( degrees< float > );
         degrees< float > increment_yaw(   degrees< float > );
+        void increment_pitch_yaw(
+            degrees< float >,
+            degrees< float >
+        );
         
         // Does not return a unit vector; use direction().unit() if needed
         vector< float, 3 > direction() const;

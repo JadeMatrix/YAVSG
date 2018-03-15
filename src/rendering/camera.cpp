@@ -5,7 +5,18 @@
 
 namespace
 {
-    static const auto max_biaxis_pitch = yavsg::degrees< float >{ 89.999f };
+    // static const auto max_biaxis_pitch = yavsg::degrees< float >{ 89.999f };
+    static const auto max_biaxis_pitch = yavsg::degrees< float >{ 80.0f };
+    
+    yavsg::degrees< float > clamp_pitch( yavsg::degrees< float > pitch )
+    {
+        if( pitch > max_biaxis_pitch )
+            return max_biaxis_pitch;
+        else if( pitch < -max_biaxis_pitch )
+            return -max_biaxis_pitch;
+        else
+            return pitch;
+    }
 }
 
 
@@ -152,14 +163,7 @@ namespace yavsg
     degrees< float > camera::pitch( degrees< float > a )
     {
         std::lock_guard< std::recursive_mutex > _lock( _mutex );
-        
-        if( a > max_biaxis_pitch )
-            pitch_yaw( max_biaxis_pitch, yaw() );
-        else if( a < -max_biaxis_pitch )
-            pitch_yaw( -max_biaxis_pitch, yaw() );
-        else
-            pitch_yaw( a, yaw() );
-        
+        pitch_yaw( a, yaw() );
         return yaw();
     }
     
@@ -178,7 +182,7 @@ namespace yavsg
         std::lock_guard< std::recursive_mutex > _lock( _mutex );
         
         auto new_focus = rotation< float >(
-            pitch_angle,
+            clamp_pitch( pitch_angle ),
             vector< float, 3 >{ 0.0f, 1.0f, 0.0f }
         ) * rotation< float >(
             yaw_angle,
@@ -197,16 +201,29 @@ namespace yavsg
         };
     }
     
+    degrees< float > camera::increment_pitch( degrees< float > a )
+    {
+        std::lock_guard< std::recursive_mutex > _lock( _mutex );
+        return pitch( a + pitch() );
+    }
+    
     degrees< float > camera::increment_yaw( degrees< float > a )
     {
         std::lock_guard< std::recursive_mutex > _lock( _mutex );
         return yaw( a + yaw() );
     }
     
-    degrees< float > camera::increment_pitch( degrees< float > a )
+    void camera::increment_pitch_yaw(
+        degrees< float > pitch_angle,
+        degrees< float > yaw_angle
+    )
     {
         std::lock_guard< std::recursive_mutex > _lock( _mutex );
-        return pitch( a + pitch() );
+        
+        pitch_yaw(
+            pitch_angle + pitch(),
+              yaw_angle +   yaw()
+        );
     }
     
     vector< float, 3 > camera::direction() const
