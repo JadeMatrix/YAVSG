@@ -245,11 +245,21 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
             
             auto sample_count = width * height;
             
+            auto needs_alpha_pass = (
+                internal_has_alpha
+                && !( flags & texture_flags::DISABLE_PREMULTIPLIED_ALPHA )
+            );
+            auto needs_drop_pass = !(
+                flags & texture_flags::KEEP_UNUSED_CHANNELS
+            );
+            auto needs_gamma_pass = !( flags & texture_flags::LINEAR_INPUT );
+            
             // Perform alpha premultiplication & gamma correction
             // TODO: Just use OpenGL sRGB type if internal format is RGB(A)8
             if( data && (
-                   !( flags & texture_flags::DISABLE_PREMULTIPLIED_ALPHA )
-                || !( flags & texture_flags::LINEAR_INPUT                )
+                   needs_alpha_pass
+                || needs_drop_pass
+                || needs_gamma_pass
             ) )
             {
                 // Any format that requires multiplying will have 4 channels

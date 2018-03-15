@@ -87,7 +87,10 @@ namespace yavsg { namespace gl // Texture configuration types //////////////////
         // Ignore any input data and just tell OpenGL to allocate texture space
         ALLOCATE_ONLY               = 0x01 << 1,
         // Skip conversion to sRGB for gamma-correctness
-        LINEAR_INPUT                = 0x01 << 2
+        LINEAR_INPUT                = 0x01 << 2,
+        // Don't drop channels that have only default values (only affects alpha
+        // for now)
+        KEEP_UNUSED_CHANNELS        = 0x01 << 3
     };
 } }
 
