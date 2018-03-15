@@ -264,6 +264,12 @@ namespace yavsg // Specializable bind delegation ///////////////////////////////
                 Framebuffer
             >;
             
+            bind_attributes_type::template bind_one< FirstActiveTexture >(
+                program,
+                std::get< TupleIndex - 1 >( names  ),
+                std::get< TupleIndex - 1 >( values )
+            );
+            
             bind_material_values<
                 (
                     FirstActiveTexture
@@ -274,12 +280,6 @@ namespace yavsg // Specializable bind delegation ///////////////////////////////
                 AttributeBuffer,
                 Framebuffer
             >::bind( program, names, values );
-            
-            bind_attributes_type::template bind_one< FirstActiveTexture >(
-                program,
-                std::get< TupleIndex - 1 >( names ),
-                std::get< TupleIndex - 1 >( values )
-            );
         }
     };
     
