@@ -63,10 +63,10 @@ void main()
                 )
             ).r;
             
-            // float weight = 1.0 + ( sample_depth - depth );
-            float weight = 1.0;
-            if( depth > sample_depth )
-                weight = 0.0;
+            float weight = 1.0 + ( sample_depth - depth );
+            // float weight = 1.0;
+            // if( depth > sample_depth )
+            //     weight = 0.0;
             
             fragment_out_color += texture(
                 framebuffer_source_color,

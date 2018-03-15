@@ -86,21 +86,51 @@ int main( int argc, char* argv[] )
         {
             while( SDL_PollEvent( &window_event ) )
             {
-                if( window_event.type == SDL_QUIT )
+                switch( window_event.type )
                 {
+                case SDL_KEYDOWN:
+                case SDL_KEYUP:
+                    {
+                        switch( window_event.key.keysym.sym )
+                        {
+                        case SDLK_ESCAPE:
+                            if( SDL_GetWindowFlags( window.sdl_window ) & (
+                                  SDL_WINDOW_FULLSCREEN
+                                | SDL_WINDOW_FULLSCREEN_DESKTOP
+                            ) )
+                                running = false;
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                    break;
+                case SDL_MOUSEMOTION:
+                    ors -> main_camera.increment_pitch_yaw(
+                        static_cast< float >( window_event.motion.yrel ) / -2.0f,
+                        static_cast< float >( window_event.motion.xrel ) / -2.0f
+                    );
+                    break;
+                case SDL_MOUSEWHEEL:
+                    {
+                        auto new_focal_point = (
+                            static_cast< float >( window_event.wheel.y )
+                            / 4.0f
+                            + ors -> main_camera.focal_point()
+                        );
+                        auto near = ors -> main_camera.near_point();
+                        auto  far = ors -> main_camera. far_point();
+                        if( new_focal_point < near )
+                            new_focal_point = near + 0.1f;
+                        else if( new_focal_point > far )
+                            new_focal_point = far - 0.1f;
+                        ors -> main_camera.focal_point( new_focal_point );
+                    }
+                    break;
+                case SDL_QUIT:
                     running = false;
                     break;
-                }
-                else if(
-                    window_event.type == SDL_KEYUP
-                    && window_event.key.keysym.sym == SDLK_ESCAPE
-                    && SDL_GetWindowFlags( window.sdl_window ) & (
-                          SDL_WINDOW_FULLSCREEN
-                        | SDL_WINDOW_FULLSCREEN_DESKTOP
-                    )
-                )
-                {
-                    running = false;
+                default:
                     break;
                 }
             }

@@ -274,9 +274,8 @@ namespace yavsg
         auto desired_fov = yavsg::radians< GLfloat >{
             yavsg::degrees< GLfloat >{ 90 }
         };
-        main_camera.move( -( cos( desired_fov ) - cos( base_fov ) ) / 2 );
         main_camera.fov( desired_fov );
-        main_camera.look_at( { 0, 0, 0 } ); // Set focal point to 0,0,0 too
+        main_camera.look_at( { 0.0f, 0.0f, 0.0f } );
         main_camera.focal_point( 1.0f );
     }
     
@@ -288,14 +287,6 @@ namespace yavsg
     void obj_render_step::run( gl::write_only_framebuffer& target )
     {
         auto current_time = std::chrono::high_resolution_clock::now();
-        
-        auto rotate_by = degrees< GLfloat >(
-            std::chrono::duration_cast<
-                std::chrono::duration< float >
-            >( current_time - previous_time ).count()
-            * 3
-        );
-        main_camera.increment_yaw( rotate_by );
         
         // TODO: error checking
         
