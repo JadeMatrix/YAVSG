@@ -31,7 +31,9 @@ namespace yavsg
     
     void initialize_task_system( bool main_will_task = true );
     void initialize_task_system( std::size_t worker_count );
-    // Synchronous, must be called before main thread exits
+    // Synchronous, must be called before main thread exits, and after
+    // become_task_worker() exits on the calling thread (if that function was
+    // called)
     void       stop_task_system( bool dequeue_all = false );
 }
 

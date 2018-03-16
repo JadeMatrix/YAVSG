@@ -67,8 +67,6 @@ namespace yavsg
         if( worker_flags & task_worker_flag::MAIN_THREAD )
             worker_flags |= task_worker_flag::GPU_THREAD;
         
-        bool encountered_error = false;
-        
         // List of queues to check, in order of priority
         std::vector< task_queue_type* > queues;
         
@@ -126,61 +124,67 @@ namespace yavsg
                 + general_lopri_queue.size()
             );
             
+            bool encountered_error = false;
+            
             if( total_tasks_enqueued > 0 )
                 // Let some other worker pop
                 queues_condition.notify_one();
             
-            // Execute task and conditionally requeue it
-            try
+            if( task )
             {
-                if( task && ( *task )() )
-                    submit_task( std::move( task ) );
-                task = nullptr;
+                lock.unlock();
+                
+                try
+                {
+                    if( ( *task )() )
+                        submit_task( std::move( task ) );
+                    
+                    // Dispose of task if it wasn't requeued
+                    task = nullptr;
+                }
+                catch( const yavsg::gl::summary_error& e )
+                {
+                    std::cerr
+                        << "worker thread "
+                        << std::this_thread::get_id()
+                        << " exiting due to OpenGL error: "
+                        << e.what()
+                        << "; codes:"
+                        << std::endl
+                    ;
+                    yavsg::gl::print_summary_error_codes( std::cerr, e );
+                    encountered_error = true;
+                }
+                catch( const std::exception& e )
+                {
+                    std::cerr
+                        << "worker thread "
+                        << std::this_thread::get_id()
+                        << " exiting due to uncaught std::exception: "
+                        << e.what()
+                        << std::endl
+                    ;
+                    encountered_error = true;
+                }
+                catch( ... )
+                {
+                    std::cerr
+                        << "worker thread "
+                        << std::this_thread::get_id()
+                        << " exiting due to uncaught non-std::exception"
+                        << std::endl
+                    ;
+                    encountered_error = true;
+                }
             }
-            catch( const yavsg::gl::summary_error& e )
-            {
-                std::cerr
-                    << "worker thread "
-                    << std::this_thread::get_id()
-                    << " exiting due to OpenGL error: "
-                    << e.what()
-                    << "; codes:"
-                    << std::endl
-                ;
-                yavsg::gl::print_summary_error_codes( std::cerr, e );
-                encountered_error = true;
-            }
-            catch( const std::exception& e )
-            {
-                std::cerr
-                    << "worker thread "
-                    << std::this_thread::get_id()
-                    << " exiting due to uncaught std::exception: "
-                    << e.what()
-                    << std::endl
-                ;
-                encountered_error = true;
-            }
-            catch( ... )
-            {
-                std::cerr
-                    << "worker thread "
-                    << std::this_thread::get_id()
-                    << " exiting due to uncaught non-std::exception"
-                    << std::endl
-                ;
-                encountered_error = true;
-            }
+            else
+                queues_condition.wait( lock );
             
             if( encountered_error )
             {
                 task_system_running = false;
                 queues_condition.notify_all();
             }
-            else if( task_system_running )
-                // Only wait if something else didn't shut down the system since
-                // the start of this loop
-                queues_condition.wait( lock );
         }
     }
     
@@ -216,11 +220,20 @@ namespace yavsg
             general_lopri_queue.clear();
         }
     }
-    
+}
+
+
+namespace yavsg // stop_task_system_task ///////////////////////////////////////
+{
     bool stop_task_system_task::operator()()
     {
         task_system_running = false;
         queues_condition.notify_all();
         return false;
+    }
+    
+    task_flags_type stop_task_system_task::flags() const
+    {
+        return task_flag::HIGH_PRIORITY;
     }
 }
