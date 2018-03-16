@@ -31,6 +31,7 @@ namespace yavsg // Tasks ///////////////////////////////////////////////////////
     public:
         virtual ~task();
         virtual task_flags_type flags() const = 0;
+        virtual task_flags_type flags() const;
         virtual bool operator()() = 0;
     };
 }
