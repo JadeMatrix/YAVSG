@@ -5,8 +5,8 @@
 
 namespace gl_tut
 {
-    const int window_width  = 800;
-    const int window_height = 600;
+    const int window_width  = 1280;
+    const int window_height = 720;
 }
 
 

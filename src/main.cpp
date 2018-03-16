@@ -34,6 +34,7 @@ int main( int argc, char* argv[] )
             gl_tut::window_height,
             SDL_WINDOW_OPENGL // | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN
         );
+        SDL_SetRelativeMouseMode( SDL_TRUE );
         
         // Run GLEW stuff _after_ creating SDL/GL context
     #ifndef __APPLE__
