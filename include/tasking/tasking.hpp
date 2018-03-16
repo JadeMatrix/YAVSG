@@ -56,7 +56,7 @@ namespace yavsg // Task system /////////////////////////////////////////////////
     
     void initialize_task_system( bool main_will_task = true );
     void initialize_task_system( std::size_t worker_count );
-    void       stop_task_system();
+    void       stop_task_system( bool dequeue_all = false );
 }
 
 

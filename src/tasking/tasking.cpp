@@ -82,7 +82,6 @@ namespace yavsg // Task system /////////////////////////////////////////////////
         while( true )
         {
             std::unique_lock< std::mutex > lock( queues_mutex );
-            queues_condition.wait( lock );
             
             if( !task_system_running )
             {
@@ -92,9 +91,7 @@ namespace yavsg // Task system /////////////////////////////////////////////////
             
             task_ptr_type task;
             
-            // TODO: find an executable task & if found pop it
             for( auto& queue : queues )
-                // for( auto& task : *queue )
                 for(
                     auto task_iter = queue -> begin();
                     task_iter != queue -> end();
@@ -103,13 +100,16 @@ namespace yavsg // Task system /////////////////////////////////////////////////
                 {
                     auto task_flags = ( *task_iter ) -> flags();
                     
-                    if( (
-                        task_flags & task_flag::MAIN_THREAD
-                        && worker_flags & task_worker_flag::MAIN_THREAD
-                    ) || (
-                        task_flags & task_flag::GPU_THREAD
-                        && worker_flags & task_worker_flag::GPU_THREAD
-                    ) || task_flags & task_flag::NONE )
+                    auto main_req_met = !(
+                                task_flags &        task_flag::MAIN_THREAD
+                        && !( worker_flags & task_worker_flag::MAIN_THREAD )
+                    );
+                    auto gpu_req_met = !(
+                                task_flags &        task_flag::GPU_THREAD
+                        && !( worker_flags & task_worker_flag::GPU_THREAD )
+                    );
+                    
+                    if( main_req_met && gpu_req_met )
                     {
                         std::swap( task, *task_iter );
                         queue -> erase( task_iter );
@@ -118,7 +118,6 @@ namespace yavsg // Task system /////////////////////////////////////////////////
                 }
         done_searching:
             
-            // TODO: number of tasks in all queues
             std::size_t total_tasks_enqueued = (
                      main_hipri_queue.size()
                 +    main_lopri_queue.size()
@@ -126,17 +125,16 @@ namespace yavsg // Task system /////////////////////////////////////////////////
                 + general_lopri_queue.size()
             );
             
-            lock.unlock();
-            
             if( total_tasks_enqueued > 0 )
                 // Let some other worker pop
                 queues_condition.notify_one();
             
-            // TODO: execute task if found
-            if( task )
-            {
-                auto should_requeue = ( *task )();
-            }
+            // Execute task and conditionally requeue it
+            if( task && ( *task )() )
+                submit_task( std::move( task ) );
+            task = nullptr;
+            
+            queues_condition.wait( lock );
         }
     }
     
@@ -158,11 +156,18 @@ namespace yavsg // Task system /////////////////////////////////////////////////
             );
     }
     
-    void stop_task_system()
+    void stop_task_system( bool dequeue_all )
     {
         task_system_running = false;
         queues_condition.notify_all();
         for( auto& worker : slaved_workers )
             worker.join();
+        if( dequeue_all )
+        {
+               main_hipri_queue.clear();
+               main_lopri_queue.clear();
+            general_hipri_queue.clear();
+            general_lopri_queue.clear();
+        }
     }
 }
