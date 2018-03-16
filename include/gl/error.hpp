@@ -6,6 +6,7 @@
 #include "_gl_base.hpp"
 
 #include <exception>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -45,6 +46,9 @@ namespace yavsg { namespace gl
             ); \
         } \
     }
+    
+    // Utility function for use in `catch()` blocks
+    void print_summary_error_codes( std::ostream&, const summary_error& );
 } }
 
 

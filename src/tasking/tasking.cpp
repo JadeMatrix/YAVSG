@@ -2,9 +2,11 @@
 
 // yavsg::stop_task_system_task
 #include "../../include/tasking/utility_tasks.hpp"
+#include "../../include/gl/error.hpp"   // yavsg::gl::summary_error
 
 #include <atomic>
 #include <condition_variable>
+#include <iostream>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -64,6 +66,8 @@ namespace yavsg
         // Main thread and GPU thread are the same for now
         if( worker_flags & task_worker_flag::MAIN_THREAD )
             worker_flags |= task_worker_flag::GPU_THREAD;
+        
+        bool encountered_error = false;
         
         // List of queues to check, in order of priority
         std::vector< task_queue_type* > queues;
@@ -127,11 +131,56 @@ namespace yavsg
                 queues_condition.notify_one();
             
             // Execute task and conditionally requeue it
-            if( task && ( *task )() )
-                submit_task( std::move( task ) );
-            task = nullptr;
+            try
+            {
+                if( task && ( *task )() )
+                    submit_task( std::move( task ) );
+                task = nullptr;
+            }
+            catch( const yavsg::gl::summary_error& e )
+            {
+                std::cerr
+                    << "worker thread "
+                    << std::this_thread::get_id()
+                    << " exiting due to OpenGL error: "
+                    << e.what()
+                    << "; codes:"
+                    << std::endl
+                ;
+                yavsg::gl::print_summary_error_codes( std::cerr, e );
+                encountered_error = true;
+            }
+            catch( const std::exception& e )
+            {
+                std::cerr
+                    << "worker thread "
+                    << std::this_thread::get_id()
+                    << " exiting due to uncaught std::exception: "
+                    << e.what()
+                    << std::endl
+                ;
+                encountered_error = true;
+            }
+            catch( ... )
+            {
+                std::cerr
+                    << "worker thread "
+                    << std::this_thread::get_id()
+                    << " exiting due to uncaught non-std::exception"
+                    << std::endl
+                ;
+                encountered_error = true;
+            }
             
-            queues_condition.wait( lock );
+            if( encountered_error )
+            {
+                task_system_running = false;
+                queues_condition.notify_all();
+            }
+            else if( task_system_running )
+                // Only wait if something else didn't shut down the system since
+                // the start of this loop
+                queues_condition.wait( lock );
         }
     }
     

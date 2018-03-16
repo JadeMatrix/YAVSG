@@ -211,55 +211,20 @@ int main( int argc, char* argv[] )
             << "; codes:"
             << std::endl
         ;
-        if( e.error_codes.size() )
-        {
-            for( auto code : e.error_codes )
-            {
-                std::cerr << "  ";
-                switch( code )
-                {
-                case GL_INVALID_ENUM:
-                    std::cerr << "GL_INVALID_ENUM";
-                    break;
-                case GL_INVALID_VALUE:
-                    std::cerr << "GL_INVALID_VALUE";
-                    break;
-                case GL_INVALID_OPERATION:
-                    std::cerr << "GL_INVALID_OPERATION";
-                    break;
-                case GL_STACK_OVERFLOW:
-                    std::cerr << "GL_STACK_OVERFLOW";
-                    break;
-                case GL_STACK_UNDERFLOW:
-                    std::cerr << "GL_STACK_UNDERFLOW";
-                    break;
-                case GL_OUT_OF_MEMORY:
-                    std::cerr << "GL_OUT_OF_MEMORY";
-                    break;
-                case GL_INVALID_FRAMEBUFFER_OPERATION:
-                    std::cerr << "GL_INVALID_FRAMEBUFFER_OPERATION";
-                    break;
-                case 0x0507: // GL_CONTEXT_LOST available in 4.5+
-                    std::cerr << "GL_CONTEXT_LOST";
-                    break;
-                case GL_TABLE_TOO_LARGE:
-                    std::cerr << "GL_TABLE_TOO_LARGE";
-                    break;
-                default:
-                    std::cerr << std::to_string( code );
-                    break;
-                }
-                std::cerr << std::endl;
-            }
-        }
-        else
-            std::cerr << "  (none)" << std::endl;
+        yavsg::gl::print_summary_error_codes( std::cerr, e );
     }
     catch( const std::exception& e )
     {
         std::cerr
             << "program exiting: "
             << e.what()
+            << std::endl
+        ;
+    }
+    catch( ... )
+    {
+        std::cerr
+            << "program exiting due to uncaught non-std::exception"
             << std::endl
         ;
     }
