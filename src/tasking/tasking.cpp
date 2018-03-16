@@ -1,5 +1,8 @@
 #include "../../include/tasking/tasking.hpp"
 
+// yavsg::stop_task_system_task
+#include "../../include/tasking/utility_tasks.hpp"
+
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
@@ -163,5 +166,12 @@ namespace yavsg
             general_hipri_queue.clear();
             general_lopri_queue.clear();
         }
+    }
+    
+    bool stop_task_system_task::operator()()
+    {
+        task_system_running = false;
+        queues_condition.notify_all();
+        return false;
     }
 }
