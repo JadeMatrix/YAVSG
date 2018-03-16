@@ -79,19 +79,23 @@ namespace yavsg { namespace gl // Texture configuration types //////////////////
     };
     
     using texture_flags_type = std::size_t;
-    enum texture_flags
+    namespace texture_flags
     {
-        NONE                        = 0x00,
+        static const texture_flags_type NONE                        = 0x00;
+        
         // If alpha channel exists, don't premultiply alpha
-        DISABLE_PREMULTIPLIED_ALPHA = 0x01 << 0,
+        static const texture_flags_type DISABLE_PREMULTIPLIED_ALPHA = 0x01 << 0;
+        
         // Ignore any input data and just tell OpenGL to allocate texture space
-        ALLOCATE_ONLY               = 0x01 << 1,
+        static const texture_flags_type ALLOCATE_ONLY               = 0x01 << 1;
+        
         // Skip conversion to sRGB for gamma-correctness
-        LINEAR_INPUT                = 0x01 << 2,
+        static const texture_flags_type LINEAR_INPUT                = 0x01 << 2;
+        
         // Don't drop channels that have only default values (only affects alpha
         // for now)
-        KEEP_UNUSED_CHANNELS        = 0x01 << 3
-    };
+        static const texture_flags_type KEEP_UNUSED_CHANNELS        = 0x01 << 3;
+    }
 } }
 
 
