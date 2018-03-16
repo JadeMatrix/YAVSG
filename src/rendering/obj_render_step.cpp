@@ -3,7 +3,6 @@
 #include "../../include/math/common_transforms.hpp"
 #include "../../include/gl/shader.hpp"
 #include "../../include/gl/texture.hpp"
-#include "../../include/rendering/gl_tut.hpp"   // gl_tut::window_width & gl_tut::window_height
 #include "../../include/rendering/shader_variable_names.hpp"
 
 #include <tiny_obj_loader.h>
@@ -301,8 +300,8 @@ namespace yavsg
         scene_program.set_uniform(
             shader_string_id::TRANSFORM_PROJECTION,
             main_camera.projection< GLfloat >(
-                  static_cast< GLfloat >( gl_tut::window_width  )
-                / static_cast< GLfloat >( gl_tut::window_height )
+                  static_cast< GLfloat >( target.width () )
+                / static_cast< GLfloat >( target.height() )
             )
         );
         

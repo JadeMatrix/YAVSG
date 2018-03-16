@@ -48,7 +48,7 @@ namespace yavsg
         gl::index_buffer bottom_left_indices;
         gl::index_buffer bottom_right_indices;
         
-        source_type sub_buffer;
+        source_type* sub_buffer;
         
         debug_4up_postprocess_step(
             child_type* top_left,

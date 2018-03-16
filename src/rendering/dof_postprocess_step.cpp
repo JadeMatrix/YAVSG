@@ -1,6 +1,5 @@
 #include "../../include/rendering/dof_postprocess_step.hpp"
 
-#include "../../include/rendering/gl_tut.hpp"
 #include "../../include/rendering/shader_variable_names.hpp"
 
 #include "../../include/gl/shader.hpp"
@@ -88,11 +87,11 @@ namespace yavsg
         
         postprocess_program.set_uniform(
             shader_string_id::FRAMEBUFFER_TARGET_WIDTH,
-            static_cast< GLfloat >( gl_tut::window_width )
+            static_cast< GLfloat >( target.width() )
         );
         postprocess_program.set_uniform(
             shader_string_id::FRAMEBUFFER_TARGET_HEIGHT,
-            static_cast< GLfloat >( gl_tut::window_height )
+            static_cast< GLfloat >( target.height() )
         );
         
         postprocess_program.run(

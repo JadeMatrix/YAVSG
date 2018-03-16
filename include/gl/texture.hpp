@@ -170,6 +170,9 @@ namespace yavsg { namespace gl
         texture( const texture& ) = delete;
         texture& operator=( const texture& ) = delete;
         
+        // ... but enable move assignment
+        texture& operator=( texture&& ) = default;
+        
         static texture from_file(
             const std::string& filename,
             const texture_filter_settings& settings,

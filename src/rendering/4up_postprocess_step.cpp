@@ -1,6 +1,5 @@
 #include "../../include/rendering/4up_postprocess_step.hpp"
 
-#include "../../include/rendering/gl_tut.hpp"
 #include "../../include/rendering/shader_variable_names.hpp"
 
 #include "../../include/gl/shader.hpp"
@@ -115,10 +114,7 @@ namespace yavsg
             0 + 12, 1 + 12, 2 + 12,
             2 + 12, 3 + 12, 0 + 12
         } ),
-        sub_buffer(
-            gl_tut::window_width,
-            gl_tut::window_height
-        )
+        sub_buffer( nullptr )
     {
         postprocess_program.link_attribute< 0 >(
             shader_string_id::VERTEX_IN_POSITION,
@@ -143,6 +139,9 @@ namespace yavsg
             delete bottom_left;
         if( bottom_right )
             delete bottom_right;
+        
+        if( sub_buffer )
+            delete sub_buffer;
     }
     
     void debug_4up_postprocess_step::run(
@@ -167,9 +166,23 @@ namespace yavsg
             gl::index_buffer& indices;
         };
         
+        if( !sub_buffer )
+            sub_buffer = new source_type(
+                target. width(),
+                target.height()
+            );
+        else if(
+               sub_buffer ->  width() != target. width()
+            || sub_buffer -> height() != target.height()
+        )
+            sub_buffer -> set_size(
+                target. width(),
+                target.height()
+            );
+        
         source_type* source_buffer;
         
-        sub_buffer.alpha_blending( gl::alpha_blend_mode::DISABLED );
+        sub_buffer -> alpha_blending( gl::alpha_blend_mode::DISABLED );
         
         for( auto substep : {
             substep_info{     top_left,     top_left_indices },
@@ -180,10 +193,10 @@ namespace yavsg
         {
             if( substep.step )
             {
-                sub_buffer.bind();
-                substep.step -> run( source, sub_buffer );
+                sub_buffer -> bind();
+                substep.step -> run( source, *sub_buffer );
                 
-                source_buffer = &sub_buffer;
+                source_buffer = sub_buffer;
             }
             else
                 source_buffer = &source;
