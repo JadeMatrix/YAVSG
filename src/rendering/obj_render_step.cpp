@@ -237,9 +237,6 @@ namespace yavsg
             10.0f
         )
     {
-        start_time = std::chrono::high_resolution_clock::now();
-        previous_time = start_time;
-        
         manager_insert_obj(
             object_manager,
             obj_filename,
@@ -286,8 +283,6 @@ namespace yavsg
     
     void obj_render_step::run( gl::write_only_framebuffer& target )
     {
-        auto current_time = std::chrono::high_resolution_clock::now();
-        
         // TODO: error checking
         
         glEnable( GL_DEPTH_TEST );
@@ -353,7 +348,5 @@ namespace yavsg
                 );
             }
         }
-        
-        previous_time = current_time;
     }
 }

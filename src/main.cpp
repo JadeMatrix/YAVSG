@@ -12,6 +12,7 @@
 #include "../include/rendering/4up_postprocess_step.hpp"
 #include "../include/rendering/dof_postprocess_step.hpp"
 
+#include <chrono>
 #include <exception>
 #include <iostream>
 #include <string>
@@ -70,6 +71,9 @@ int main( int argc, char* argv[] )
                 )
             )
         };
+        
+        auto    start_time = std::chrono::high_resolution_clock::now();
+        auto previous_time = start_time;
         
         fb_type buffer_A(
             gl_tut::window_width,
@@ -138,6 +142,8 @@ int main( int argc, char* argv[] )
             if( !running )
                 std::cout << "quitting..." << std::endl;
             
+            auto current_time = std::chrono::high_resolution_clock::now();
+            
             // Even though only target_buffer needs to be a write-only buffer,
             // these both need to be the same type for std::swap()
             wo_fb_type* source_buffer;
@@ -186,6 +192,7 @@ int main( int argc, char* argv[] )
             }
             
             SDL_GL_SwapWindow( window.sdl_window );
+            previous_time = current_time;
         }
         
         for( auto step : postprocess_steps )

@@ -13,7 +13,6 @@
 #include "../gl/texture.hpp"
 #include "../math/vector.hpp"
 
-#include <chrono>
 #include <string>
 #include <vector>
 
@@ -87,8 +86,6 @@ namespace yavsg
         
         render_object_manager_type object_manager;
         
-        std::chrono::high_resolution_clock::time_point start_time;
-        std::chrono::high_resolution_clock::time_point previous_time;
         program_type scene_program;
         
         camera main_camera;
