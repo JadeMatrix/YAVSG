@@ -45,6 +45,7 @@ ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
     src/rendering/shader_variable_names.cpp
     src/rendering/camera.cpp
     src/tasking/tasking.cpp
+    src/tasking/task.cpp
 )
 SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_INFO_PLIST           "Info.plist.in"

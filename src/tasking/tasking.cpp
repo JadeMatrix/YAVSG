@@ -8,18 +8,7 @@
 #include <list>
 
 
-namespace yavsg // Tasks ///////////////////////////////////////////////////////
-{
-    task::~task() {}
-    
-    task_flags_type task::flags() const
-    {
-        return task_flag::NONE;
-    }
-}
-
-
-namespace // Task system globals ///////////////////////////////////////////////
+namespace
 {
     // Holds only the workers belonging to the tasking subsystem; there may be
     // other threads running as workers via become_task_worker(), such as the
@@ -40,7 +29,7 @@ namespace // Task system globals ///////////////////////////////////////////////
 }
 
 
-namespace yavsg // Task system /////////////////////////////////////////////////
+namespace yavsg
 {
     void submit_task( std::unique_ptr< task > t )
     {
