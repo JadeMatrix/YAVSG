@@ -30,7 +30,7 @@ namespace yavsg { namespace gl // Depth/stencil texture attributes /////////////
     
     // There's no `int24`, so just use `int_least32_t`; also, just use
     // `GL_UNSIGNED_INT_24_8` as the incoming type, as (for now) depth/stencil
-    // buffers will only be created with `texture_flags::ALLOCATE_ONLY`
+    // buffers will only be created with `texture_flag::ALLOCATE_ONLY`
     
     template<> struct texture_format_traits< depth_stecil_dummy<
         std::int_least16_t
@@ -189,7 +189,7 @@ namespace yavsg { namespace gl // Framebuffer color target init ////////////////
                     texture_filter_settings::minify_mode::LINEAR,
                     texture_filter_settings::mipmap_type::NONE,
                 },
-                texture_flags::ALLOCATE_ONLY
+                texture_flag::ALLOCATE_ONLY
             } } );
             
             FirstColorTargetType& t = std::get< 0 >( first_target );
@@ -242,7 +242,7 @@ namespace yavsg { namespace gl // Framebuffer color target init ////////////////
                     texture_filter_settings::minify_mode::LINEAR,
                     texture_filter_settings::mipmap_type::NONE,
                 },
-                texture_flags::ALLOCATE_ONLY
+                texture_flag::ALLOCATE_ONLY
             } } );
             
             LastColorTargetType& t = std::get< 0 >( last_target );
@@ -328,7 +328,7 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
                 texture_filter_settings::minify_mode::LINEAR,
                 texture_filter_settings::mipmap_type::NONE,
             },
-            texture_flags::ALLOCATE_ONLY
+            texture_flag::ALLOCATE_ONLY
         );
         
         glFramebufferTexture2D(

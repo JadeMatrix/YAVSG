@@ -65,11 +65,11 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
         bool has_varying_alpha = false;
         bool multiply_alpha = !(
             flags
-            & yavsg::gl::texture_flags::DISABLE_PREMULTIPLIED_ALPHA
+            & yavsg::gl::texture_flag::DISABLE_PREMULTIPLIED_ALPHA
         );
         bool linearize = !(
             flags
-            & yavsg::gl::texture_flags::LINEAR_INPUT
+            & yavsg::gl::texture_flag::LINEAR_INPUT
         );
         
         auto  in_data = static_cast< const T* >(              data );
@@ -136,11 +136,11 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
         bool has_varying_alpha = false;
         bool multiply_alpha = !(
             flags
-            & yavsg::gl::texture_flags::DISABLE_PREMULTIPLIED_ALPHA
+            & yavsg::gl::texture_flag::DISABLE_PREMULTIPLIED_ALPHA
         );
         bool linearize = !(
             flags
-            & yavsg::gl::texture_flags::LINEAR_INPUT
+            & yavsg::gl::texture_flag::LINEAR_INPUT
         );
         
         auto  in_data = static_cast< const T* >(              data );
@@ -213,7 +213,7 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
         
         try
         {
-            if( flags & texture_flags::ALLOCATE_ONLY )
+            if( flags & texture_flag::ALLOCATE_ONLY )
                 data = nullptr;
             else if( !data )
                 throw std::runtime_error(
@@ -247,12 +247,12 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
             
             auto needs_alpha_pass = (
                 internal_has_alpha
-                && !( flags & texture_flags::DISABLE_PREMULTIPLIED_ALPHA )
+                && !( flags & texture_flag::DISABLE_PREMULTIPLIED_ALPHA )
             );
             auto needs_drop_pass = !(
-                flags & texture_flags::KEEP_UNUSED_CHANNELS
+                flags & texture_flag::KEEP_UNUSED_CHANNELS
             );
-            auto needs_gamma_pass = !( flags & texture_flags::LINEAR_INPUT );
+            auto needs_gamma_pass = !( flags & texture_flag::LINEAR_INPUT );
             
             // Perform alpha premultiplication & gamma correction
             // TODO: Just use OpenGL sRGB type if internal format is RGB(A)8
@@ -290,7 +290,7 @@ namespace yavsg { namespace gl // Texture base class implementation ////////////
                 texture_flags_type modified_flags = flags;
                 if( gl_format != GL_RGBA )
                     modified_flags
-                        |= texture_flags::DISABLE_PREMULTIPLIED_ALPHA;
+                        |= texture_flag::DISABLE_PREMULTIPLIED_ALPHA;
                 
                 switch( gl_type )
                 {

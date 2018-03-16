@@ -59,9 +59,9 @@ namespace
             yavsg::material_texture_type* specular_map = nullptr;
             
             for( auto& info : {
-                texture_info{    color_map, material.diffuse_texname , yavsg::gl::texture_flags::NONE         },
-                texture_info{   normal_map, material.bump_texname    , yavsg::gl::texture_flags::LINEAR_INPUT },
-                texture_info{ specular_map, material.specular_texname, yavsg::gl::texture_flags::LINEAR_INPUT }
+                texture_info{    color_map, material.diffuse_texname , yavsg::gl::texture_flag::NONE         },
+                texture_info{   normal_map, material.bump_texname    , yavsg::gl::texture_flag::LINEAR_INPUT },
+                texture_info{ specular_map, material.specular_texname, yavsg::gl::texture_flag::LINEAR_INPUT }
             } )
             {
                 if( info.filename.size() )

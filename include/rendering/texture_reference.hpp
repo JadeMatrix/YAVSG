@@ -29,7 +29,7 @@ namespace yavsg
         texture_reference(
             const std::string                & filename,
             const gl::texture_filter_settings& settings,
-            gl::texture_flags_type             flags = gl::texture_flags::NONE
+            gl::texture_flags_type             flags = gl::texture_flag::NONE
         );
         
         ~texture_reference();

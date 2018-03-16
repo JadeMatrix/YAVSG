@@ -79,22 +79,22 @@ namespace yavsg { namespace gl // Texture configuration types //////////////////
     };
     
     using texture_flags_type = std::size_t;
-    namespace texture_flags
+    namespace texture_flag
     {
-        static const texture_flags_type NONE                        = 0x00;
+        static const texture_flags_type                        NONE = 0x00;
         
         // If alpha channel exists, don't premultiply alpha
         static const texture_flags_type DISABLE_PREMULTIPLIED_ALPHA = 0x01 << 0;
         
         // Ignore any input data and just tell OpenGL to allocate texture space
-        static const texture_flags_type ALLOCATE_ONLY               = 0x01 << 1;
+        static const texture_flags_type               ALLOCATE_ONLY = 0x01 << 1;
         
         // Skip conversion to sRGB for gamma-correctness
-        static const texture_flags_type LINEAR_INPUT                = 0x01 << 2;
+        static const texture_flags_type                LINEAR_INPUT = 0x01 << 2;
         
         // Don't drop channels that have only default values (only affects alpha
         // for now)
-        static const texture_flags_type KEEP_UNUSED_CHANNELS        = 0x01 << 3;
+        static const texture_flags_type        KEEP_UNUSED_CHANNELS = 0x01 << 3;
     }
 } }
 
@@ -157,12 +157,12 @@ namespace yavsg { namespace gl
             std::size_t height,
             const std::array< DataType, Channels >* data,
             const texture_filter_settings& settings,
-            texture_flags_type flags = texture_flags::NONE
+            texture_flags_type flags = texture_flag::NONE
         );
         texture(
             SDL_Surface* sdl_surface, // Not `const` due to the SDL API
             const texture_filter_settings& settings,
-            texture_flags_type flags = texture_flags::NONE
+            texture_flags_type flags = texture_flag::NONE
         );
         texture( texture&& );
         
@@ -176,7 +176,7 @@ namespace yavsg { namespace gl
         static texture from_file(
             const std::string& filename,
             const texture_filter_settings& settings,
-            texture_flags_type flags = texture_flags::NONE
+            texture_flags_type flags = texture_flag::NONE
         );
         
         // For use by stuff like framebuffers that need to control texture
