@@ -16,10 +16,6 @@
 #include <memory>
 
 
-// DEBUG:
-#include <iostream>
-
-
 namespace yavsg
 {
     template< typename DataType, std::size_t Channels > class texture_reference
@@ -105,7 +101,6 @@ namespace yavsg // Tasks ///////////////////////////////////////////////////////
             _settings   { settings },
             _flags      { flags    }
         {
-            // DEBUG:
             if( !_shared_data )
                 throw std::invalid_argument(
                     "shared_data to load_texture_file_task is null"
@@ -144,7 +139,6 @@ namespace yavsg // Tasks ///////////////////////////////////////////////////////
             _settings   { settings                 },
             _flags      { flags                    }
         {
-            // DEBUG:
             if( !_shared_data )
                 throw std::invalid_argument(
                     "shared_data to upload_texture_data_task is null"
@@ -203,10 +197,6 @@ namespace yavsg // Texture reference shared data implementation ////////////////
     {
         // The shared data being destroyed means that nothing refers to the
         // texture anymore, including any tasks operating on it
-        // DEBUG:
-        std::cout << (
-            "locking in shared_data::~shared_data()\n"
-        );
         std::lock_guard< std::mutex > lock( data_mutex );
         if( texture )
             submit_task( std::make_unique<
@@ -233,10 +223,6 @@ namespace yavsg // Texture reference implementation ////////////////////////////
     {
         if( _shared_data )
         {
-            // DEBUG:
-            std::cout << (
-                "locking in texture_reference::operator bool()\n"
-            );
             std::lock_guard< std::mutex > lock( const_cast< std::mutex& >(
                 _shared_data -> data_mutex
             ) );
@@ -254,10 +240,6 @@ namespace yavsg // Texture reference implementation ////////////////////////////
     {
         if( _shared_data )
         {
-            // DEBUG:
-            std::cout << (
-                "locking in texture_reference::operator ->()\n"
-            );
             std::lock_guard< std::mutex > lock( _shared_data -> data_mutex );
             if( _shared_data -> texture )
                 return _shared_data -> texture;
@@ -280,10 +262,6 @@ namespace yavsg // Texture reference implementation ////////////////////////////
     {
         if( _shared_data )
         {
-            // DEBUG:
-            std::cout << (
-                "locking in texture_reference::operator ->() const\n"
-            );
             std::lock_guard< std::mutex > lock( const_cast< std::mutex& >(
                 _shared_data -> data_mutex
             ) );
@@ -373,10 +351,6 @@ namespace yavsg // Task implementations ////////////////////////////////////////
         std::size_t Channels
     > bool upload_texture_data_task< DataType, Channels >::operator()()
     {
-        // DEBUG:
-        std::cout << (
-            "locking in upload_texture_data_task::operator ()()\n"
-        );
         std::lock_guard< std::mutex > lock( _shared_data -> data_mutex );
         
         // _shared_data -> texture = std::make_unique<

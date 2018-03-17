@@ -20,7 +20,6 @@
 namespace yavsg
 {
     using material_texture_type = texture_reference< GLfloat, 4 >;
-    // TODO: std::optional<gl::texture>
     using material_description_base = material<
         material_texture_type,
         material_texture_type,

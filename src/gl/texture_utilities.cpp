@@ -11,10 +11,6 @@
 #include <utility>  // std::swap()
 
 
-// DEBUG:
-#include <iostream>
-
-
 namespace // Anisotropic filtering support /////////////////////////////////////
 {
     std::once_flag aniso_filter_flag;
@@ -472,11 +468,6 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
         }
         else // Convert pixels
         {
-            // DEBUG:
-            std::cout << (
-                "converting SDL surface\n"
-            );
-            
             SDL_PixelFormat* new_format = nullptr;
             
             bool format_has_alpha;
@@ -540,19 +531,9 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
                     + std::string( SDL_GetError() )
                 );
             
-            // DEBUG:
-            std::cout << (
-                "converting SDL surface\n"
-            );
-            
             std::swap( sdl_surface, converted_surface );
             SDL_FreeSurface( converted_surface );
         }
-        
-        // DEBUG:
-        std::cout << (
-            "retaining pixels from SDL surface\n"
-        );
         
         // Mark surface pixels as preallocated so SDL doesn't free them
         // sdl_surface -> flags |= SDL_PREALLOC;
@@ -563,11 +544,6 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
         auto sample_count = channels * width * height;
         auto sdl_surface_data = new char[ sample_count ];
         
-        // DEBUG:
-        std::cout << (
-            "allocated new pixel data\n"
-        );
-        
         // Copy data; need to do this because the data may/will be freed
         // elsewhere and be freed with `delete[]`, but SDL allocates with
         // `malloc()` since it's written in C
@@ -575,11 +551,6 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             static_cast< char* >( sdl_surface -> pixels ),
             sample_count,
             sdl_surface_data
-        );
-        
-        // DEBUG:
-        std::cout << (
-            "processing pixels from SDL surface\n"
         );
         
         SDL_FreeSurface( sdl_surface );
