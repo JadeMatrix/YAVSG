@@ -6,7 +6,6 @@
 #include "error.hpp"
 #include "texture.hpp"
 
-#include <array>
 #include <cstdint>      // std::int_least16_t, std::int_least32_t
 #include <exception>
 #include <string>
@@ -37,8 +36,8 @@ namespace yavsg { namespace gl // Depth/stencil texture attributes /////////////
     >, 1 >
     {
         static const GLint  gl_internal_format = GL_DEPTH_COMPONENT16;
-        static const GLenum gl_format          = GL_DEPTH_COMPONENT;
-        static const GLenum gl_type            = GL_UNSIGNED_INT_24_8;
+        static const GLenum gl_incoming_format = GL_DEPTH_COMPONENT;
+        static const GLenum gl_incoming_type   = GL_UNSIGNED_INT_24_8;
     };
     
     template<> struct texture_format_traits< depth_stecil_dummy<
@@ -46,15 +45,15 @@ namespace yavsg { namespace gl // Depth/stencil texture attributes /////////////
     >, 1 >
     {
         static const GLint  gl_internal_format = GL_DEPTH_COMPONENT24;
-        static const GLenum gl_format          = GL_DEPTH_COMPONENT;
-        static const GLenum gl_type            = GL_UNSIGNED_INT_24_8;
+        static const GLenum gl_incoming_format = GL_DEPTH_COMPONENT;
+        static const GLenum gl_incoming_type   = GL_UNSIGNED_INT_24_8;
     };
     
     template<> struct texture_format_traits< depth_stecil_dummy< GLfloat >, 1 >
     {
         static const GLint  gl_internal_format = GL_DEPTH_COMPONENT32F;
-        static const GLenum gl_format          = GL_DEPTH_COMPONENT;
-        static const GLenum gl_type            = GL_UNSIGNED_INT_24_8;
+        static const GLenum gl_incoming_format = GL_DEPTH_COMPONENT;
+        static const GLenum gl_incoming_type   = GL_UNSIGNED_INT_24_8;
     };
     
     template<> struct texture_format_traits< depth_stecil_dummy<
@@ -62,15 +61,15 @@ namespace yavsg { namespace gl // Depth/stencil texture attributes /////////////
     >, 2 >
     {
         static const GLint  gl_internal_format = GL_DEPTH24_STENCIL8;
-        static const GLenum gl_format          = GL_DEPTH_STENCIL;
-        static const GLenum gl_type            = GL_UNSIGNED_INT_24_8;
+        static const GLenum gl_incoming_format = GL_DEPTH_STENCIL;
+        static const GLenum gl_incoming_type   = GL_UNSIGNED_INT_24_8;
     };
     
     template<> struct texture_format_traits< depth_stecil_dummy< GLfloat >, 2 >
     {
         static const GLint  gl_internal_format = GL_DEPTH32F_STENCIL8;
-        static const GLenum gl_format          = GL_DEPTH_STENCIL;
-        static const GLenum gl_type            = GL_UNSIGNED_INT_24_8;
+        static const GLenum gl_incoming_format = GL_DEPTH_STENCIL;
+        static const GLenum gl_incoming_type   = GL_UNSIGNED_INT_24_8;
     };
 } }
 
@@ -180,10 +179,7 @@ namespace yavsg { namespace gl // Framebuffer color target init ////////////////
             std::tuple< FirstColorTargetType > first_target( { FirstColorTargetType{
                 width,
                 height,
-                static_cast< std::array<
-                    typename FirstColorTargetType::sample_type,
-                    FirstColorTargetType::channels
-                >* >( nullptr ),
+                nullptr,
                 {
                     texture_filter_settings::magnify_mode::LINEAR,
                     texture_filter_settings::minify_mode::LINEAR,
@@ -233,10 +229,7 @@ namespace yavsg { namespace gl // Framebuffer color target init ////////////////
             std::tuple< LastColorTargetType > last_target( { LastColorTargetType{
                 width,
                 height,
-                static_cast< std::array<
-                    typename LastColorTargetType::sample_type,
-                    LastColorTargetType::channels
-                >* >( nullptr ),
+                nullptr,
                 {
                     texture_filter_settings::magnify_mode::LINEAR,
                     texture_filter_settings::minify_mode::LINEAR,
@@ -319,10 +312,7 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
         auto t = depth_stencil_type(
             this -> _width,
             this -> _height,
-            static_cast< std::array<
-                depth_stencil_type::sample_type,
-                depth_stencil_type::channels
-            >* >( nullptr ),
+            nullptr,
             {
                 texture_filter_settings::magnify_mode::LINEAR,
                 texture_filter_settings::minify_mode::LINEAR,

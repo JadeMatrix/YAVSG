@@ -49,14 +49,14 @@ namespace
             
             struct texture_info
             {
-                yavsg::material_texture_type*& texture;
+                yavsg::material_texture_type& texture;
                 const std::string& filename;
                 yavsg::gl::texture_flags_type flags;
             };
             
-            yavsg::material_texture_type*    color_map = nullptr;
-            yavsg::material_texture_type*   normal_map = nullptr;
-            yavsg::material_texture_type* specular_map = nullptr;
+            yavsg::material_texture_type    color_map;
+            yavsg::material_texture_type   normal_map;
+            yavsg::material_texture_type specular_map;
             
             for( auto& info : {
                 texture_info{    color_map, material.diffuse_texname , yavsg::gl::texture_flag::NONE         },
@@ -71,7 +71,7 @@ namespace
                     
                     using settings = yavsg::gl::texture_filter_settings;
                     
-                    info.texture = new yavsg::material_texture_type(
+                    info.texture = yavsg::material_texture_type::from_file(
                         texture_filename,
                         {
                             settings::magnify_mode::LINEAR,

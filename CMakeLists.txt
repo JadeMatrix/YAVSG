@@ -35,7 +35,7 @@ INCLUDE_DIRECTORIES(
 ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
     src/main.cpp
     src/sdl/sdl_utils.cpp
-    src/gl/texture.cpp
+    src/gl/texture_utilities.cpp
     src/gl/shader.cpp
     src/gl/framebuffer.cpp
     src/gl/error.cpp
