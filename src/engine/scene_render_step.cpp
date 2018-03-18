@@ -1,10 +1,10 @@
-#include "../../include/rendering/scene_render_step.hpp"
+#include "../../include/engine/scene_render_step.hpp"
 
-#include "../../include/math/common_transforms.hpp"
 #include "../../include/gl/error.hpp"
 #include "../../include/gl/shader.hpp"
 #include "../../include/gl/texture.hpp"
-#include "../../include/rendering/gl_tut.hpp"   // gl_tut::window_width & gl_tut::window_height
+#include "../../include/math/common_transforms.hpp"
+#include "../../include/engine/gl_tut.hpp"  // gl_tut::window_width & gl_tut::window_height
 
 
 namespace yavsg

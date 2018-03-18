@@ -3,12 +3,12 @@
 #define YAVSG_RENDERING_SCENE_RENDER_STEP_HPP
 
 
-#include "render_step.hpp"
-#include "../gl/shader_program.hpp"
 #include "../gl/attribute_buffer.hpp"
+#include "../gl/shader_program.hpp"
 #include "../gl/texture.hpp"
-#include "../math/vector.hpp"
 #include "../math/quaternion.hpp"
+#include "../math/vector.hpp"
+#include "../rendering/render_step.hpp"
 
 #include <string>
 #include <vector>

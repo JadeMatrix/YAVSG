@@ -1,18 +1,18 @@
-#include "../include/gl/_gl_base.hpp" // For GLEW initialization, if any
+#include "../../include/gl/_gl_base.hpp" // For GLEW initialization, if any
 
-#include "../include/gl/error.hpp"
-#include "../include/gl/framebuffer.hpp"
-#include "../include/sdl/sdl_utils.hpp"
-#include "../include/rendering/render_step.hpp"
+#include "../../include/gl/error.hpp"
+#include "../../include/gl/framebuffer.hpp"
+#include "../../include/rendering/render_step.hpp"
+#include "../../include/sdl/sdl_utils.hpp"
+#include "../../include/tasking/tasking.hpp"
+#include "../../include/tasking/utility_tasks.hpp"
 
 // DEVEL:
-#include "../include/rendering/gl_tut.hpp"
-#include "../include/rendering/obj_render_step.hpp"
-#include "../include/rendering/basic_postprocess_step.hpp"
-#include "../include/rendering/4up_postprocess_step.hpp"
-#include "../include/rendering/dof_postprocess_step.hpp"
-#include "../include/tasking/tasking.hpp"
-#include "../include/tasking/utility_tasks.hpp"
+#include "../../include/engine/gl_tut.hpp"
+#include "../../include/engine/obj_render_step.hpp"
+#include "../../include/engine/basic_postprocess_step.hpp"
+#include "../../include/engine/4up_postprocess_step.hpp"
+#include "../../include/engine/dof_postprocess_step.hpp"
 
 #include <chrono>
 #include <exception>

@@ -3,6 +3,9 @@
 #define YAVSG_GL_ATTRIBUTE_BUFFER_HPP
 
 
+#include "_gl_base.hpp"
+#include "error.hpp"
+
 #include <array>
 #include <cstdint>  // std::uintptr_t
 #include <tuple>

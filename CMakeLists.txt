@@ -33,16 +33,16 @@ INCLUDE_DIRECTORIES(
 
 
 ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
-    src/main.cpp
+    src/engine/main.cpp
     src/sdl/sdl_utils.cpp
     src/gl/texture_utilities.cpp
     src/gl/shader.cpp
     src/gl/framebuffer.cpp
     src/gl/error.cpp
-    src/rendering/basic_postprocess_step.cpp
-    src/rendering/4up_postprocess_step.cpp
-    src/rendering/dof_postprocess_step.cpp
-    src/rendering/obj_render_step.cpp
+    src/engine/basic_postprocess_step.cpp
+    src/engine/4up_postprocess_step.cpp
+    src/engine/dof_postprocess_step.cpp
+    src/engine/obj_render_step.cpp
     src/rendering/shader_variable_names.cpp
     src/rendering/camera.cpp
     src/tasking/tasking.cpp

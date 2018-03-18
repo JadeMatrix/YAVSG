@@ -1,8 +1,8 @@
-#include "../../include/rendering/obj_render_step.hpp"
+#include "../../include/engine/obj_render_step.hpp"
 
-#include "../../include/math/common_transforms.hpp"
 #include "../../include/gl/shader.hpp"
 #include "../../include/gl/texture.hpp"
+#include "../../include/math/common_transforms.hpp"
 #include "../../include/rendering/shader_variable_names.hpp"
 
 #include <tiny_obj_loader.h>
@@ -10,7 +10,6 @@
 #include <algorithm>    // std::max()
 #include <array>
 #include <exception>
-#include <functional>   // std::reference_wrapper
 #include <iostream>     // std::cerr for tinyobj warnings
 
 
@@ -102,14 +101,6 @@ namespace
         for( auto& obj_shape : obj_shapes )
         {
             std::size_t index_offset = 0;
-            
-            // DEBUG:
-            std::cout
-                << "loading a shape with "
-                << obj_shape.mesh.num_face_vertices.size()
-                << " faces"
-                << std::endl
-            ;
             
             for(
                 std::size_t face = 0;

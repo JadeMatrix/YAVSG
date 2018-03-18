@@ -3,15 +3,15 @@
 #define YAVSG_RENDERING_OBJ_RENDER_STEP_HPP
 
 
-#include "render_step.hpp"
-#include "render_object_manager.hpp"
-#include "material.hpp"
-#include "texture_reference.hpp"
-#include "camera.hpp"
 #include "../gl/attribute_buffer.hpp"
 #include "../gl/shader_program.hpp"
 #include "../gl/texture.hpp"
 #include "../math/vector.hpp"
+#include "../rendering/camera.hpp"
+#include "../rendering/material.hpp"
+#include "../rendering/render_object_manager.hpp"
+#include "../rendering/render_step.hpp"
+#include "../rendering/texture_reference.hpp"
 
 #include <string>
 #include <vector>
@@ -20,11 +20,13 @@
 namespace yavsg
 {
     using material_texture_type = texture_reference< GLfloat, 4 >;
+    
     using material_description_base = material<
         material_texture_type,
         material_texture_type,
         material_texture_type
     >;
+    
     class material_description : public material_description_base
     {
     public:

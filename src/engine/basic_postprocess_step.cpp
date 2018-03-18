@@ -1,13 +1,14 @@
-#include "../../include/rendering/dof_postprocess_step.hpp"
+#include "../../include/engine/basic_postprocess_step.hpp"
 
 #include "../../include/rendering/shader_variable_names.hpp"
-
 #include "../../include/gl/shader.hpp"
 
 
 namespace yavsg
 {
-    dof_postprocess_step::dof_postprocess_step( const camera& sc ) :
+    basic_postprocess_step::basic_postprocess_step(
+        const std::string& fragment_shader_filename
+    ) :
         postprocess_program( {
             yavsg::gl::shader::from_file(
                 GL_VERTEX_SHADER,
@@ -15,7 +16,7 @@ namespace yavsg
             ).id,
             yavsg::gl::shader::from_file(
                 GL_FRAGMENT_SHADER,
-                "../src/shaders/postprocess/dof.frag"
+                fragment_shader_filename
             ).id
         } ),
         vertices( {
@@ -27,8 +28,7 @@ namespace yavsg
         indices( {
             0, 1, 2,
             2, 3, 0
-        } ),
-        scene_camera( sc )
+        } )
     {
         postprocess_program.link_attribute< 0 >(
             shader_string_id::VERTEX_IN_POSITION,
@@ -43,7 +43,7 @@ namespace yavsg
         );
     }
     
-    void dof_postprocess_step::run(
+    void basic_postprocess_step::run(
         source_type               & source,
         gl::write_only_framebuffer& target
     )
@@ -70,19 +70,6 @@ namespace yavsg
         postprocess_program.set_uniform(
             shader_string_id::FRAMEBUFFER_SOURCE_DEPTH,
             1
-        );
-        
-        postprocess_program.set_uniform(
-            shader_string_id::CAMERA_POINT_NEAR,
-            scene_camera.near_point()
-        );
-        postprocess_program.set_uniform(
-            shader_string_id::CAMERA_POINT_FOCAL,
-            scene_camera.focal_point()
-        );
-        postprocess_program.set_uniform(
-            shader_string_id::CAMERA_POINT_FAR,
-            scene_camera.far_point()
         );
         
         postprocess_program.set_uniform(
