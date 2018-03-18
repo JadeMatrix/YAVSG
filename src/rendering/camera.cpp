@@ -5,8 +5,7 @@
 
 namespace
 {
-    // static const auto max_biaxis_pitch = yavsg::degrees< float >{ 89.999f };
-    static const auto max_biaxis_pitch = yavsg::degrees< float >{ 80.0f };
+    static const auto max_biaxis_pitch = yavsg::degrees< float >{ 89.999f };
     
     yavsg::degrees< float > clamp_pitch( yavsg::degrees< float > pitch )
     {
