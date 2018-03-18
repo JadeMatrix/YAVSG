@@ -535,18 +535,14 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             SDL_FreeSurface( converted_surface );
         }
         
-        // Mark surface pixels as preallocated so SDL doesn't free them
-        // sdl_surface -> flags |= SDL_PREALLOC;
-        // auto sdl_surface_data = sdl_surface -> pixels;
-        // SDL_FreeSurface( sdl_surface );
         std::size_t width  = sdl_surface -> w;
         std::size_t height = sdl_surface -> h;
-        auto sample_count = channels * width * height;
-        auto sdl_surface_data = new char[ sample_count ];
         
         // Copy data; need to do this because the data may/will be freed
         // elsewhere and be freed with `delete[]`, but SDL allocates with
         // `malloc()` since it's written in C
+        auto sample_count = channels * width * height;
+        auto sdl_surface_data = new char[ sample_count ];
         std::copy_n(
             static_cast< char* >( sdl_surface -> pixels ),
             sample_count,
