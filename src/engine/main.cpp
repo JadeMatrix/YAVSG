@@ -5,6 +5,10 @@
 
 // DEVEL:
 #include "../../include/engine/frame.hpp"
+#include "../../include/events/event_listener.hpp"
+#include "../../include/sdl/_sdl_base.hpp"
+#include "../../include/tasking/tasking.hpp"
+#include "../../include/tasking/utility_tasks.hpp"
 
 #include <exception>
 #include <iostream>
@@ -14,6 +18,15 @@ int main( int argc, char* argv[] )
 {
     try
     {
+        yavsg::event_listener< SDL_QuitEvent > quit_listener(
+            []( const SDL_QuitEvent& e ){
+                std::cout << "quitting...\n";
+                yavsg::submit_task(
+                    std::make_unique< yavsg::stop_task_system_task >()
+                );
+            }
+        );
+        
         yavsg::submit_task( std::make_unique< yavsg::frame_task >() );
         
         yavsg::initialize_task_system( true );
