@@ -1,6 +1,6 @@
 #pragma once
-#ifndef YAVSG_RENDERING_OBJ_RENDER_STEP_HPP
-#define YAVSG_RENDERING_OBJ_RENDER_STEP_HPP
+#ifndef YAVSG_ENGINE_OBJ_RENDER_STEP_HPP
+#define YAVSG_ENGINE_OBJ_RENDER_STEP_HPP
 
 
 #include "../gl/attribute_buffer.hpp"

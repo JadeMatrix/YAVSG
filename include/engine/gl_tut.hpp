@@ -1,6 +1,6 @@
 #pragma once
-#ifndef YAVSG_RENDERING_GL_TUT_HPP
-#define YAVSG_RENDERING_GL_TUT_HPP
+#ifndef YAVSG_ENGINE_GL_TUT_HPP
+#define YAVSG_ENGINE_GL_TUT_HPP
 
 
 namespace gl_tut
