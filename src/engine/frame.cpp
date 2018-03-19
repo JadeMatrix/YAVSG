@@ -28,7 +28,6 @@ namespace yavsg
             window_height,
             SDL_WINDOW_OPENGL // | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN
         },
-        running{ true },
         camera_look_listener{ [ this ]( const SDL_MouseMotionEvent& e ){
             this -> ors -> main_camera.increment_pitch_yaw(
                 static_cast< float >( e.yrel ) / -4.0f,
@@ -120,68 +119,59 @@ namespace yavsg
     
     bool frame_task::operator()()
     {
-        if( !running )
-        {
-            std::cout << "quitting..." << std::endl;
-            submit_task(
-                std::make_unique< stop_task_system_task >()
-            );
-        }
+        auto current_time = std::chrono::high_resolution_clock::now();
+        
+        // Even though only target_buffer needs to be a write-only
+        // buffer, these both need to be the same type for std::swap()
+        wo_fb_type* source_buffer;
+        wo_fb_type* target_buffer;
+        
+        if( postprocess_steps.size() )
+            target_buffer = buffer_A;
         else
+            target_buffer = &window.default_framebuffer();
+        source_buffer = buffer_B;
+        
+        target_buffer -> alpha_blending(
+            gl::alpha_blend_mode::PREMULTIPLIED_DROP_ALPHA
+        );
+        target_buffer -> bind();
+        
+        // Run all scene render steps against the same framebuffer
+        for( auto step : scene_steps )
+            step -> run( *target_buffer );
+        
+        auto postprocess_step_iter = postprocess_steps.begin();
+        while( postprocess_step_iter != postprocess_steps.end() )
         {
-            auto current_time = std::chrono::high_resolution_clock::now();
+            std::swap( source_buffer, target_buffer);
             
-            // Even though only target_buffer needs to be a write-only
-            // buffer, these both need to be the same type for std::swap()
-            wo_fb_type* source_buffer;
-            wo_fb_type* target_buffer;
+            bool is_first_step =
+                postprocess_step_iter == postprocess_steps.begin();
             
-            if( postprocess_steps.size() )
-                target_buffer = buffer_A;
-            else
+            // Get the current step before advancing the iterator
+            auto step = *postprocess_step_iter;
+            // The last postprocess step should target the window's
+            // default framebuffer
+            if( ++postprocess_step_iter == postprocess_steps.end() )
                 target_buffer = &window.default_framebuffer();
-            source_buffer = buffer_B;
             
             target_buffer -> alpha_blending(
-                gl::alpha_blend_mode::PREMULTIPLIED_DROP_ALPHA
+                gl::alpha_blend_mode::DISABLED
             );
+            
             target_buffer -> bind();
             
-            // Run all scene render steps against the same framebuffer
-            for( auto step : scene_steps )
-                step -> run( *target_buffer );
-            
-            auto postprocess_step_iter = postprocess_steps.begin();
-            while( postprocess_step_iter != postprocess_steps.end() )
-            {
-                std::swap( source_buffer, target_buffer);
-                
-                bool is_first_step =
-                    postprocess_step_iter == postprocess_steps.begin();
-                
-                // Get the current step before advancing the iterator
-                auto step = *postprocess_step_iter;
-                // The last postprocess step should target the window's
-                // default framebuffer
-                if( ++postprocess_step_iter == postprocess_steps.end() )
-                    target_buffer = &window.default_framebuffer();
-                
-                target_buffer -> alpha_blending(
-                    gl::alpha_blend_mode::DISABLED
-                );
-                
-                target_buffer -> bind();
-                
-                step -> run(
-                    *static_cast< fb_type* >( source_buffer ),
-                    *                         target_buffer
-                );
-            }
-            
-            SDL_GL_SwapWindow( window.sdl_window );
-            previous_time = current_time;
+            step -> run(
+                *static_cast< fb_type* >( source_buffer ),
+                *                         target_buffer
+            );
         }
         
-        return running;
+        SDL_GL_SwapWindow( window.sdl_window );
+        previous_time = current_time;
+        
+        // TODO: Frame timer for window should submit a new frame task
+        return true;
     }
 }
