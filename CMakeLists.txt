@@ -43,6 +43,7 @@ ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
     src/engine/4up_postprocess_step.cpp
     src/engine/dof_postprocess_step.cpp
     src/engine/obj_render_step.cpp
+    src/engine/frame.cpp
     src/rendering/shader_variable_names.cpp
     src/rendering/camera.cpp
     src/tasking/tasking.cpp
