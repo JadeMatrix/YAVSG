@@ -58,6 +58,8 @@ namespace yavsg
                 general_lopri_queue.emplace_back( std::move( t ) );
         }
         
+        // If the notified worker is unable to execute the task due to flags,
+        // notifications will chain until one can
         queues_condition.notify_one();
     }
     

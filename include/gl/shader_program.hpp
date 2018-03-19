@@ -26,7 +26,6 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
         GLuint& gl_program_id               // Passed along for error handling
     );
     
-    // TODO: template< typename Buffer, unsigned int Targets > class shader_program
     template< class AttributeBuffer, class Framebuffer > class shader_program
     {
     public:
