@@ -68,6 +68,8 @@ namespace yavsg
         // Main thread and GPU thread are the same for now
         if( worker_flags & task_worker_flag::MAIN_THREAD )
             worker_flags |= task_worker_flag::GPU_THREAD;
+        else if( worker_flags & task_worker_flag::GPU_THREAD )
+            worker_flags |= task_worker_flag::MAIN_THREAD;
         
         // List of queues to check, in order of priority
         std::vector< task_queue_type* > queues;
