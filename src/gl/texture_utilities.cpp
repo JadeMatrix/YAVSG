@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <exception>
 #include <limits>
-#include <mutex>
+#include <mutex>    // std::mutex, std::once_flag, std::call_once()
 #include <utility>  // std::swap()
 
 

@@ -18,14 +18,14 @@ int main( int argc, char* argv[] )
 {
     try
     {
-        yavsg::event_listener< SDL_QuitEvent > quit_listener(
+        yavsg::event_listener< SDL_QuitEvent > quit_listener{
             []( const SDL_QuitEvent& e ){
                 std::cout << "quitting...\n";
                 yavsg::submit_task(
                     std::make_unique< yavsg::stop_task_system_task >()
                 );
             }
-        );
+        };
         
         yavsg::submit_task( std::make_unique< yavsg::frame_task >() );
         
