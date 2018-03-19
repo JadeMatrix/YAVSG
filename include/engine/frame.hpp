@@ -6,7 +6,8 @@
 #include "../rendering/render_step.hpp"
 #include "../engine/obj_render_step.hpp"
 #include "../sdl/sdl_utils.hpp"
-#include "../tasking/tasking.hpp"
+#include "../tasking/task.hpp"
+#include "../events/event_listener.hpp"
 
 #include <chrono>
 #include <vector>
@@ -43,6 +44,9 @@ namespace yavsg
         
         fb_type* buffer_A;
         fb_type* buffer_B;
+        
+        event_listener< SDL_MouseMotionEvent > camera_look_listener;
+        event_listener< SDL_MouseWheelEvent  > focal_adjust_listener;
         
     public:
         frame_task();

@@ -39,6 +39,7 @@ ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
     src/engine/frame.cpp
     src/engine/main.cpp
     src/engine/obj_render_step.cpp
+    src/events/event_listener.cpp
     src/gl/error.cpp
     src/gl/framebuffer.cpp
     src/gl/shader.cpp

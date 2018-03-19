@@ -4,6 +4,7 @@
 #include "../../include/engine/basic_postprocess_step.hpp"
 #include "../../include/engine/dof_postprocess_step.hpp"
 #include "../../include/gl/framebuffer.hpp"
+#include "../../include/tasking/tasking.hpp"
 #include "../../include/tasking/utility_tasks.hpp"
 
 #include <iostream>
@@ -27,7 +28,27 @@ namespace yavsg
             window_height,
             SDL_WINDOW_OPENGL // | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN
         },
-        running{ true }
+        running{ true },
+        camera_look_listener{ [ this ]( const SDL_MouseMotionEvent& e ){
+            this -> ors -> main_camera.increment_pitch_yaw(
+                static_cast< float >( e.yrel ) / -4.0f,
+                static_cast< float >( e.xrel ) / -4.0f
+            );
+        } },
+        focal_adjust_listener{ [ this ]( const SDL_MouseWheelEvent& e ){
+            auto new_focal_point = (
+                static_cast< float >( e.y )
+                / 4.0f
+                + this -> ors -> main_camera.focal_point()
+            );
+            auto near = this -> ors -> main_camera.near_point();
+            auto  far = this -> ors -> main_camera. far_point();
+            if( new_focal_point < near )
+                new_focal_point = near + 0.1f;
+            else if( new_focal_point > far )
+                new_focal_point = far - 0.1f;
+            this -> ors -> main_camera.focal_point( new_focal_point );
+        } }
     {
         SDL_SetRelativeMouseMode( SDL_TRUE );
         
@@ -99,58 +120,6 @@ namespace yavsg
     
     bool frame_task::operator()()
     {
-        SDL_Event window_event;
-        while( SDL_PollEvent( &window_event ) )
-        {
-            switch( window_event.type )
-            {
-            case SDL_KEYDOWN:
-            case SDL_KEYUP:
-                {
-                    switch( window_event.key.keysym.sym )
-                    {
-                    case SDLK_ESCAPE:
-                        if( SDL_GetWindowFlags( window.sdl_window ) & (
-                              SDL_WINDOW_FULLSCREEN
-                            | SDL_WINDOW_FULLSCREEN_DESKTOP
-                        ) )
-                            running = false;
-                        break;
-                    default:
-                        break;
-                    }
-                }
-                break;
-            case SDL_MOUSEMOTION:
-                ors -> main_camera.increment_pitch_yaw(
-                    static_cast< float >( window_event.motion.yrel ) / -4.0f,
-                    static_cast< float >( window_event.motion.xrel ) / -4.0f
-                );
-                break;
-            case SDL_MOUSEWHEEL:
-                {
-                    auto new_focal_point = (
-                        static_cast< float >( window_event.wheel.y )
-                        / 4.0f
-                        + ors -> main_camera.focal_point()
-                    );
-                    auto near = ors -> main_camera.near_point();
-                    auto  far = ors -> main_camera. far_point();
-                    if( new_focal_point < near )
-                        new_focal_point = near + 0.1f;
-                    else if( new_focal_point > far )
-                        new_focal_point = far - 0.1f;
-                    ors -> main_camera.focal_point( new_focal_point );
-                }
-                break;
-            case SDL_QUIT:
-                running = false;
-                break;
-            default:
-                break;
-            }
-        }
-        
         if( !running )
         {
             std::cout << "quitting..." << std::endl;
