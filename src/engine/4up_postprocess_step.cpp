@@ -1,142 +1,38 @@
 #include "../../include/engine/4up_postprocess_step.hpp"
 
-#include "../../include/rendering/shader_variable_names.hpp"
 #include "../../include/gl/shader.hpp"
-
-
-namespace
-{
-    const std::string vertex_shader = R"<<<(
-#version 150 core
-in vec3 vertex_in_position;
-in vec2 vertex_in_texture;
-out VERTEX_OUT
-{
-    vec2 texture;
-} vertex_out;
-void main()
-{
-    vertex_out.texture = vertex_in_texture;
-    gl_Position = vec4(
-        vertex_in_position.x,
-        vertex_in_position.y,
-        0.0,
-        1.0
-    );
-}
-)<<<";
-    
-    const std::string fragment_shader = R"<<<(
-#version 150 core
-in VERTEX_OUT
-{
-    vec2 texture;
-} fragment_in;
-out vec4 fragment_out_color;
-uniform sampler2D framebuffer_source_color;
-void main()
-{
-    fragment_out_color = texture(
-        framebuffer_source_color,
-        vec2(
-            fragment_in.texture.x,
-            fragment_in.texture.y * -1
-        )
-    );
-}
-)<<<";
-}
+#include "../../include/engine/basic_postprocess_step.hpp"
+#include "../../include/rendering/shader_variable_names.hpp"
 
 
 namespace yavsg
 {
     debug_4up_postprocess_step::debug_4up_postprocess_step(
-        child_type* top_left,
-        child_type* top_right,
-        child_type* bottom_left,
-        child_type* bottom_right
+        std::unique_ptr< child_type > top_left,
+        std::unique_ptr< child_type > top_right,
+        std::unique_ptr< child_type > bottom_left,
+        std::unique_ptr< child_type > bottom_right
     ) :
-        top_left(     top_left     ),
-        top_right(    top_right    ),
-        bottom_left(  bottom_left  ),
-        bottom_right( bottom_right ),
-        postprocess_program( {
-            gl::shader( GL_VERTEX_SHADER  ,  vertex_shader ).id,
-            gl::shader( GL_FRAGMENT_SHADER,fragment_shader ).id
-        } ),
-        vertices( {
-            /*
-            (-1, 1)   ( 0, 1)   ( 1, 1)
-            
-            (-1, 0)   ( 0, 0)   ( 1, 0)
-            
-            (-1,-1)   ( 0,-1)   ( 1,-1)
-            */
-            
-            // Top left
-            { { -1.0f,  1.0f }, { 0.0f, 0.0f } }, //    top left
-            { {  0.0f,  1.0f }, { 1.0f, 0.0f } }, //    top right
-            { {  0.0f,  0.0f }, { 1.0f, 1.0f } }, // bottom right
-            { { -1.0f,  0.0f }, { 0.0f, 1.0f } }, // bottom left
-            
-            // Top right
-            { {  0.0f,  1.0f }, { 0.0f, 0.0f } }, //    top left
-            { {  1.0f,  1.0f }, { 1.0f, 0.0f } }, //    top right
-            { {  1.0f,  0.0f }, { 1.0f, 1.0f } }, // bottom right
-            { {  0.0f,  0.0f }, { 0.0f, 1.0f } }, // bottom left
-            
-            // Bottom left
-            { { -1.0f,  0.0f }, { 0.0f, 0.0f } }, //    top left
-            { {  0.0f,  0.0f }, { 1.0f, 0.0f } }, //    top right
-            { {  0.0f, -1.0f }, { 1.0f, 1.0f } }, // bottom right
-            { { -1.0f, -1.0f }, { 0.0f, 1.0f } }, // bottom left
-            
-            // Bottom right
-            { {  0.0f,  0.0f }, { 0.0f, 0.0f } }, //    top left
-            { {  1.0f,  0.0f }, { 1.0f, 0.0f } }, //    top right
-            { {  1.0f, -1.0f }, { 1.0f, 1.0f } }, // bottom right
-            { {  0.0f, -1.0f }, { 0.0f, 1.0f } }  // bottom left
-        } ),
-        top_left_indices( {
-            0 +  0, 1 +  0, 2 +  0,
-            2 +  0, 3 +  0, 0 +  0
-        } ),
-        top_right_indices( {
-            0 +  4, 1 +  4, 2 +  4,
-            2 +  4, 3 +  4, 0 +  4
-        } ),
-        bottom_left_indices( {
-            0 +  8, 1 +  8, 2 +  8,
-            2 +  8, 3 +  8, 0 +  8
-        } ),
-        bottom_right_indices( {
-            0 + 12, 1 + 12, 2 + 12,
-            2 + 12, 3 + 12, 0 + 12
+        top_left{     std::move( top_left     ) },
+        top_right{    std::move( top_right    ) },
+        bottom_left{  std::move( bottom_left  ) },
+        bottom_right{ std::move( bottom_right ) }
+    {
+        struct substep_info
+        {
+            std::unique_ptr< child_type >& step;
+        };
+        
+        for( auto substep : {
+            substep_info{ this -> top_left     },
+            substep_info{ this -> top_right    },
+            substep_info{ this -> bottom_left  },
+            substep_info{ this -> bottom_right }
         } )
-    {
-        postprocess_program.link_attribute< 0 >(
-            shader_string_id::VERTEX_IN_POSITION,
-            vertices
-        );
-        postprocess_program.link_attribute< 1 >(
-            shader_string_id::VERTEX_IN_TEXTURE,
-            vertices
-        );
-        postprocess_program.bind_target< 0 >(
-            shader_string_id::FRAGMENT_OUT_COLOR
-        );
-    }
-    
-    debug_4up_postprocess_step::~debug_4up_postprocess_step()
-    {
-        if( top_left )
-            delete top_left;
-        if( top_right )
-            delete top_right;
-        if( bottom_left )
-            delete bottom_left;
-        if( bottom_right )
-            delete bottom_right;
+            if( !substep.step )
+                substep.step = std::make_unique< basic_postprocess_step >(
+                    "../src/shaders/postprocess.frag"
+                );
     }
     
     void debug_4up_postprocess_step::run(
@@ -145,8 +41,6 @@ namespace yavsg
     )
     {
         // TODO: error handling
-        
-        // TODO: just use glViewport()?
         
         glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
         glClear(
@@ -160,52 +54,42 @@ namespace yavsg
         struct substep_info
         {
             child_type* step;
-            gl::index_buffer& indices;
+            int x_offset_factor;
+            int y_offset_factor;
         };
         
-        if(
-            !sub_buffer
-            || sub_buffer ->  width() != target. width()
-            || sub_buffer -> height() != target.height()
-        )
-            sub_buffer = std::make_unique< source_type >(
-                target. width(),
-                target.height()
-            );
-        
-        source_type* source_buffer;
-        
-        sub_buffer -> alpha_blending( gl::alpha_blend_mode::DISABLED );
-        
         for( auto substep : {
-            substep_info{     top_left,     top_left_indices },
-            substep_info{    top_right,    top_right_indices },
-            substep_info{  bottom_left,  bottom_left_indices },
-            substep_info{ bottom_right, bottom_right_indices }
+            substep_info{     top_left.get(), 0, 1 },
+            substep_info{    top_right.get(), 1, 1 },
+            substep_info{  bottom_left.get(), 0, 0 },
+            substep_info{ bottom_right.get(), 1, 0 }
         } )
         {
+            auto half_width  = target. width() / 2;
+            auto half_height = target.height() / 2;
+            
+            glViewport(
+                substep.x_offset_factor * half_width,
+                substep.y_offset_factor * half_height,
+                half_width,
+                half_height
+            );
+            
+            glEnable( GL_SCISSOR_TEST );
+            glScissor(
+                substep.x_offset_factor * half_width,
+                substep.y_offset_factor * half_height,
+                half_width,
+                half_height
+            );
+            
             if( substep.step )
             {
-                sub_buffer -> bind();
-                substep.step -> run( source, *sub_buffer );
-                
-                source_buffer = sub_buffer.get();
+                target.bind();
+                substep.step -> run( source, target );
             }
-            else
-                source_buffer = &source;
-            
-            target.bind();
-            
-            source_buffer -> color_buffer< 0 >().bind_as< 0 >();
-            postprocess_program.set_uniform(
-                shader_string_id::FRAMEBUFFER_SOURCE_COLOR,
-                0
-            );
-            
-            postprocess_program.run(
-                vertices,
-                substep.indices
-            );
         }
+        
+        glDisable( GL_SCISSOR_TEST );
     }
 }

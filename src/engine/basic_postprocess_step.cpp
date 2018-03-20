@@ -81,8 +81,6 @@ namespace yavsg
             static_cast< GLfloat >( target.height() )
         );
         
-        glViewport( 0, 0, target.width(), target.height() );
-        
         postprocess_program.run(
             vertices,
             indices

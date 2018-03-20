@@ -67,24 +67,24 @@ namespace yavsg
             ors
         };
         postprocess_steps = std::vector< postprocess_step_type* >{
-            // new debug_4up_postprocess_step(
-            //     nullptr,
-            //     new basic_postprocess_step(
-            //         "../src/shaders/postprocess/linear_to_sRGB.frag"
-            //     ),
-            //     new dof_postprocess_step(
-            //         ors -> main_camera
-            //     ),
-            //     new basic_postprocess_step(
-            //         "../src/shaders/postprocess/buffer_analysis.frag"
-            //     )
-            // )
-            new dof_postprocess_step(
-                ors -> main_camera
-            ),
-            new basic_postprocess_step(
-                "../src/shaders/postprocess/linear_to_sRGB.frag"
+            new debug_4up_postprocess_step(
+                nullptr,
+                std::make_unique< basic_postprocess_step >(
+                    "../src/shaders/postprocess/linear_to_sRGB.frag"
+                ),
+                std::make_unique< dof_postprocess_step >(
+                    ors -> main_camera
+                ),
+                std::make_unique< basic_postprocess_step >(
+                    "../src/shaders/postprocess/buffer_analysis.frag"
+                )
             )
+            // new dof_postprocess_step(
+            //     ors -> main_camera
+            // ),
+            // new basic_postprocess_step(
+            //     "../src/shaders/postprocess/linear_to_sRGB.frag"
+            // )
         };
         
         start_time = std::chrono::high_resolution_clock::now();
@@ -147,7 +147,17 @@ namespace yavsg
         
         // Run all scene render steps against the same framebuffer
         for( auto step : scene_steps )
+        {
+            // Reset viewport to default before running step
+            glViewport(
+                0,
+                0,
+                target_buffer -> width(),
+                target_buffer -> height()
+            );
+            
             step -> run( *target_buffer );
+        }
         
         auto postprocess_step_iter = postprocess_steps.begin();
         while( postprocess_step_iter != postprocess_steps.end() )
@@ -169,6 +179,14 @@ namespace yavsg
             );
             
             target_buffer -> bind();
+            
+            // Reset viewport to default before running step
+            glViewport(
+                0,
+                0,
+                target_buffer -> width(),
+                target_buffer -> height()
+            );
             
             step -> run(
                 *static_cast< fb_type* >( source_buffer ),
