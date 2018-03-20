@@ -1,5 +1,6 @@
 #include "../../include/engine/obj_render_step.hpp"
 
+#include "../../include/gl/error.hpp"
 #include "../../include/gl/shader.hpp"
 #include "../../include/gl/texture.hpp"
 #include "../../include/math/common_transforms.hpp"
@@ -273,14 +274,19 @@ namespace yavsg
     
     void obj_render_step::run( gl::write_only_framebuffer& target )
     {
-        // TODO: error checking
-        
-        glEnable( GL_DEPTH_TEST );
         glClearColor( 0.5f, 0.5f, 0.5f, 1.0f );
         glClear(
               GL_COLOR_BUFFER_BIT
             | GL_DEPTH_BUFFER_BIT
             | GL_STENCIL_BUFFER_BIT
+        );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't clear buffer for yavsg::obj_render_step::run()"
+        );
+        
+        glEnable( GL_DEPTH_TEST );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't enable depth testing for yavsg::obj_render_step::run()"
         );
         
         scene_program.set_uniform(

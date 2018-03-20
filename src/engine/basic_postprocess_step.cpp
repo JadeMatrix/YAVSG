@@ -1,7 +1,8 @@
 #include "../../include/engine/basic_postprocess_step.hpp"
 
-#include "../../include/rendering/shader_variable_names.hpp"
+#include "../../include/gl/error.hpp"
 #include "../../include/gl/shader.hpp"
+#include "../../include/rendering/shader_variable_names.hpp"
 
 
 namespace yavsg
@@ -48,16 +49,21 @@ namespace yavsg
         gl::write_only_framebuffer& target
     )
     {
-        // TODO: error handling
-        
         glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
         glClear(
               GL_COLOR_BUFFER_BIT
             | GL_DEPTH_BUFFER_BIT
             | GL_STENCIL_BUFFER_BIT
         );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't clear buffer for yavsg::basic_postprocess_step::run()"
+        );
         
         glDisable( GL_DEPTH_TEST );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't disable depth testing for "
+            "yavsg::basic_postprocess_step::run()"
+        );
         
         source.color_buffer< 0 >().bind_as< 0 >();
         postprocess_program.set_uniform(

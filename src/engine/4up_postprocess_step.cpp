@@ -1,5 +1,6 @@
 #include "../../include/engine/4up_postprocess_step.hpp"
 
+#include "../../include/gl/error.hpp"
 #include "../../include/gl/shader.hpp"
 #include "../../include/engine/basic_postprocess_step.hpp"
 #include "../../include/rendering/shader_variable_names.hpp"
@@ -40,16 +41,21 @@ namespace yavsg
         gl::write_only_framebuffer& target
     )
     {
-        // TODO: error handling
-        
         glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
         glClear(
               GL_COLOR_BUFFER_BIT
             | GL_DEPTH_BUFFER_BIT
             | GL_STENCIL_BUFFER_BIT
         );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't clear buffer for yavsg::debug_4up_postprocess_step::run()"
+        );
         
         glDisable( GL_DEPTH_TEST );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't disable depth testing for "
+            "yavsg::debug_4up_postprocess_step::run()"
+        );
         
         struct substep_info
         {
@@ -74,13 +80,26 @@ namespace yavsg
                 half_width,
                 half_height
             );
+            YAVSG_GL_THROW_FOR_ERRORS(
+                "couldn't set viewport for "
+                "yavsg::debug_4up_postprocess_step::run()"
+            );
             
             glEnable( GL_SCISSOR_TEST );
+            YAVSG_GL_THROW_FOR_ERRORS(
+                "couldn't enable scissor testing for "
+                "yavsg::debug_4up_postprocess_step::run()"
+            );
+            
             glScissor(
                 substep.x_offset_factor * half_width,
                 substep.y_offset_factor * half_height,
                 half_width,
                 half_height
+            );
+            YAVSG_GL_THROW_FOR_ERRORS(
+                "couldn't set scissor for "
+                "yavsg::debug_4up_postprocess_step::run()"
             );
             
             if( substep.step )
@@ -91,5 +110,9 @@ namespace yavsg
         }
         
         glDisable( GL_SCISSOR_TEST );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't disable scissor testing for "
+            "yavsg::debug_4up_postprocess_step::run()"
+        );
     }
 }
