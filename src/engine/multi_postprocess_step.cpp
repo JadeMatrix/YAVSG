@@ -4,6 +4,7 @@
 
 #include <exception>
 #include <fstream>
+#include <set>
 
 
 namespace
@@ -48,7 +49,12 @@ namespace yavsg
     {
         std::string fragment_shader_source = fragment_shader_header;
         
-        for( auto& function_name : function_names )
+        // Iterating over a set of function names ensures each one is defined
+        // only once even if it's called multiple times
+        for( auto& function_name : std::set< std::string >{
+            function_names.begin(),
+            function_names.end()
+        } )
         {
             auto filename = (
                 "../src/shaders/postprocess/"
@@ -74,7 +80,6 @@ namespace yavsg
                 {}
             );
             
-            // TODO: Make sure definitions aren't repeated
             fragment_shader_source += function_source;
         }
         
