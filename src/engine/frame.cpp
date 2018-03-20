@@ -26,7 +26,7 @@ namespace yavsg
             SDL_WINDOWPOS_CENTERED,
             window_width,
             window_height,
-            SDL_WINDOW_OPENGL // | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN
+            SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE // | SDL_WINDOW_FULLSCREEN
         },
         camera_look_listener{ [ this ]( const SDL_MouseMotionEvent& e ){
             this -> ors -> main_camera.increment_pitch_yaw(
@@ -89,23 +89,10 @@ namespace yavsg
         
         start_time = std::chrono::high_resolution_clock::now();
         previous_time = start_time;
-        
-        // TODO: Get dimensions from window
-        buffer_A = new fb_type(
-            window_width,
-            window_height
-        );
-        buffer_B = new fb_type(
-            window_width,
-            window_height
-        );
     }
     
     frame_task::~frame_task()
     {
-        delete buffer_A;
-        delete buffer_B;
-        
         for( auto step : postprocess_steps )
             delete step;
         for( auto step : scene_steps )
@@ -121,16 +108,37 @@ namespace yavsg
     {
         auto current_time = std::chrono::high_resolution_clock::now();
         
+        // TODO: Just use window dimensions
+        auto& window_buffer = window.default_framebuffer();
+        
+        // Initialize buffers or update dimensions; only checks one because both
+        // A and B's states are locked
+        if(
+            !buffer_A
+            || buffer_A ->  width() != window_buffer. width()
+            || buffer_A -> height() != window_buffer.height()
+        )
+        {
+            buffer_A = std::make_unique< fb_type >(
+                window_buffer. width(),
+                window_buffer.height()
+            );
+            buffer_B = std::make_unique< fb_type >(
+                window_buffer. width(),
+                window_buffer.height()
+            );
+        }
+        
         // Even though only target_buffer needs to be a write-only
         // buffer, these both need to be the same type for std::swap()
         wo_fb_type* source_buffer;
         wo_fb_type* target_buffer;
         
         if( postprocess_steps.size() )
-            target_buffer = buffer_A;
+            target_buffer = buffer_A.get();
         else
             target_buffer = &window.default_framebuffer();
-        source_buffer = buffer_B;
+        source_buffer = buffer_B.get();
         
         target_buffer -> alpha_blending(
             gl::alpha_blend_mode::PREMULTIPLIED_DROP_ALPHA
@@ -154,7 +162,7 @@ namespace yavsg
             // The last postprocess step should target the window's
             // default framebuffer
             if( ++postprocess_step_iter == postprocess_steps.end() )
-                target_buffer = &window.default_framebuffer();
+                target_buffer = &window_buffer;
             
             target_buffer -> alpha_blending(
                 gl::alpha_blend_mode::DISABLED

@@ -112,8 +112,7 @@ namespace yavsg
         bottom_right_indices( {
             0 + 12, 1 + 12, 2 + 12,
             2 + 12, 3 + 12, 0 + 12
-        } ),
-        sub_buffer( nullptr )
+        } )
     {
         postprocess_program.link_attribute< 0 >(
             shader_string_id::VERTEX_IN_POSITION,
@@ -138,9 +137,6 @@ namespace yavsg
             delete bottom_left;
         if( bottom_right )
             delete bottom_right;
-        
-        if( sub_buffer )
-            delete sub_buffer;
     }
     
     void debug_4up_postprocess_step::run(
@@ -149,6 +145,8 @@ namespace yavsg
     )
     {
         // TODO: error handling
+        
+        // TODO: just use glViewport()?
         
         glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
         glClear(
@@ -165,16 +163,12 @@ namespace yavsg
             gl::index_buffer& indices;
         };
         
-        if( !sub_buffer )
-            sub_buffer = new source_type(
-                target. width(),
-                target.height()
-            );
-        else if(
-               sub_buffer ->  width() != target. width()
+        if(
+            !sub_buffer
+            || sub_buffer ->  width() != target. width()
             || sub_buffer -> height() != target.height()
         )
-            sub_buffer -> set_size(
+            sub_buffer = std::make_unique< source_type >(
                 target. width(),
                 target.height()
             );
@@ -195,7 +189,7 @@ namespace yavsg
                 sub_buffer -> bind();
                 substep.step -> run( source, *sub_buffer );
                 
-                source_buffer = sub_buffer;
+                source_buffer = sub_buffer.get();
             }
             else
                 source_buffer = &source;

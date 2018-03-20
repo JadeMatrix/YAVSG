@@ -10,6 +10,7 @@
 #include "../events/event_listener.hpp"
 
 #include <chrono>
+#include <memory>   // std::unique_ptr
 #include <vector>
 
 
@@ -40,8 +41,8 @@ namespace yavsg
         std::chrono::high_resolution_clock::time_point    start_time;
         std::chrono::high_resolution_clock::time_point previous_time;
         
-        fb_type* buffer_A;
-        fb_type* buffer_B;
+        std::unique_ptr< fb_type > buffer_A;
+        std::unique_ptr< fb_type > buffer_B;
         
         event_listener< SDL_MouseMotionEvent > camera_look_listener;
         event_listener< SDL_MouseWheelEvent  > focal_adjust_listener;

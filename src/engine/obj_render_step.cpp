@@ -296,6 +296,8 @@ namespace yavsg
             )
         );
         
+        glViewport( 0, 0, target.width(), target.height() );
+        
         scene_program.set_uniform(
             shader_string_id::CAMERA_POINT_NEAR,
             main_camera.near_point()

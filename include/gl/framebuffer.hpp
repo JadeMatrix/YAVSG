@@ -150,8 +150,6 @@ namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
         );
         ~framebuffer();
         
-        void set_size( std::size_t width, std::size_t height );
-        
         depth_stencil_type& depth_stencil_buffer();
         
         template< std::size_t Nth > typename std::tuple_element<
@@ -329,11 +327,11 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
             0   // Mipmap level (not useful)
         );
         YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't attach depth buffer texture "
+            "couldn't attach depth/stencil buffer texture "
             + std::to_string( t.gl_texture_id() )
             + " to framebuffer "
             + std::to_string( this -> gl_id )
-            + " for yavsg::gl::framebuffer::depth_buffer_init()"
+            + " for yavsg::gl::framebuffer::depth_stencil_buffer_init()"
         );
         
         return t;
@@ -368,15 +366,53 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
     template< class... ColorTargetTypes >
     void framebuffer< ColorTargetTypes... >::check_finalized()
     {
-        if(
-            glCheckFramebufferStatus( GL_FRAMEBUFFER )
-            != GL_FRAMEBUFFER_COMPLETE
-        )
+        auto status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
+        
+        if( status != GL_FRAMEBUFFER_COMPLETE )
+        {
+            std::string status_string;
+            switch( status )
+            {
+            case GL_FRAMEBUFFER_UNDEFINED:
+                status_string = "GL_FRAMEBUFFER_UNDEFINED";
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                status_string = "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                status_string = "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                status_string = "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                status_string = "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
+                break;
+            case GL_FRAMEBUFFER_UNSUPPORTED:
+                status_string = "GL_FRAMEBUFFER_UNSUPPORTED";
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+                status_string = "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+                status_string = "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
+                break;
+            case 0:
+                status_string = "error calling glCheckFramebufferStatus()";
+                break;
+            default:
+                status_string = "<unrecognized code>";
+                break;
+            }
+            
             throw std::runtime_error(
                 "failed to complete famebuffer "
                 + std::to_string( this -> gl_id )
-                + " for yavsg::gl::framebuffer"
+                + " ("
+                + status_string
+                + ") for yavsg::gl::framebuffer"
             );
+        }
     }
     
     template< class... ColorTargetTypes >
@@ -400,36 +436,6 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
     framebuffer< ColorTargetTypes... >::~framebuffer()
     {
         glDeleteFramebuffers( 1, &( this -> gl_id ) );
-    }
-    
-    template< class... ColorTargetTypes >
-    void framebuffer< ColorTargetTypes... >::set_size(
-        std::size_t width,
-        std::size_t height
-    )
-    {
-        this -> _width  = width;
-        this -> _height = height;
-        
-        try
-        {
-            _color_buffers = framebuffer_color_target_initializer<
-                ColorTargetTypes...
-            >::init(
-                this -> _width,
-                this -> _height,
-                this -> gl_id
-            );
-        }
-        catch( const summary_error& e )
-        {
-            throw summary_error(
-                e.what() + std::string(
-                    " for yavsg::gl::framebuffer::set_size()"
-                ),
-                e.error_codes
-            );
-        }
     }
     
     template< class... ColorTargetTypes >

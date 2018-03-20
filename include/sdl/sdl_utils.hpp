@@ -5,8 +5,10 @@
 
 #include "_sdl_base.hpp"
 #include "../gl/framebuffer.hpp"
+#include "../events/event_listener.hpp"
 
 #include <string>
+#include <memory>   // std::unique_ptr
 #include <utility>  // std::size_t
 
 
@@ -22,7 +24,11 @@ namespace yavsg
     class SDL_window_manager
     {
     protected:
-        yavsg::gl::write_only_framebuffer* _default_framebuffer;
+        std::unique_ptr< gl::write_only_framebuffer > _default_framebuffer;
+        event_listener< SDL_WindowEvent > window_change_listener;
+        
+        // Update internal state
+        void resize( std::size_t w, std::size_t h );
         
     public:
         SDL_Window*   sdl_window;

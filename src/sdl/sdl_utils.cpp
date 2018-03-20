@@ -53,6 +53,20 @@ namespace yavsg // SDL_manager /////////////////////////////////////////////////
 
 namespace yavsg // SDL_window_manager //////////////////////////////////////////
 {
+    void SDL_window_manager::resize( std::size_t w, std::size_t h )
+    {
+        // Can't use `std::make_unique<>()` because `write_only_framebuffer`'s
+        // constructor is protected & friended only with `SDL_window_manager`
+        _default_framebuffer = std::unique_ptr< gl::write_only_framebuffer > (
+            new gl::write_only_framebuffer(
+                0,  // Framebuffer ID
+                1,  // Color targets
+                w,
+                h
+            )
+        );
+    }
+    
     SDL_window_manager::SDL_window_manager(
         const std::string& title,
         std::size_t x,
@@ -60,7 +74,20 @@ namespace yavsg // SDL_window_manager //////////////////////////////////////////
         std::size_t w,
         std::size_t h,
         Uint32 flags
-    )
+    ) :
+        window_change_listener{ [ this ]( const SDL_WindowEvent& e ){
+            if( SDL_GetWindowID( this -> sdl_window ) != e.windowID )
+                return;
+            
+            switch( e.event )
+            {
+            case SDL_WINDOWEVENT_SIZE_CHANGED:
+                this -> resize( e.data1, e.data2 );
+                break;
+            default:
+                break;
+            }
+        } }
     {
         sdl_window = SDL_CreateWindow(
             title.c_str(),
@@ -87,12 +114,7 @@ namespace yavsg // SDL_window_manager //////////////////////////////////////////
         }
         
         // Create wrapper for default framebuffer after context
-        _default_framebuffer = new yavsg::gl::write_only_framebuffer(
-            0,  // Framebuffer ID
-            1,  // Color targets
-            w,
-            h
-        );
+        resize( w, h );
     }
     
     SDL_window_manager::~SDL_window_manager()
