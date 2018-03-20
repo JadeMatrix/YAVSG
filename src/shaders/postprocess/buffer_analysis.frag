@@ -1,22 +1,4 @@
-#version 150 core
-
-// Input ///////////////////////////////////////////////////////////////////////
-
-in VERTEX_OUT
-{
-    vec2 texture;
-} fragment_in;
-
-// Output //////////////////////////////////////////////////////////////////////
-
-out vec4 fragment_out_color;
-
-////////////////////////////////////////////////////////////////////////////////
-
-uniform sampler2D framebuffer_source_color;
-uniform sampler2D framebuffer_source_depth;
-
-void main()
+void buffer_analysis()
 {
     float alpha = texture(
         framebuffer_source_color,

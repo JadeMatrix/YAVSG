@@ -3,6 +3,7 @@
 #include "../../include/engine/4up_postprocess_step.hpp"
 #include "../../include/engine/basic_postprocess_step.hpp"
 #include "../../include/engine/dof_postprocess_step.hpp"
+#include "../../include/engine/multi_postprocess_step.hpp"
 #include "../../include/gl/framebuffer.hpp"
 #include "../../include/tasking/tasking.hpp"
 #include "../../include/tasking/utility_tasks.hpp"
@@ -69,21 +70,27 @@ namespace yavsg
         postprocess_steps = std::vector< postprocess_step_type* >{
             new debug_4up_postprocess_step(
                 nullptr,
-                std::make_unique< basic_postprocess_step >(
-                    "../src/shaders/postprocess/linear_to_sRGB.frag"
+                std::make_unique< multi_postprocess_step >(
+                    std::vector< std::string >{
+                        "linear_to_sRGB"
+                    }
                 ),
                 std::make_unique< dof_postprocess_step >(
                     ors -> main_camera
                 ),
-                std::make_unique< basic_postprocess_step >(
-                    "../src/shaders/postprocess/buffer_analysis.frag"
+                std::make_unique< multi_postprocess_step >(
+                    std::vector< std::string >{
+                        "buffer_analysis"
+                    }
                 )
-            )
-            // new dof_postprocess_step(
+            ),
+            // std::make_unique< dof_postprocess_step >(
             //     ors -> main_camera
             // ),
-            // new basic_postprocess_step(
-            //     "../src/shaders/postprocess/linear_to_sRGB.frag"
+            // std::make_unique< multi_postprocess_step >(
+            //     std::vector< std::string >{
+            //         "linear_to_sRGB"
+            //     }
             // )
         };
         

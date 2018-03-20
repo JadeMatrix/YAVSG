@@ -1,27 +1,5 @@
-#version 150 core
-
-// Input ///////////////////////////////////////////////////////////////////////
-
-in VERTEX_OUT
+void linear_to_sRGB()
 {
-    vec2 texture;
-} fragment_in;
-
-// Output //////////////////////////////////////////////////////////////////////
-
-out vec4 fragment_out_color;
-
-////////////////////////////////////////////////////////////////////////////////
-
-uniform sampler2D framebuffer_source_color;
-
-void main()
-{
-    fragment_out_color = texture(
-        framebuffer_source_color,
-        fragment_in.texture
-    );
-    
     float samples[ 3 ];
     samples[ 0 ] = fragment_out_color.r;
     samples[ 1 ] = fragment_out_color.g;

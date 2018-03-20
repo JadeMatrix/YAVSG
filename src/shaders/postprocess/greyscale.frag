@@ -1,27 +1,5 @@
-#version 150 core
-
-// Input ///////////////////////////////////////////////////////////////////////
-
-in VERTEX_OUT
+void greyscale()
 {
-    vec2 texture;
-} fragment_in;
-
-// Output //////////////////////////////////////////////////////////////////////
-
-out vec4 fragment_out_color;
-
-////////////////////////////////////////////////////////////////////////////////
-
-uniform sampler2D framebuffer_source_color;
-
-void main()
-{
-    fragment_out_color = texture(
-        framebuffer_source_color,
-        fragment_in.texture
-    );
-    
     // // Unweighted
     // float average = (
     //       fragment_out_color.r

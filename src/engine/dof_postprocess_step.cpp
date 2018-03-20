@@ -14,7 +14,7 @@ namespace yavsg
             ).id,
             yavsg::gl::shader::from_file(
                 GL_FRAGMENT_SHADER,
-                "../src/shaders/postprocess/dof.frag"
+                "../src/shaders/dof.frag"
             ).id
         } ),
         vertices( {

@@ -1,26 +1,6 @@
-#version 150 core
-
-// Input ///////////////////////////////////////////////////////////////////////
-
-in VERTEX_OUT
-{
-    vec2 texture;
-} fragment_in;
-
-// Output //////////////////////////////////////////////////////////////////////
-
-out vec4 fragment_out_color;
-
-////////////////////////////////////////////////////////////////////////////////
-
-uniform sampler2D framebuffer_source_color;
-// uniform struct
-// {
-//     float width;
-//     float height;
-// } framebuffer_target;
-
-void main()
+// Multi-sample, needs to be run as the first function in a multi-function
+// postprocess step
+void sobel()
 {
     // float half_width  = framebuffer_target.width  / 2;
     // float half_height = framebuffer_target.height / 2;
