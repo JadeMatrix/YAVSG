@@ -16,7 +16,7 @@ namespace yavsg
 {
     class scene
     {
-    protected:
+    public:
         
         // Material structures /////////////////////////////////////////////////
         
@@ -56,11 +56,11 @@ namespace yavsg
             {}
         };
         
-    public:
-        
         static const std::size_t material_texture_count = std::tuple_size<
             material_description::tuple_type
         >::value;
+        
+        // Vertex structures ///////////////////////////////////////////////////
         
         using attribute_buffer_type = gl::attribute_buffer<
             vector< GLfloat, 3 >,    // position
@@ -83,12 +83,6 @@ namespace yavsg
         
     public:
         scene();
-        
-        // DEVEL:
-        void insert_model(
-            const std::string& obj_filename,
-            const std::string& obj_mtl_directory
-        );
     };
 }
 

@@ -41,6 +41,7 @@ ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
     src/engine/main.cpp
     src/engine/multi_postprocess_step.cpp
     src/engine/obj_render_step.cpp
+    src/engine/obj.cpp
     src/engine/scene.cpp
     src/gl/error.cpp
     src/gl/framebuffer.cpp

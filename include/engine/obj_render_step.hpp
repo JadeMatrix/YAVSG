@@ -17,6 +17,10 @@ namespace yavsg
 {
     class obj_render_step : public render_step
     {
+    protected:
+        // TODO: get rid of thise once shader programs & VAOs are separate
+        bool first_run;
+        
     public:
         using program_type = gl::shader_program<
             scene::attribute_buffer_type,
@@ -28,10 +32,7 @@ namespace yavsg
         // TODO: Move
         scene obj_scene;
         
-        obj_render_step(
-            const std::string& obj_filename,
-            const std::string& obj_mtl_directory
-        );
+        obj_render_step();
         virtual void run( gl::write_only_framebuffer& target );
     };
 }

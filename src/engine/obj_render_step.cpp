@@ -5,18 +5,14 @@
 #include "../../include/gl/texture.hpp"
 #include "../../include/math/common_transforms.hpp"
 #include "../../include/rendering/shader_variable_names.hpp"
+#include "../../include/tasking/tasking.hpp"
 
 #include <array>
-#include <exception>
-#include <vector>
 
 
 namespace yavsg
 {
-    obj_render_step::obj_render_step(
-        const std::string& obj_filename,
-        const std::string& obj_mtl_directory
-    ) :
+    obj_render_step::obj_render_step() :
         scene_program( {
             gl::shader::from_file(
                 GL_VERTEX_SHADER,
@@ -26,33 +22,9 @@ namespace yavsg
                 GL_FRAGMENT_SHADER,
                 "../src/shaders/obj_scene.frag"
             ).id
-        } )
+        } ),
+        first_run{ true }
     {
-        obj_scene.insert_model(
-            obj_filename,
-            obj_mtl_directory
-        );
-        
-        // Link attributes
-        auto objects_ref = obj_scene.object_manager.write();
-        auto& uploaded_vertices = objects_ref -> back().vertices;
-        scene_program.link_attribute< 0 >(
-            shader_string_id::VERTEX_IN_POSITION,
-            uploaded_vertices
-        );
-        scene_program.link_attribute< 1 >(
-            shader_string_id::VERTEX_IN_NORMAL,
-            uploaded_vertices
-        );
-        scene_program.link_attribute< 2 >(
-            shader_string_id::VERTEX_IN_COLOR,
-            uploaded_vertices
-        );
-        scene_program.link_attribute< 3 >(
-            shader_string_id::VERTEX_IN_TEXTURE,
-            uploaded_vertices
-        );
-        
         scene_program.bind_target< 0 >(
             shader_string_id::FRAGMENT_OUT_COLOR
         );
@@ -65,11 +37,6 @@ namespace yavsg
         obj_scene.main_camera.look_at( { 0.0f, 0.0f, 0.0f } );
         obj_scene.main_camera.focal_point( 1.0f );
     }
-    
-    // obj_render_step::~obj_render_step()
-    // {
-        
-    // }
     
     void obj_render_step::run( gl::write_only_framebuffer& target )
     {
@@ -115,6 +82,34 @@ namespace yavsg
         );
         
         auto objects_ref = obj_scene.object_manager.read();
+        
+        if(
+            first_run
+            && objects_ref -> size()
+            && objects_ref -> back().vertices.size()
+        )
+        {
+            // Link attributes
+            auto& uploaded_vertices = objects_ref -> back().vertices;
+            scene_program.link_attribute< 0 >(
+                shader_string_id::VERTEX_IN_POSITION,
+                uploaded_vertices
+            );
+            scene_program.link_attribute< 1 >(
+                shader_string_id::VERTEX_IN_NORMAL,
+                uploaded_vertices
+            );
+            scene_program.link_attribute< 2 >(
+                shader_string_id::VERTEX_IN_COLOR,
+                uploaded_vertices
+            );
+            scene_program.link_attribute< 3 >(
+                shader_string_id::VERTEX_IN_TEXTURE,
+                uploaded_vertices
+            );
+            
+            first_run = false;
+        }
         
         for( auto& object : *objects_ref )
         {

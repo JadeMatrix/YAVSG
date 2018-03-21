@@ -8,7 +8,8 @@
 #include "../../include/tasking/tasking.hpp"
 #include "../../include/tasking/utility_tasks.hpp"
 
-#include <iostream>
+// DEVEL:
+#include "../../include/engine/obj.hpp"
 
 
 namespace
@@ -59,10 +60,14 @@ namespace yavsg
             throw std::runtime_error( "failed to initialize GLEW" );
     #endif
         
-        ors = new obj_render_step(
+        ors = new obj_render_step();
+        
+        // TODO: Move _somewhere_ else
+        submit_task( std::make_unique< load_obj_task >(
+            ors -> obj_scene.object_manager,
             "../local/Crytek Sponza Atrium/sponza.obj",
             "../local/Crytek Sponza Atrium/"
-        );
+        ) );
         
         scene_steps = std::vector< render_step* >{
             ors
