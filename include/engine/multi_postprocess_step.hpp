@@ -45,8 +45,8 @@ namespace yavsg
         );
         
         virtual void run(
-            gl::framebuffer< gl::texture< GLfloat, 3 > >& source,
-            gl::write_only_framebuffer                  & target
+            const gl::framebuffer< gl::texture< GLfloat, 3 > >& source,
+                  gl::write_only_framebuffer                  & target
         );
     };
 }

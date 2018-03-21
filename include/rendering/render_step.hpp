@@ -22,8 +22,8 @@ namespace yavsg
     public:
         virtual ~postprocess_step() {}
         virtual void run(
-            gl::framebuffer< ColorTargetTypes... >& source,
-            gl::write_only_framebuffer            & target
+            const gl::framebuffer< ColorTargetTypes... >& source,
+                  gl::write_only_framebuffer            & target
         ) = 0;
     };
 }

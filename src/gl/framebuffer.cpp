@@ -10,6 +10,18 @@
 
 namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
 {
+    write_only_framebuffer& write_only_framebuffer::operator =(
+        write_only_framebuffer&& o
+    )
+    {
+        std::swap( _width         , o._width          );
+        std::swap( _height        , o._height         );
+        std::swap( _alpha_blending, o._alpha_blending );
+        std::swap( gl_id          , o.gl_id           );
+        
+        return *this;
+    }
+    
     write_only_framebuffer::write_only_framebuffer(
         GLuint gl_id,
         std::size_t num_color_targets,

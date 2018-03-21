@@ -129,8 +129,8 @@ namespace yavsg
     }
     
     void multi_postprocess_step::run(
-        gl::framebuffer< gl::texture< GLfloat, 3 > >& source,
-        gl::write_only_framebuffer            & target
+        const gl::framebuffer< gl::texture< GLfloat, 3 > >& source,
+              gl::write_only_framebuffer                  & target
     )
     {
         glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );

@@ -41,7 +41,7 @@ namespace yavsg
         );
         
         virtual void run(
-            source_type               & source,
+            const source_type         & source,
             gl::write_only_framebuffer& target
         );
     };

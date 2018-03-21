@@ -40,7 +40,7 @@ namespace yavsg
             const std::string& fragment_shader_filename
         );
         virtual void run(
-            source_type               & source,
+            const source_type         & source,
             gl::write_only_framebuffer& target
         );
     };

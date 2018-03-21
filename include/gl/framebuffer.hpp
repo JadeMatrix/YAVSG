@@ -107,7 +107,16 @@ namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
             std::size_t
         );
         
+        // Protected move assignment operator for use by window management
+        write_only_framebuffer& operator =( write_only_framebuffer&& );
+        
     public:
+        // Delete copy constructor & copy assignment operator
+        write_only_framebuffer( const write_only_framebuffer& ) = delete;
+        write_only_framebuffer& operator =(
+            const write_only_framebuffer&
+        ) = delete;
+        
         const std::size_t num_color_targets;
         
         std::size_t  width() const;
@@ -150,12 +159,19 @@ namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
         );
         ~framebuffer();
         
-        depth_stencil_type& depth_stencil_buffer();
+        // Delete copy constructor & copy assignment operator
+        framebuffer( const framebuffer& ) = delete;
+        framebuffer& operator =( const framebuffer& ) = delete;
         
-        template< std::size_t Nth > typename std::tuple_element<
+        // Make move assignment operator public
+        framebuffer& operator =( framebuffer&& );
+        
+        const depth_stencil_type& depth_stencil_buffer() const;
+        
+        template< std::size_t Nth > const typename std::tuple_element<
             Nth,
             color_buffers_type
-        >::type& color_buffer();
+        >::type& color_buffer() const;
     };
 } }
 
@@ -439,21 +455,39 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
     }
     
     template< class... ColorTargetTypes >
-    typename framebuffer<
+    framebuffer< ColorTargetTypes... >& framebuffer<
+        ColorTargetTypes...
+    >::operator =( framebuffer&& o )
+    {
+        // `write_only_framebuffer` members
+        std::swap( _width         , o._width          );
+        std::swap( _height        , o._height         );
+        std::swap( _alpha_blending, o._alpha_blending );
+        std::swap( gl_id          , o.gl_id           );
+        
+        // `framebuffer` memebrs
+        std::swap( _depth_stencil_buffer, o._depth_stencil_buffer );
+        std::swap( _color_buffers       , o._color_buffers        );
+        
+        return *this;
+    }
+    
+    template< class... ColorTargetTypes >
+    const typename framebuffer<
         ColorTargetTypes...
     >::depth_stencil_type& framebuffer<
         ColorTargetTypes...
-    >::depth_stencil_buffer()
+    >::depth_stencil_buffer() const
     {
         return _depth_stencil_buffer;
     }
     
     template< class... ColorTargetTypes >
     template< std::size_t Nth >
-    typename std::tuple_element<
+    const typename std::tuple_element<
         Nth,
         typename framebuffer< ColorTargetTypes... >::color_buffers_type
-    >::type& framebuffer< ColorTargetTypes... >::color_buffer()
+    >::type& framebuffer< ColorTargetTypes... >::color_buffer() const
     {
         return std::get< Nth >( _color_buffers );
     }
