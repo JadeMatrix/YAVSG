@@ -30,7 +30,7 @@ namespace yavsg
             SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE // | SDL_WINDOW_FULLSCREEN
         },
         camera_look_listener{ [ this ]( const SDL_MouseMotionEvent& e ){
-            this -> ors -> main_camera.increment_pitch_yaw(
+            this -> ors -> obj_scene.main_camera.increment_pitch_yaw(
                 static_cast< float >( e.yrel ) / -4.0f,
                 static_cast< float >( e.xrel ) / -4.0f
             );
@@ -39,15 +39,15 @@ namespace yavsg
             auto new_focal_point = (
                 static_cast< float >( e.y )
                 / 4.0f
-                + this -> ors -> main_camera.focal_point()
+                + this -> ors -> obj_scene.main_camera.focal_point()
             );
-            auto near = this -> ors -> main_camera.near_point();
-            auto  far = this -> ors -> main_camera. far_point();
+            auto near = this -> ors -> obj_scene.main_camera.near_point();
+            auto  far = this -> ors -> obj_scene.main_camera. far_point();
             if( new_focal_point < near )
                 new_focal_point = near + 0.1f;
             else if( new_focal_point > far )
                 new_focal_point = far - 0.1f;
-            this -> ors -> main_camera.focal_point( new_focal_point );
+            this -> ors -> obj_scene.main_camera.focal_point( new_focal_point );
         } }
     {
         SDL_SetRelativeMouseMode( SDL_TRUE );
@@ -72,11 +72,12 @@ namespace yavsg
                 nullptr,
                 std::make_unique< multi_postprocess_step >(
                     std::vector< std::string >{
-                        "linear_to_sRGB"
+                        "linear_to_sRGB",
+                        "circular_gradient"
                     }
                 ),
                 std::make_unique< dof_postprocess_step >(
-                    ors -> main_camera
+                    ors -> obj_scene.main_camera
                 ),
                 std::make_unique< multi_postprocess_step >(
                     std::vector< std::string >{

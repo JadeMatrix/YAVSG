@@ -36,11 +36,12 @@ ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
     src/engine/4up_postprocess_step.cpp
     src/engine/basic_postprocess_step.cpp
     src/engine/dof_postprocess_step.cpp
+    src/events/event_listener.cpp
     src/engine/frame.cpp
     src/engine/main.cpp
     src/engine/multi_postprocess_step.cpp
     src/engine/obj_render_step.cpp
-    src/events/event_listener.cpp
+    src/engine/scene.cpp
     src/gl/error.cpp
     src/gl/framebuffer.cpp
     src/gl/shader.cpp
