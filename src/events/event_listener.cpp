@@ -216,7 +216,7 @@ namespace yavsg // Listener constructor implementations ////////////////////////
             } \
         ); \
         std::unique_lock< std::mutex > _lock( listeners_mutex ); \
-        auto _id = next_listener_id++; \
+        _id = next_listener_id++; \
         MAPNAME[ _id ] = callback; \
     }
     
