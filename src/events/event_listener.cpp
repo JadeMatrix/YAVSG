@@ -255,6 +255,7 @@ namespace yavsg // Listener destructor implementations /////////////////////////
     template<> \
     event_listener< EVENT >::~event_listener() \
     { \
+        std::unique_lock< std::mutex > lock( listeners_mutex ); \
         MAPNAME.erase( _id ); \
     }
     
