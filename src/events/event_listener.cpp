@@ -3,6 +3,7 @@
 #include "../../include/sdl/_sdl_base.hpp"
 #include "../../include/tasking/task.hpp"
 #include "../../include/tasking/tasking.hpp"
+#include "../../include/tasking/utility_tasks.hpp"
 
 #include <map>
 #include <mutex>    // std::mutex, std::once_flag, std::call_once()
@@ -18,7 +19,10 @@ namespace
     #define DEFINE_LISTENER_MAP_FOR( EVENT, MAPNAME ) \
     std::map< \
         yavsg::listener_id, \
-        std::function< void( const EVENT& ) > \
+        std::pair< \
+            std::function< void( const EVENT& ) >, \
+            yavsg::task_flags_type \
+        > \
     > MAPNAME;
     
     DEFINE_LISTENER_MAP_FOR( SDL_CommonEvent          ,            common_listeners )
@@ -54,14 +58,14 @@ namespace // Event consumer task ///////////////////////////////////////////////
 {
     #define DEFINE_SUBMIT_EVENT_CALLBACK_TASK( EVENT_MEMBER ) \
     { \
-        auto callback = callback_pair.second; \
+        auto callback = callback_pair.second.first; \
         auto event    = window_event.EVENT_MEMBER; \
         yavsg::submit_task( std::make_unique< yavsg::callback_task >( \
             [ callback, event ](){ \
                 callback( event ); \
                 return false; \
             }, \
-            yavsg::task_flag::MAIN_THREAD \
+            callback_pair.second.second \
         ) ); \
     }
     
@@ -219,7 +223,8 @@ namespace yavsg // Listener constructor implementations ////////////////////////
     #define DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( EVENT, MAPNAME ) \
     template<> \
     event_listener< EVENT >::event_listener( \
-        std::function< void( const EVENT& ) > callback \
+        std::function< void( const EVENT& ) > callback, \
+        task_flags_type flags \
     ) \
     { \
         std::call_once( \
@@ -230,7 +235,7 @@ namespace yavsg // Listener constructor implementations ////////////////////////
         ); \
         std::unique_lock< std::mutex > _lock( listeners_mutex ); \
         _id = next_listener_id++; \
-        MAPNAME[ _id ] = callback; \
+        MAPNAME[ _id ] = { callback, flags }; \
     }
     
     DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_CommonEvent          ,            common_listeners )

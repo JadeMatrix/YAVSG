@@ -3,6 +3,8 @@
 #define YAVSG_EVENTS_EVENT_LISTENER_HPP
 
 
+#include "../tasking/task.hpp"
+
 #include <functional>   // std::function
 #include <utility>      // std::size_t
 
@@ -17,7 +19,10 @@ namespace yavsg
         listener_id _id;
         
     public:
-        event_listener( std::function< void( const EventType& ) > );
+        event_listener(
+            std::function< void( const EventType& ) >,
+            task_flags_type flags = task_flag::NONE
+        );
         
         event_listener( event_listener&& ) = default;
         event_listener( const event_listener& ) = delete;
