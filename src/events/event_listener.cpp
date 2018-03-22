@@ -52,6 +52,19 @@ namespace
 
 namespace // Event consumer task ///////////////////////////////////////////////
 {
+    #define DEFINE_SUBMIT_EVENT_CALLBACK_TASK( EVENT_MEMBER ) \
+    { \
+        auto callback = callback_pair.second; \
+        auto event    = window_event.EVENT_MEMBER; \
+        yavsg::submit_task( std::make_unique< yavsg::callback_task >( \
+            [ callback, event ](){ \
+                callback( event ); \
+                return false; \
+            }, \
+            yavsg::task_flag::MAIN_THREAD \
+        ) ); \
+    }
+    
     class poll_events_task : public yavsg::task
     {
     public:
@@ -63,8 +76,6 @@ namespace // Event consumer task ///////////////////////////////////////////////
         
         virtual bool operator()()
         {
-            // TODO: submit callback tasks
-            
             SDL_Event window_event;
             while( SDL_PollEvent( &window_event ) )
             {
@@ -72,109 +83,109 @@ namespace // Event consumer task ///////////////////////////////////////////////
                 {
                 case SDL_WINDOWEVENT:
                     for( auto& callback_pair : window_listeners )
-                        callback_pair.second( window_event.window );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( window )
                     break;
                 case SDL_KEYDOWN:
                 case SDL_KEYUP:
                     for( auto& callback_pair : keyboard_listeners )
-                        callback_pair.second( window_event.key );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( key )
                     break;
                 case SDL_TEXTEDITING:
                     for( auto& callback_pair : text_edit_listeners )
-                        callback_pair.second( window_event.edit );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( edit )
                     break;
                 case SDL_TEXTINPUT:
                     for( auto& callback_pair : text_input_listeners )
-                        callback_pair.second( window_event.text );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( text )
                     break;
                 case SDL_MOUSEMOTION:
                     for( auto& callback_pair : mouse_motion_listeners )
-                        callback_pair.second( window_event.motion );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( motion )
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                 case SDL_MOUSEBUTTONUP:
                     for( auto& callback_pair : mouse_button_listeners )
-                        callback_pair.second( window_event.button );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( button )
                     break;
                 case SDL_MOUSEWHEEL:
                     for( auto& callback_pair : scroll_listeners )
-                        callback_pair.second( window_event.wheel );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( wheel )
                     break;
                 case SDL_JOYAXISMOTION:
                     for( auto& callback_pair : joy_axis_listeners )
-                        callback_pair.second( window_event.jaxis );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( jaxis )
                     break;
                 case SDL_JOYBALLMOTION:
                     for( auto& callback_pair : joy_ball_listeners )
-                        callback_pair.second( window_event.jball );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( jball )
                     break;
                 case SDL_JOYHATMOTION:
                     for( auto& callback_pair : joy_hat_listeners )
-                        callback_pair.second( window_event.jhat );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( jhat )
                     break;
                 case SDL_JOYBUTTONDOWN:
                 case SDL_JOYBUTTONUP:
                     for( auto& callback_pair : joy_button_listeners )
-                        callback_pair.second( window_event.jbutton );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( jbutton )
                     break;
                 case SDL_JOYDEVICEADDED:
                 case SDL_JOYDEVICEREMOVED:
                     for( auto& callback_pair : joy_device_listeners )
-                        callback_pair.second( window_event.jdevice );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( jdevice )
                     break;
                 case SDL_CONTROLLERAXISMOTION:
                     for( auto& callback_pair : controller_axis_listeners )
-                        callback_pair.second( window_event.caxis );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( caxis )
                     break;
                 case SDL_CONTROLLERBUTTONDOWN:
                 case SDL_CONTROLLERBUTTONUP:
                     for( auto& callback_pair : controller_button_listeners )
-                        callback_pair.second( window_event.cbutton );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( cbutton )
                     break;
                 case SDL_CONTROLLERDEVICEADDED:
                 case SDL_CONTROLLERDEVICEREMOVED:
                 case SDL_CONTROLLERDEVICEREMAPPED:
                     for( auto& callback_pair : controller_device_listeners )
-                        callback_pair.second( window_event.cdevice );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( cdevice )
                     break;
                 case SDL_AUDIODEVICEADDED:
                 case SDL_AUDIODEVICEREMOVED:
                     for( auto& callback_pair : audio_device_listeners )
-                        callback_pair.second( window_event.adevice );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( adevice )
                     break;
                 case SDL_QUIT:
                     for( auto& callback_pair : quit_listeners )
-                        callback_pair.second( window_event.quit );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( quit )
                     break;
                 case SDL_USEREVENT:
                     for( auto& callback_pair : user_event_listeners )
-                        callback_pair.second( window_event.user );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( user )
                     break;
                 case SDL_SYSWMEVENT:
                     for( auto& callback_pair : sys_wm_listeners )
-                        callback_pair.second( window_event.syswm );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( syswm )
                     break;
                 case SDL_FINGERDOWN:
                 case SDL_FINGERUP:
                 case SDL_FINGERMOTION:
                     for( auto& callback_pair : touch_listeners )
-                        callback_pair.second( window_event.tfinger );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( tfinger )
                     break;
                 case SDL_MULTIGESTURE:
                     for( auto& callback_pair : gesture_listeners )
-                        callback_pair.second( window_event.mgesture );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( mgesture )
                     break;
                 case SDL_DOLLARGESTURE:
                 case SDL_DOLLARRECORD:
                     for( auto& callback_pair : dollar_gesture_listeners )
-                        callback_pair.second( window_event.dgesture );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( dgesture )
                     break;
                 case SDL_DROPFILE:
                 case SDL_DROPTEXT:
                 case SDL_DROPBEGIN:
                 case SDL_DROPCOMPLETE:
                     for( auto& callback_pair : drop_listeners )
-                        callback_pair.second( window_event.drop );
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( drop )
                     break;
                 // case SDL_APP_TERMINATING:
                 // case SDL_APP_LOWMEMORY:
@@ -189,8 +200,8 @@ namespace // Event consumer task ///////////////////////////////////////////////
                 // case SDL_RENDER_DEVICE_RESET:
                 //     // Common
                 default:
-                    for( auto& callback_pair :  common_listeners )
-                        callback_pair.second( window_event.common );
+                    for( auto& callback_pair : common_listeners )
+                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( common )
                     break;
                 }
             }
@@ -198,6 +209,8 @@ namespace // Event consumer task ///////////////////////////////////////////////
             return true;
         }
     };
+    
+    #undef DEFINE_SUBMIT_EVENT_CALLBACK_TASK
 }
 
 
