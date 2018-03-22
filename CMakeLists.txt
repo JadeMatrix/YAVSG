@@ -52,6 +52,7 @@ ADD_EXECUTABLE( ${PROJECT_NAME} MACOSX_BUNDLE
     src/sdl/sdl_utils.cpp
     src/tasking/task.cpp
     src/tasking/tasking.cpp
+    src/windowsys/window.cpp
 )
 SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_INFO_PLIST           "Info.plist.in"

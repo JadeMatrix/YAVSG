@@ -17,6 +17,7 @@
 namespace yavsg
 {
     class SDL_window_manager;
+    class window;
 }
 
 
@@ -93,6 +94,7 @@ namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
         // This is so the window can create a base_framebuffer for the default
         // framebuffer
         friend class yavsg::SDL_window_manager;
+        friend class yavsg::window;
         
     protected:
         std::size_t _width;
