@@ -24,7 +24,11 @@ namespace yavsg
         
         ~event_listener();
         
-        event_listener& operator=( event_listener&& ) = default;
+        event_listener& operator=( event_listener&& o )
+        {
+            std::swap( _id, o._id );
+            return *this;
+        }
     };
 }
 
