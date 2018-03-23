@@ -7,6 +7,7 @@
 #include <exception>    // std::runtime_error, std::invalid_argument
 #include <limits>       // std::numeric_limits
 #include <iostream>     // std::cerr
+#include <sstream>      // std::stringstream
 
 
 namespace // Window dimension utilities ////////////////////////////////////////
@@ -46,6 +47,55 @@ namespace // Window dimension utilities ////////////////////////////////////////
             }
         
         return clamped;
+    }
+    
+    std::string window_state_repr( const yavsg::window_state& state )
+    {
+        std::stringstream ss;
+        
+        ss
+            << "window \""
+            << state.title
+            << "\" "
+            << state.width
+            << "×"
+            << state.height
+            << " @ "
+            << state.x
+            << ","
+            << state.y
+            << "; scale="
+            << state.scale_factor
+            << "; "
+            << ( state.resizable  ? "resizable" : "fixed size" )
+            << "; "
+            << ( state.has_border ? "bordered"  : "borderless" )
+            << "; arrangement: "
+        ;
+        
+        switch( state.arranged )
+        {
+        case yavsg::window_arrange_state::INVALID:
+            ss << "invalid";
+            break;
+        case yavsg::window_arrange_state::NORMAL:
+            ss << "normal";
+            break;
+        case yavsg::window_arrange_state::FULLSCREEN_NATIVE:
+            ss << "native fullscreen";
+            break;
+        case yavsg::window_arrange_state::FULLSCREEN_CUSTOM:
+            ss << "custom fullscreen";
+            break;
+        case yavsg::window_arrange_state::MINIMIZED:
+            ss << "minimized";
+            break;
+        case yavsg::window_arrange_state::HIDDEN:
+            ss << "hidden";
+            break;
+        }
+        
+        return ss.str();
     }
 }
 
