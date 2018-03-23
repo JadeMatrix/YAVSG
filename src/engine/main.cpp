@@ -1,6 +1,7 @@
 #include "../../include/gl/_gl_base.hpp" // For GLEW initialization, if any
 
 #include "../../include/gl/error.hpp"
+#include "../../include/sdl/sdl_utils.hpp"
 #include "../../include/tasking/tasking.hpp"
 
 // DEVEL:
@@ -10,15 +11,26 @@
 #include "../../include/tasking/tasking.hpp"
 #include "../../include/tasking/utility_tasks.hpp"
 #include "../../include/windowsys/window.hpp"
+#include "../../include/engine/obj.hpp"
 
 #include <exception>
 #include <iostream>
+#include <utility>  // std::size_t
+
+
+namespace
+{
+    const std::size_t window_width  = 1280;
+    const std::size_t window_height = 720;
+}
 
 
 int main( int argc, char* argv[] )
 {
     try
     {
+        yavsg::SDL_manager sdl;
+        
         yavsg::event_listener< SDL_QuitEvent > quit_listener{
             []( const SDL_QuitEvent& e ){
                 std::cout << "quitting...\n";
@@ -42,8 +54,8 @@ int main( int argc, char* argv[] )
         
         // DEVEL:
         auto test_window = new yavsg::window( {
-            1280,
-            720,
+            window_width,
+            window_height,
             -1,
             -1,
             yavsg::window_arrange_state::NORMAL,
@@ -52,6 +64,14 @@ int main( int argc, char* argv[] )
             true,
             true
         } );
+        
+        submit_task( std::make_unique< yavsg::load_obj_task >(
+            test_window -> main_scene.object_manager,
+            "../local/Crytek Sponza Atrium/sponza.obj",
+            "../local/Crytek Sponza Atrium/"
+        ) );
+        
+        SDL_SetRelativeMouseMode( SDL_TRUE );
         yavsg::event_listener< SDL_KeyboardEvent > center_window_listener{
             [ test_window ]( const SDL_KeyboardEvent& e ){
                 if( e.type == SDL_KEYUP && e.keysym.sym == SDLK_c )
@@ -59,15 +79,13 @@ int main( int argc, char* argv[] )
                     std::cout << "centering window...\n";
                     test_window -> center();
                 }
-            },
-            yavsg::task_flag::MAIN_THREAD
+            }
         };
         yavsg::event_listener< SDL_KeyboardEvent > break_listener{
-            [ test_window ]( const SDL_KeyboardEvent& e ){
+            []( const SDL_KeyboardEvent& e ){
                 if( e.type == SDL_KEYUP && e.keysym.sym == SDLK_SPACE )
                     std::cout << "\n--------------------------------------\n\n";
-            },
-            yavsg::task_flag::MAIN_THREAD
+            }
         };
         yavsg::event_listener< SDL_KeyboardEvent > close_window_listener{
             [ test_window ]( const SDL_KeyboardEvent& e ){
@@ -78,11 +96,14 @@ int main( int argc, char* argv[] )
                     SDL_Event quit_event;
                     quit_event.quit.type = SDL_QUIT;
                     SDL_PushEvent( &quit_event );
+                    std::cout << "quit event pushed\n";
                 }
             },
             yavsg::task_flag::MAIN_THREAD
         };
         
+        // TODO: Figure out why quit events don't work in single-threaded mode
+        // yavsg::initialize_task_system( static_cast< std::size_t >( 0 ) );
         yavsg::initialize_task_system( true );
         std::cout << "task system initialized, becoming worker...\n";
         yavsg::become_task_worker( yavsg::task_flag::MAIN_THREAD );

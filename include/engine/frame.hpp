@@ -3,14 +3,13 @@
 #define YAVSG_ENGINE_FRAME_HPP
 
 
-#include "../rendering/render_step.hpp"
-#include "../engine/obj_render_step.hpp"
-#include "../sdl/sdl_utils.hpp"
-#include "../tasking/task.hpp"
 #include "../events/event_listener.hpp"
+#include "../rendering/render_step.hpp"
+#include "../tasking/task.hpp"
+#include "../windowsys/window.hpp"
 
 #include <chrono>
-#include <memory>   // std::unique_ptr
+#include <memory>   // std::unique_ptr, std::shared_ptr
 #include <vector>
 
 
@@ -30,10 +29,10 @@ namespace yavsg
     protected:
         // TODO: OpenGL context should not be controlled by the frame task;
         // instead the frame task should be submitted by a window
-        SDL_manager sdl;
-        SDL_window_manager window;
+        // SDL_manager sdl;
+        // SDL_window_manager window;
         
-        obj_render_step* ors;
+        std::shared_ptr< window_reference > window_ref;
         
         std::vector<      render_step     * > scene_steps;
         std::vector< postprocess_step_type* > postprocess_steps;
@@ -48,8 +47,9 @@ namespace yavsg
         event_listener< SDL_MouseWheelEvent  > focal_adjust_listener;
         
     public:
-        frame_task();
+        frame_task( std::shared_ptr< window_reference > );
         ~frame_task();
+        
         task_flags_type flags() const;
         bool operator()();
     };

@@ -3,6 +3,7 @@
 #define YAVSG_RENDERING_RENDER_STEP_HPP
 
 
+#include "../engine/scene.hpp"
 #include "../gl/framebuffer.hpp"
 
 #include <utility>  // std::size_t
@@ -14,7 +15,10 @@ namespace yavsg
     {
     public:
         virtual ~render_step() {}
-        virtual void run( gl::write_only_framebuffer& target ) = 0;
+        virtual void run(
+            const scene&,
+            gl::write_only_framebuffer&
+        ) = 0;
     };
     
     template< class... ColorTargetTypes > class postprocess_step

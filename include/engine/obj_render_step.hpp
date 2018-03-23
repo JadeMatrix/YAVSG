@@ -29,11 +29,8 @@ namespace yavsg
         
         program_type scene_program;
         
-        // TODO: Move
-        scene obj_scene;
-        
         obj_render_step();
-        virtual void run( gl::write_only_framebuffer& target );
+        virtual void run( const scene&, gl::write_only_framebuffer& );
     };
 }
 

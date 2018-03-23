@@ -1,13 +1,34 @@
 #include "../../include/windowsys/window.hpp"
 
+#include "../../include/engine/frame.hpp"
 #include "../../include/tasking/task.hpp"
 #include "../../include/tasking/tasking.hpp"
 
 #include <cmath>        // std::isnan()
 #include <exception>    // std::runtime_error, std::invalid_argument
-#include <limits>       // std::numeric_limits
 #include <iostream>     // std::cerr
+#include <limits>       // std::numeric_limits
 #include <sstream>      // std::stringstream
+
+
+namespace // OpenGL initialization utilities ///////////////////////////////////
+{
+    std::once_flag opengl_extensions_initialized_flag;
+    
+    void ensure_opengl_extensions_initialized()
+    {
+        std::call_once(
+            opengl_extensions_initialized_flag,
+            [](){
+            #ifndef __APPLE__
+                glewExperimental = GL_TRUE;
+                if( glewInit() != GLEW_OK )
+                    throw std::runtime_error( "failed to initialize GLEW" );
+            #endif
+            }
+        );
+    }
+}
 
 
 namespace // Window dimension utilities ////////////////////////////////////////
@@ -136,263 +157,304 @@ namespace yavsg // Window update task //////////////////////////////////////////
         
         virtual bool operator()()
         {
-            std::unique_lock< std::mutex > ref_lock(
-                target_reference -> reference_mutex
-            );
-            if( !target_reference -> window )
-                // Window is closed
-                return false;
-            
-            std::unique_lock< std::mutex > window_lock(
-                target_reference -> window -> state_mutex
-            );
-            
-            using arng_state = yavsg::window_arrange_state;
-            
-            if( new_state.arranged == arng_state::INVALID )
-                throw std::invalid_argument(
-                    "cannot update window to an invalid arrangement"
+            // Artificial scope because the frame task (possibly submitted at
+            // the end of the function) also needs to lock the reference mutex
+            {
+                std::unique_lock< std::mutex > ref_lock(
+                    target_reference -> reference_mutex
                 );
-            
-            auto requested_width  = new_state.width;
-            auto requested_height = new_state.height;
-            if( clamp_window_dimensions( new_state ) )
-                std::cerr
-                    << "requested window width,height "
-                    << requested_width
-                    << ","
-                    << requested_height
-                    << " was clamped to "
-                    << new_state.width
-                    << ","
-                    << new_state.height
-                    << std::endl
-                ;
-            
-            int x, y;
-            if( update_flags & update_window_flag::CENTER )
-            {
-                x = y = SDL_WINDOWPOS_CENTERED;
-                std::cerr
-                    << "requested window x,y ignored because centering"
-                    << std::endl
-                ;
-            }
-            else
-            {
-                if( new_state.x > 0 )
-                    x = static_cast< int >( new_state.x );
-                else
-                    x = SDL_WINDOWPOS_UNDEFINED;
+                if( !target_reference -> window )
+                    // Window is closed
+                    return false;
                 
-                if( new_state.y > 0 )
-                    y = static_cast< int >( new_state.y );
-                else
-                    y = SDL_WINDOWPOS_UNDEFINED;
-            }
-            
-            if( !target_reference -> window -> sdl_window )
-            {
-                Uint32 sdl_window_flags = SDL_WINDOW_OPENGL;
+                std::unique_lock< std::mutex > window_lock(
+                    target_reference -> window -> state_mutex
+                );
                 
-                if( new_state.scale_factor > 1 )
-                    sdl_window_flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+                using arng_state = yavsg::window_arrange_state;
                 
-                if( new_state.resizable )
-                    sdl_window_flags |= SDL_WINDOW_RESIZABLE;
+                if( new_state.arranged == arng_state::INVALID )
+                    throw std::invalid_argument(
+                        "cannot update window to an invalid arrangement"
+                    );
                 
-                if( !new_state.has_border )
-                    sdl_window_flags |= SDL_WINDOW_BORDERLESS;
+                auto requested_width  = new_state.width;
+                auto requested_height = new_state.height;
+                if( clamp_window_dimensions( new_state ) )
+                    std::cerr
+                        << "requested window width,height "
+                        << requested_width
+                        << ","
+                        << requested_height
+                        << " was clamped to "
+                        << new_state.width
+                        << ","
+                        << new_state.height
+                        << std::endl
+                    ;
                 
-                if( new_state.arranged == arng_state::HIDDEN )
-                    sdl_window_flags |= SDL_WINDOW_HIDDEN;
+                int x, y;
+                if( update_flags & update_window_flag::CENTER )
+                {
+                    x = y = SDL_WINDOWPOS_CENTERED;
+                    std::cerr
+                        << "requested window x,y ignored because centering"
+                        << std::endl
+                    ;
+                }
                 else
                 {
-                    sdl_window_flags |= SDL_WINDOW_SHOWN;
+                    if( new_state.x > 0 )
+                        x = static_cast< int >( new_state.x );
+                    else
+                        x = SDL_WINDOWPOS_UNDEFINED;
                     
-                    if(
-                           new_state.arranged == arng_state::FULLSCREEN_NATIVE
-                        || new_state.arranged == arng_state::FULLSCREEN_CUSTOM
-                    )
-                        sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
+                    if( new_state.y > 0 )
+                        y = static_cast< int >( new_state.y );
+                    else
+                        y = SDL_WINDOWPOS_UNDEFINED;
                 }
                 
-                target_reference -> window -> sdl_window = SDL_CreateWindow(
-                    new_state.title.c_str(),
-                    x,
-                    y,
-                    static_cast< int >( new_state.width  ),
-                    static_cast< int >( new_state.height ),
-                    sdl_window_flags
-                );
-                if( target_reference -> window -> sdl_window == nullptr )
-                    throw std::runtime_error(
-                        "couldn't create SDL2 window: "
-                        + std::string{ SDL_GetError() }
-                    );
-            }
-            else
-            {
-                if( new_state.arranged == arng_state::HIDDEN )
-                    SDL_HideWindow( target_reference -> window -> sdl_window );
-                else
+                if( !target_reference -> window -> sdl_window )
                 {
-                    SDL_ShowWindow( target_reference -> window -> sdl_window );
+                    Uint32 sdl_window_flags = SDL_WINDOW_OPENGL;
                     
-                    if(
-                           new_state.arranged == arng_state::FULLSCREEN_NATIVE
-                        || new_state.arranged == arng_state::FULLSCREEN_CUSTOM
-                    )
-                    {
-                        if( SDL_SetWindowFullscreen(
-                            target_reference -> window -> sdl_window,
-                            SDL_WINDOW_FULLSCREEN
-                        ) )
-                            throw std::runtime_error(
-                                "couldn't set SDL2 window fullscreen: "
-                                + std::string{ SDL_GetError() }
-                            );
-                    }
+                    if( new_state.scale_factor > 1 )
+                        sdl_window_flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+                    
+                    if( new_state.resizable )
+                        sdl_window_flags |= SDL_WINDOW_RESIZABLE;
+                    
+                    if( !new_state.has_border )
+                        sdl_window_flags |= SDL_WINDOW_BORDERLESS;
+                    
+                    if( new_state.arranged == arng_state::HIDDEN )
+                        sdl_window_flags |= SDL_WINDOW_HIDDEN;
                     else
                     {
-                        if( SDL_SetWindowFullscreen(
+                        sdl_window_flags |= SDL_WINDOW_SHOWN;
+                        
+                        if(
+                               new_state.arranged == arng_state::FULLSCREEN_NATIVE
+                            || new_state.arranged == arng_state::FULLSCREEN_CUSTOM
+                        )
+                            sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
+                    }
+                    
+                    target_reference -> window -> sdl_window = SDL_CreateWindow(
+                        new_state.title.c_str(),
+                        x,
+                        y,
+                        static_cast< int >( new_state.width  ),
+                        static_cast< int >( new_state.height ),
+                        sdl_window_flags
+                    );
+                    if( target_reference -> window -> sdl_window == nullptr )
+                        throw std::runtime_error(
+                            "couldn't create SDL2 window: "
+                            + std::string{ SDL_GetError() }
+                        );
+                    
+                    target_reference -> window -> gl_context = SDL_GL_CreateContext(
+                        target_reference -> window -> sdl_window
+                    );
+                    if( target_reference -> window -> gl_context == nullptr )
+                    {
+                        std::string context_error_string{
+                            "failed to create OpenGL context via SDL2 window: "
+                        };
+                        context_error_string += SDL_GetError();
+                        SDL_DestroyWindow(
+                            target_reference -> window -> sdl_window
+                        );
+                        throw std::runtime_error( context_error_string );
+                    }
+                    
+                    // Run GLEW stuff _after_ creating SDL/GL context
+                    ensure_opengl_extensions_initialized();
+                }
+                else
+                {
+                    if( new_state.arranged == arng_state::HIDDEN )
+                        SDL_HideWindow(
+                            target_reference -> window -> sdl_window
+                        );
+                    else
+                    {
+                        SDL_ShowWindow(
+                            target_reference -> window -> sdl_window
+                        );
+                        
+                        if(
+                               new_state.arranged == arng_state::FULLSCREEN_NATIVE
+                            || new_state.arranged == arng_state::FULLSCREEN_CUSTOM
+                        )
+                        {
+                            if( SDL_SetWindowFullscreen(
+                                target_reference -> window -> sdl_window,
+                                SDL_WINDOW_FULLSCREEN
+                            ) )
+                                throw std::runtime_error(
+                                    "couldn't set SDL2 window fullscreen: "
+                                    + std::string{ SDL_GetError() }
+                                );
+                        }
+                        else
+                        {
+                            if( SDL_SetWindowFullscreen(
+                                target_reference -> window -> sdl_window,
+                                0x00
+                            ) )
+                                throw std::runtime_error(
+                                    "couldn't set SDL2 window windowed: "
+                                    + std::string{ SDL_GetError() }
+                                );
+                        }
+                    }
+                    
+                    SDL_SetWindowResizable(
+                        target_reference -> window -> sdl_window,
+                        static_cast< SDL_bool >( new_state.resizable )
+                    );
+                    
+                    SDL_SetWindowBordered(
+                        target_reference -> window -> sdl_window,
+                        static_cast< SDL_bool >( new_state.has_border )
+                    );
+                    
+                    SDL_SetWindowTitle(
+                        target_reference -> window -> sdl_window,
+                        new_state.title.c_str()
+                    );
+                    SDL_SetWindowPosition(
+                        target_reference -> window -> sdl_window,
+                        x,
+                        y
+                    );
+                    SDL_SetWindowSize(
+                        target_reference -> window -> sdl_window,
+                        static_cast< int >( new_state.width  ),
+                        static_cast< int >( new_state.height )
+                    );
+                }
+                
+                if( update_flags & update_window_flag::MAXIMIZE )
+                    SDL_MaximizeWindow(
+                        target_reference -> window -> sdl_window
+                    );
+                
+                if( update_flags & update_window_flag::FRONT )
+                    SDL_RaiseWindow( target_reference -> window -> sdl_window );
+                
+                switch( new_state.arranged )
+                {
+                case arng_state::INVALID: // Already handled
+                case arng_state::HIDDEN:  // Already handled
+                case arng_state::NORMAL:  // Nothing to do
+                    break;
+                case arng_state::FULLSCREEN_NATIVE:
+                    {
+                        auto display_index = SDL_GetWindowDisplayIndex(
+                            target_reference -> window -> sdl_window
+                        );
+                        if( display_index < 1 )
+                            throw std::runtime_error(
+                                "couldn't get SDL2 window display index: "
+                                + std::string{ SDL_GetError() }
+                            );
+                        
+                        SDL_DisplayMode mode;
+                        
+                        if( SDL_GetDisplayMode( display_index, 0, &mode ) )
+                            throw std::runtime_error(
+                                "couldn't get SDL2 display mode for display "
+                                + std::to_string( display_index )
+                                + ": "
+                                + std::string{ SDL_GetError() }
+                            );
+                        
+                        if( SDL_SetWindowDisplayMode(
                             target_reference -> window -> sdl_window,
-                            0x00
+                            &mode
                         ) )
                             throw std::runtime_error(
-                                "couldn't set SDL2 window windowed: "
+                                "couldn't set SDL2 window display mode to "
+                                "native mode: "
                                 + std::string{ SDL_GetError() }
                             );
                     }
+                    break;
+                case arng_state::FULLSCREEN_CUSTOM:
+                    {
+                        SDL_DisplayMode mode;
+                        
+                        if( SDL_GetWindowDisplayMode(
+                            target_reference -> window -> sdl_window,
+                            &mode
+                        ) )
+                            throw std::runtime_error(
+                                "couldn't get SDL2 window display mode: "
+                                + std::string{ SDL_GetError() }
+                            );
+                        
+                        mode.w = static_cast< int >( new_state.width  );
+                        mode.h = static_cast< int >( new_state.height );
+                        
+                        if( SDL_SetWindowDisplayMode(
+                            target_reference -> window -> sdl_window,
+                            &mode
+                        ) )
+                            throw std::runtime_error(
+                                "couldn't set SDL2 window display mode to "
+                                + std::to_string( mode.w )
+                                + "x"
+                                + std::to_string( mode.h )
+                                + ": "
+                                + std::string{ SDL_GetError() }
+                            );
+                    }
+                    break;
+                case arng_state::MINIMIZED:
+                    SDL_MinimizeWindow( target_reference -> window -> sdl_window );
+                    break;
                 }
                 
-                SDL_SetWindowResizable(
-                    target_reference -> window -> sdl_window,
-                    static_cast< SDL_bool >( new_state.resizable )
-                );
-                
-                SDL_SetWindowBordered(
-                    target_reference -> window -> sdl_window,
-                    static_cast< SDL_bool >( new_state.has_border )
-                );
-                
-                SDL_SetWindowTitle(
-                    target_reference -> window -> sdl_window,
-                    new_state.title.c_str()
-                );
-                SDL_SetWindowPosition(
-                    target_reference -> window -> sdl_window,
-                    x,
-                    y
-                );
-                SDL_SetWindowSize(
-                    target_reference -> window -> sdl_window,
-                    static_cast< int >( new_state.width  ),
-                    static_cast< int >( new_state.height )
-                );
-            }
-            
-            if( update_flags & update_window_flag::MAXIMIZE )
-                SDL_MaximizeWindow( target_reference -> window -> sdl_window );
-            
-            if( update_flags & update_window_flag::FRONT )
-                SDL_RaiseWindow( target_reference -> window -> sdl_window );
-            
-            switch( new_state.arranged )
-            {
-            case arng_state::INVALID: // Already handled
-            case arng_state::HIDDEN:  // Already handled
-            case arng_state::NORMAL:  // Nothing to do
-                break;
-            case arng_state::FULLSCREEN_NATIVE:
-                {
-                    auto display_index = SDL_GetWindowDisplayIndex(
-                        target_reference -> window -> sdl_window
-                    );
-                    if( display_index < 1 )
-                        throw std::runtime_error(
-                            "couldn't get SDL2 window display index: "
-                            + std::string{ SDL_GetError() }
-                        );
-                    
-                    SDL_DisplayMode mode;
-                    
-                    if( SDL_GetDisplayMode( display_index, 0, &mode ) )
-                        throw std::runtime_error(
-                            "couldn't get SDL2 display mode for display "
-                            + std::to_string( display_index )
-                            + ": "
-                            + std::string{ SDL_GetError() }
-                        );
-                    
-                    if( SDL_SetWindowDisplayMode(
-                        target_reference -> window -> sdl_window,
-                        &mode
-                    ) )
-                        throw std::runtime_error(
-                            "couldn't set SDL2 window display mode to "
-                            "native mode: "
-                            + std::string{ SDL_GetError() }
-                        );
-                }
-                break;
-            case arng_state::FULLSCREEN_CUSTOM:
-                {
-                    SDL_DisplayMode mode;
-                    
-                    if( SDL_GetWindowDisplayMode(
-                        target_reference -> window -> sdl_window,
-                        &mode
-                    ) )
-                        throw std::runtime_error(
-                            "couldn't get SDL2 window display mode: "
-                            + std::string{ SDL_GetError() }
-                        );
-                    
-                    mode.w = static_cast< int >( new_state.width  );
-                    mode.h = static_cast< int >( new_state.height );
-                    
-                    if( SDL_SetWindowDisplayMode(
-                        target_reference -> window -> sdl_window,
-                        &mode
-                    ) )
-                        throw std::runtime_error(
-                            "couldn't set SDL2 window display mode to "
-                            + std::to_string( mode.w )
-                            + "x"
-                            + std::to_string( mode.h )
-                            + ": "
-                            + std::string{ SDL_GetError() }
-                        );
-                }
-                break;
-            case arng_state::MINIMIZED:
-                SDL_MinimizeWindow( target_reference -> window -> sdl_window );
-                break;
-            }
-            
-            if(
-                !std::isnan( static_cast< float >(
-                    target_reference -> window -> current_state.scale_factor
-                ) ) && (
-                    new_state.scale_factor
-                    != target_reference -> window -> current_state.scale_factor
-                )
-            )
-                std::cerr << (
-                    "ignoring change of window scale factor to "
-                    + std::to_string( static_cast< float >(
+                if(
+                    !std::isnan( static_cast< float >(
+                        target_reference -> window -> current_state.scale_factor
+                    ) ) && (
                         new_state.scale_factor
-                    ) )
-                    + "\n"
-                );
+                        != target_reference -> window -> current_state.scale_factor
+                    )
+                )
+                    std::cerr << (
+                        "ignoring change of window scale factor to "
+                        + std::to_string( static_cast< float >(
+                            new_state.scale_factor
+                        ) )
+                        + "\n"
+                    );
+                
+                // Dont' need to call the window's `update_internal_state()` as the
+                // above SDL calls will trigger `SDL_WindowEvent`s that will be
+                // handled by the window's state change listener.  The update won't
+                // be immediate but it should be fast enough for most applications
+                // (except for tight loops checking the window state, which are
+                // probably a bad idea for several reasons).
+            }
             
-            // Dont' need to call the window's `update_internal_state()` as the
-            // above SDL calls will trigger `SDL_WindowEvent`s that will be
-            // handled by the window's state change listener.  The update won't
-            // be immediate but it should be fast enough for most applications
-            // (except for tight loops checking the window state, which are
-            // probably a bad idea for several reasons).
+            std::call_once(
+                target_reference -> window -> frame_task_submit_flag,
+                [ target_reference = this -> target_reference ](){
+                    // DEBUG:
+                    std::cout << "submitting frame task...\n";
+                    yavsg::submit_task( std::make_unique< yavsg::frame_task >(
+                        target_reference
+                    ) );
+                    // DEBUG:
+                    std::cout << "submitted frame task\n";
+                }
+            );
             
             return false;
         }

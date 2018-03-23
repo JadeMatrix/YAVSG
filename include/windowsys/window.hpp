@@ -3,6 +3,7 @@
 #define YAVSG_WINDOWSYS_WINDOW_HPP
 
 
+#include "../engine/scene.hpp"
 #include "../events/event_listener.hpp"
 #include "../gl/framebuffer.hpp"
 #include "../sdl/_sdl_base.hpp"
@@ -10,7 +11,7 @@
 #include "../units/unit.hpp"    // yavsg::ratio
 
 #include <memory>               // std::unique_ptr, std::shared_ptr
-#include <mutex>
+#include <mutex>                // std::mutex, std::once_flag, std::call_once()
 #include <string>
 #include <utility>              // std::size_t
 
@@ -49,10 +50,12 @@ namespace yavsg
     };
     
     class update_window_task;
+    class frame_task;
     
     class window
     {
         friend class update_window_task;
+        friend class frame_task;
         
     protected:
         SDL_Window*   sdl_window;
@@ -67,6 +70,9 @@ namespace yavsg
         
         event_listener< SDL_WindowEvent > state_change_listener;
         
+        // TODO: use frame timer instead
+        std::once_flag frame_task_submit_flag;
+        
         void update_internal_state();
         
     public:
@@ -80,6 +86,8 @@ namespace yavsg
         void maximize();
         
         gl::write_only_framebuffer& default_framebuffer();
+        
+        scene main_scene;
     };
 }
 

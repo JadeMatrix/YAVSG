@@ -28,17 +28,12 @@ namespace yavsg
         scene_program.bind_target< 0 >(
             shader_string_id::FRAGMENT_OUT_COLOR
         );
-        
-        auto    base_fov = yavsg::radians< GLfloat >{ 45 }; // 58.31f°
-        auto desired_fov = yavsg::radians< GLfloat >{
-            yavsg::degrees< GLfloat >{ 90 }
-        };
-        obj_scene.main_camera.fov( desired_fov );
-        obj_scene.main_camera.look_at( { 0.0f, 0.0f, 0.0f } );
-        obj_scene.main_camera.focal_point( 1.0f );
     }
     
-    void obj_render_step::run( gl::write_only_framebuffer& target )
+    void obj_render_step::run(
+        const scene               & obj_scene,
+        gl::write_only_framebuffer& target
+    )
     {
         glClearColor( 0.5f, 0.5f, 0.5f, 1.0f );
         glClear(
