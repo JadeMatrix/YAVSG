@@ -38,6 +38,11 @@ namespace yavsg
         std::unique_ptr< fb_type > buffer_A;
         std::unique_ptr< fb_type > buffer_B;
         
+        std::vector< std::chrono::milliseconds >            frame_times;
+        std::vector< std::chrono::milliseconds >::size_type current_frame_time;
+        std::chrono::milliseconds                           latest_frame_time;
+        float                                               latest_frame_rate;
+        
     public:
         frame_task( std::shared_ptr< window_reference > );
         ~frame_task();

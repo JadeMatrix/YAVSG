@@ -10,12 +10,15 @@
 #include "../../include/tasking/utility_tasks.hpp"
 
 #include <iostream> // std::cerr
+#include <numeric>  // std::accumulate
 
 
 namespace yavsg
 {
     frame_task::frame_task( std::shared_ptr< window_reference > wr ) :
-        window_ref{ wr }
+        window_ref{ wr },
+        frame_times{ 10, std::chrono::milliseconds{ 0 } },
+        current_frame_time{ frame_times.size() }
     {
         std::unique_lock< std::mutex > window_reference_lock(
             window_ref -> reference_mutex
@@ -192,6 +195,27 @@ namespace yavsg
         }
         
         SDL_GL_SwapWindow( window_ref -> window -> sdl_window );
+        
+        if( ++current_frame_time >= frame_times.size() )
+            current_frame_time = 0;
+        frame_times[ current_frame_time ] = std::chrono::duration_cast<
+            std::chrono::milliseconds
+        >( current_time - previous_time );
+        latest_frame_time = std::accumulate(
+            frame_times.begin(),
+            frame_times.  end(),
+            std::chrono::milliseconds{ 0 }
+        ) / frame_times.size();
+        latest_frame_rate = 1000.0f / latest_frame_time.count();
+        
+        // DEBUG:
+        if( current_frame_time == 0 )
+            std::cout << (
+                "current framerate: "
+                + std::to_string( latest_frame_rate )
+                + "\n"
+            );
+        
         previous_time = current_time;
         
         // TODO: Frame timer for window should submit a new frame task
