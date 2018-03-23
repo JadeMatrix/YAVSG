@@ -3,6 +3,7 @@
 #include "../../include/tasking/task.hpp"
 #include "../../include/tasking/tasking.hpp"
 
+#include <cmath>        // std::isnan()
 #include <exception>    // std::runtime_error, std::invalid_argument
 #include <limits>       // std::numeric_limits
 #include <iostream>     // std::cerr
@@ -98,14 +99,6 @@ namespace yavsg // Window update task //////////////////////////////////////////
             
             using arng_state = yavsg::window_arrange_state;
             
-            Uint32 sdl_window_flags = SDL_WINDOW_OPENGL;
-            
-            if( new_state.scale_factor > 1 )
-                sdl_window_flags |= SDL_WINDOW_ALLOW_HIGHDPI;
-            
-            if( new_state.resizable )
-                sdl_window_flags |= SDL_WINDOW_RESIZABLE;
-            
             if( new_state.arranged == arng_state::INVALID )
                 throw std::invalid_argument(
                     "cannot update window to an invalid arrangement"
@@ -150,6 +143,17 @@ namespace yavsg // Window update task //////////////////////////////////////////
             
             if( !target_reference -> window -> sdl_window )
             {
+                Uint32 sdl_window_flags = SDL_WINDOW_OPENGL;
+                
+                if( new_state.scale_factor > 1 )
+                    sdl_window_flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+                
+                if( new_state.resizable )
+                    sdl_window_flags |= SDL_WINDOW_RESIZABLE;
+                
+                if( !new_state.has_border )
+                    sdl_window_flags |= SDL_WINDOW_BORDERLESS;
+                
                 if( new_state.arranged == arng_state::HIDDEN )
                     sdl_window_flags |= SDL_WINDOW_HIDDEN;
                 else
@@ -211,6 +215,16 @@ namespace yavsg // Window update task //////////////////////////////////////////
                             );
                     }
                 }
+                
+                SDL_SetWindowResizable(
+                    target_reference -> window -> sdl_window,
+                    static_cast< SDL_bool >( new_state.resizable )
+                );
+                
+                SDL_SetWindowBordered(
+                    target_reference -> window -> sdl_window,
+                    static_cast< SDL_bool >( new_state.has_border )
+                );
                 
                 SDL_SetWindowTitle(
                     target_reference -> window -> sdl_window,
@@ -307,7 +321,28 @@ namespace yavsg // Window update task //////////////////////////////////////////
                 break;
             }
             
-            target_reference -> window -> update_internal_state();
+            if(
+                !std::isnan( static_cast< float >(
+                    target_reference -> window -> current_state.scale_factor
+                ) ) && (
+                    new_state.scale_factor
+                    != target_reference -> window -> current_state.scale_factor
+                )
+            )
+                std::cerr << (
+                    "ignoring change of window scale factor to "
+                    + std::to_string( static_cast< float >(
+                        new_state.scale_factor
+                    ) )
+                    + "\n"
+                );
+            
+            // Dont' need to call the window's `update_internal_state()` as the
+            // above SDL calls will trigger `SDL_WindowEvent`s that will be
+            // handled by the window's state change listener.  The update won't
+            // be immediate but it should be fast enough for most applications
+            // (except for tight loops checking the window state, which are
+            // probably a bad idea for several reasons).
             
             return false;
         }
@@ -428,6 +463,12 @@ namespace yavsg // Window implementation ///////////////////////////////////////
         else
             SDL_GL_GetDrawableSize( sdl_window, &pixel_width, &pixel_height );
         
+        // TODO: This doesn't allow setting the window scale factor independent
+        // of the operating system; there's no "real" way to do this, but if
+        // application by convention uses the window point sizes scaled to
+        // pixels it can be faked.  This will then need to be overridden by any
+        // requested scale factor, which with this current setup there's no way
+        // to get.
         current_state.scale_factor = (
               ( static_cast< float >( pixel_width  ) / static_cast< float >( width  ) )
             + ( static_cast< float >( pixel_height ) / static_cast< float >( height ) )
@@ -435,6 +476,10 @@ namespace yavsg // Window implementation ///////////////////////////////////////
         
         current_state.resizable = static_cast< bool >(
             sdl_window_flags & SDL_WINDOW_RESIZABLE
+        );
+        
+        current_state.has_border = !static_cast< bool >(
+            sdl_window_flags & SDL_WINDOW_BORDERLESS
         );
         
         // Can't use `std::make_unique<>()` because `write_only_framebuffer`'s
@@ -451,12 +496,6 @@ namespace yavsg // Window implementation ///////////////////////////////////////
                 )
             )
         );
-        
-        // DEBUG:
-        std::cout
-            << "updated internal state"
-            << std::endl
-        ;
     }
     
     window::window( const window_state& init_state ) :
@@ -471,15 +510,13 @@ namespace yavsg // Window implementation ///////////////////////////////////////
             window_arrange_state::INVALID,
             "",
             std::numeric_limits< float >::signaling_NaN(),
+            false,
             false
         },
         state_change_listener{
             [ self_reference = this -> self_reference ](
                 const SDL_WindowEvent& e
             ){
-                // DEBUG:
-                std::cout << "handling event for active window\n";
-                
                 std::unique_lock< std::mutex > ref_lock(
                     self_reference -> reference_mutex
                 );
@@ -495,7 +532,7 @@ namespace yavsg // Window implementation ///////////////////////////////////////
                             self_reference -> window -> sdl_window
                         )
                     )
-                        // CHECK: might be triggered by own update task
+                        // May be triggered by own update task
                         self_reference -> window -> update_internal_state();
                 }
             },
@@ -577,6 +614,17 @@ namespace yavsg // Window implementation ///////////////////////////////////////
             self_reference,
             current_state,
             update_window_flag::CENTER
+        ) );
+    }
+    
+    void window::maximize()
+    {
+        std::unique_lock< std::mutex > lock( state_mutex );
+        
+        submit_task( std::make_unique< update_window_task >(
+            self_reference,
+            current_state,
+            update_window_flag::MAXIMIZE
         ) );
     }
     

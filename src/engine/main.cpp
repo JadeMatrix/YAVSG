@@ -49,9 +49,26 @@ int main( int argc, char* argv[] )
             yavsg::window_arrange_state::NORMAL,
             "YAVSG",
             1.0f,
+            true,
             true
         } );
-        // WARNING: have to destroy before exiting as worker!
+        yavsg::event_listener< SDL_KeyboardEvent > center_window_listener{
+            [ test_window ]( const SDL_KeyboardEvent& e ){
+                if( e.type == SDL_KEYUP && e.keysym.sym == SDLK_c )
+                {
+                    std::cout << "centering window...\n";
+                    test_window -> center();
+                }
+            },
+            yavsg::task_flag::MAIN_THREAD
+        };
+        yavsg::event_listener< SDL_KeyboardEvent > break_listener{
+            [ test_window ]( const SDL_KeyboardEvent& e ){
+                if( e.type == SDL_KEYUP && e.keysym.sym == SDLK_SPACE )
+                    std::cout << "\n--------------------------------------\n\n";
+            },
+            yavsg::task_flag::MAIN_THREAD
+        };
         yavsg::event_listener< SDL_KeyboardEvent > close_window_listener{
             [ test_window ]( const SDL_KeyboardEvent& e ){
                 if( e.type == SDL_KEYUP && e.keysym.sym == SDLK_ESCAPE )

@@ -37,8 +37,7 @@ namespace yavsg
         std::string title;
         ratio< float > scale_factor;
         bool resizable;
-        
-        // TODO: border
+        bool has_border;
     };
     
     // Window reference utility type for concurrent window updates
@@ -78,6 +77,7 @@ namespace yavsg
         void         state( const window_state& );
         
         void center();
+        void maximize();
         
         gl::write_only_framebuffer& default_framebuffer();
     };
