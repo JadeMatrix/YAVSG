@@ -548,35 +548,6 @@ namespace yavsg // Window implementation ///////////////////////////////////////
     
     window::~window()
     {
-        // DEBUG:
-        std::cout
-            << "destroying window..."
-            << std::endl
-        ;
-        
-        // std::unique_lock< std::mutex > lock(
-        //     const_cast< std::mutex& >( state_mutex )
-        // );
-        
-        // // Don't want to process events after the yavsg::window is destroyed but
-        // // before its cleanup task runs; this shouldn't be an issue right now as
-        // // both the cleanup task and change listener execute on a single thread
-        // // (main), but this may change in the future and I don't want the
-        // // debugging headache that would cause.
-        // state_change_listener = event_listener< SDL_WindowEvent >{
-        //     []( const SDL_WindowEvent& e ){
-        //         // DEBUG:
-        //         std::cout << "handling event for destroyed window\n";
-        //     }
-        // };
-        
-        // DEBUG:
-        std::cout
-            << "set window event handling to null, new listener location "
-            << reinterpret_cast< unsigned long >( &state_change_listener )
-            << std::endl
-        ;
-        
         // Any window system tasks or event callbacks pointing to this window
         // now know it's closed.
         std::unique_lock< std::mutex > ref_lock(
