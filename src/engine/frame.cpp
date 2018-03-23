@@ -9,8 +9,7 @@
 #include "../../include/tasking/tasking.hpp"
 #include "../../include/tasking/utility_tasks.hpp"
 
-// DEBUG:
-#include <iostream>
+#include <iostream> // std::cerr
 
 
 namespace yavsg
@@ -66,78 +65,51 @@ namespace yavsg
             }
         }
     {
-        // DEBUG:
-        std::cout << "creating frame task...\n";
-        
         std::unique_lock< std::mutex > window_reference_lock(
             window_ref -> reference_mutex
         );
         
-        // DEBUG:
-        std::cout << "creating frame task: checking window alive...\n";
-        
         if( window_ref -> window )
         {
-            // DEBUG:
-            std::cout << "creating frame task: window alive, locking...\n";
-            
             std::unique_lock< std::mutex > window_lock(
                 window_ref -> window -> state_mutex
             );
-            
-            // DEBUG:
-            std::cout << "creating frame task: locked window, creating render steps...\n";
             
             scene_steps = std::vector< render_step* >{
                 new obj_render_step()
             };
             postprocess_steps = std::vector< postprocess_step_type* >{
-                // new debug_4up_postprocess_step(
-                //     nullptr,
-                //     std::make_unique< multi_postprocess_step >(
-                //         std::vector< std::string >{
-                //             "linear_to_sRGB",
-                //             "circular_gradient"
-                //         }
-                //     ),
-                //     std::make_unique< dof_postprocess_step >(
-                //         // FIXME: unsafe
-                //         window_ref -> window -> main_scene.main_camera
-                //     ),
-                //     std::make_unique< multi_postprocess_step >(
-                //         std::vector< std::string >{
-                //             "buffer_analysis"
-                //         }
-                //     )
+                new debug_4up_postprocess_step(
+                    nullptr,
+                    std::make_unique< multi_postprocess_step >(
+                        std::vector< std::string >{
+                            "linear_to_sRGB",
+                            "circular_gradient"
+                        }
+                    ),
+                    std::make_unique< dof_postprocess_step >(
+                        // FIXME: unsafe
+                        window_ref -> window -> main_scene.main_camera
+                    ),
+                    std::make_unique< multi_postprocess_step >(
+                        std::vector< std::string >{
+                            "buffer_analysis"
+                        }
+                    )
+                ),
+                // std::make_unique< dof_postprocess_step >(
+                //     ors -> main_camera
                 // ),
-                // // std::make_unique< dof_postprocess_step >(
-                // //     ors -> main_camera
-                // // ),
-                // // std::make_unique< multi_postprocess_step >(
-                // //     std::vector< std::string >{
-                // //         "linear_to_sRGB"
-                // //     }
-                // // )
+                // std::make_unique< multi_postprocess_step >(
+                //     std::vector< std::string >{
+                //         "linear_to_sRGB"
+                //     }
+                // )
             };
-            
-            // DEBUG:
-            std::cout << "creating frame task: render steps created\n";
             
             start_time = std::chrono::high_resolution_clock::now();
             previous_time = start_time;
-            
-            
-            auto    base_fov = yavsg::radians< GLfloat >{ 45 }; // 58.31f°
-            auto desired_fov = yavsg::radians< GLfloat >{
-                yavsg::degrees< GLfloat >{ 90 }
-            };
-            window_ref -> window -> main_scene.main_camera.fov( desired_fov );
-            window_ref -> window -> main_scene.main_camera.look_at( { 0.0f, 0.0f, 0.0f } );
-            window_ref -> window -> main_scene.main_camera.focal_point( 1.0f );
         }
-        
-        // DEBUG:
-        std::cout << "creating frame task: frame task created\n";
     }
     
     frame_task::~frame_task()
@@ -155,9 +127,6 @@ namespace yavsg
     
     bool frame_task::operator()()
     {
-        // DEBUG:
-        std::cout << "drawing frame...\n";
-        
         auto current_time = std::chrono::high_resolution_clock::now();
         
         std::unique_lock< std::mutex > window_reference_lock(
@@ -165,18 +134,11 @@ namespace yavsg
         );
         
         if( !window_ref -> window )
-        {
-            // DEBUG:
-            std::cout << "cancelling frame draw task because window closed\n";
             return false;
-        }
         
         std::unique_lock< std::mutex > window_lock(
             window_ref -> window -> state_mutex
         );
-        
-        // DEBUG:
-        std::cout << "drawing frame: window locked, getting state...\n";
         
         // Window is already locked, so no need to use `window::state()`
         auto window_state = window_ref -> window -> current_state;
@@ -190,23 +152,10 @@ namespace yavsg
             return true;
         }
         
-        // DEBUG:
-        std::cout << "drawing frame: got window state, preparing buffers...\n";
-        
         // Initialize buffers or update dimensions; only checks one because both
         // A and B's states are locked
         auto pixel_width  = static_cast< std::size_t >( to_pixels( window_state. width, window_state ) );
         auto pixel_height = static_cast< std::size_t >( to_pixels( window_state.height, window_state ) );
-        
-        // DEBUG:
-        std::cout << (
-            "drawing frame: buffer dimensions: "
-            + std::to_string( pixel_width )
-            + ","
-            + std::to_string( pixel_height )
-            + "\n"
-        );
-        
         if(
             !buffer_A
             || buffer_A ->  width() != pixel_width
@@ -222,9 +171,6 @@ namespace yavsg
                 pixel_height
             );
         }
-        
-        // DEBUG:
-        std::cout << "drawing frame: buffers prepared, setting up buffers...\n";
         
         // Even though only target_buffer needs to be a write-only
         // buffer, these both need to be the same type for std::swap()
@@ -244,9 +190,6 @@ namespace yavsg
         );
         target_buffer -> bind();
         
-        // DEBUG:
-        std::cout << "drawing frame: buffers set up, drawing scene...\n";
-        
         // Run all scene render steps against the same framebuffer
         for( auto step : scene_steps )
         {
@@ -260,9 +203,6 @@ namespace yavsg
             
             step -> run( window_ref -> window -> main_scene, *target_buffer );
         }
-        
-        // DEBUG:
-        std::cout << "drawing frame: scene drawn, running postprocess steps...\n";
         
         auto postprocess_step_iter = postprocess_steps.begin();
         while( postprocess_step_iter != postprocess_steps.end() )
@@ -299,14 +239,8 @@ namespace yavsg
             );
         }
         
-        // DEBUG:
-        std::cout << "drawing frame: postprocess steps run, swapping...\n";
-        
         SDL_GL_SwapWindow( window_ref -> window -> sdl_window );
         previous_time = current_time;
-        
-        // DEBUG:
-        std::cout << "drawing frame: window swapped\n";
         
         // TODO: Frame timer for window should submit a new frame task
         return true;

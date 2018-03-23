@@ -27,11 +27,6 @@ namespace yavsg
         using wo_fb_type = gl::write_only_framebuffer;
         
     protected:
-        // TODO: OpenGL context should not be controlled by the frame task;
-        // instead the frame task should be submitted by a window
-        // SDL_manager sdl;
-        // SDL_window_manager window;
-        
         std::shared_ptr< window_reference > window_ref;
         
         std::vector<      render_step     * > scene_steps;

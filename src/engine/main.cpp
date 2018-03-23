@@ -12,6 +12,7 @@
 #include "../../include/tasking/utility_tasks.hpp"
 #include "../../include/windowsys/window.hpp"
 #include "../../include/engine/obj.hpp"
+#include "../../include/units/angular.hpp"
 
 #include <exception>
 #include <iostream>
@@ -64,6 +65,14 @@ int main( int argc, char* argv[] )
             true,
             true
         } );
+        
+        auto    base_fov = yavsg::radians< GLfloat >{ 45 }; // 58.31f°
+        auto desired_fov = yavsg::radians< GLfloat >{
+            yavsg::degrees< GLfloat >{ 90 }
+        };
+        test_window -> main_scene.main_camera.fov( desired_fov );
+        test_window -> main_scene.main_camera.look_at( { 0.0f, 0.0f, 0.0f } );
+        test_window -> main_scene.main_camera.focal_point( 1.0f );
         
         submit_task( std::make_unique< yavsg::load_obj_task >(
             test_window -> main_scene.object_manager,

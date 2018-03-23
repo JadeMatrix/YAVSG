@@ -5,9 +5,10 @@
 #include <SDL2/SDL_image.h>
 
 #include <exception>
+#include <string>
 
 
-namespace yavsg // SDL_manager /////////////////////////////////////////////////
+namespace yavsg
 {
     SDL_manager::SDL_manager()
     {
@@ -47,84 +48,5 @@ namespace yavsg // SDL_manager /////////////////////////////////////////////////
     {
         IMG_Quit();
         SDL_Quit();
-    }
-}
-
-
-namespace yavsg // SDL_window_manager //////////////////////////////////////////
-{
-    void SDL_window_manager::resize( std::size_t w, std::size_t h )
-    {
-        // Can't use `std::make_unique<>()` because `write_only_framebuffer`'s
-        // constructor is protected & friended only with `SDL_window_manager`
-        _default_framebuffer = std::unique_ptr< gl::write_only_framebuffer > (
-            new gl::write_only_framebuffer(
-                0,  // Framebuffer ID
-                1,  // Color targets
-                w,
-                h
-            )
-        );
-    }
-    
-    SDL_window_manager::SDL_window_manager(
-        const std::string& title,
-        std::size_t x,
-        std::size_t y,
-        std::size_t w,
-        std::size_t h,
-        Uint32 flags
-    ) :
-        window_change_listener{ [ this ]( const SDL_WindowEvent& e ){
-            if( SDL_GetWindowID( this -> sdl_window ) != e.windowID )
-                return;
-            
-            switch( e.event )
-            {
-            case SDL_WINDOWEVENT_SIZE_CHANGED:
-                this -> resize( e.data1, e.data2 );
-                break;
-            default:
-                break;
-            }
-        } }
-    {
-        sdl_window = SDL_CreateWindow(
-            title.c_str(),
-            x,
-            y,
-            w,
-            h,
-            flags
-        );
-        if( sdl_window == nullptr )
-            throw std::runtime_error(
-                "failed to create SDL2 window: "
-                + std::string( SDL_GetError() )
-            );
-        
-        gl_context = SDL_GL_CreateContext( sdl_window );
-        if( gl_context == nullptr )
-        {
-            std::string context_error_string
-                = "failed to create OpenGL context via SDL2 window: ";
-            context_error_string += SDL_GetError();
-            SDL_DestroyWindow( sdl_window );
-            throw std::runtime_error( context_error_string );
-        }
-        
-        // Create wrapper for default framebuffer after context
-        resize( w, h );
-    }
-    
-    SDL_window_manager::~SDL_window_manager()
-    {
-        SDL_GL_DeleteContext( gl_context );
-        SDL_DestroyWindow( sdl_window );
-    }
-    
-    yavsg::gl::write_only_framebuffer& SDL_window_manager::default_framebuffer()
-    {
-        return *_default_framebuffer;
     }
 }

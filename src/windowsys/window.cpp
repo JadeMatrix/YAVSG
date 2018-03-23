@@ -435,24 +435,20 @@ namespace yavsg // Window update task //////////////////////////////////////////
                         + "\n"
                     );
                 
-                // Dont' need to call the window's `update_internal_state()` as the
-                // above SDL calls will trigger `SDL_WindowEvent`s that will be
-                // handled by the window's state change listener.  The update won't
-                // be immediate but it should be fast enough for most applications
-                // (except for tight loops checking the window state, which are
-                // probably a bad idea for several reasons).
+                // Dont' need to call the window's `update_internal_state()` as
+                // the above SDL calls will trigger `SDL_WindowEvent`s that will
+                // be handled by the window's state change listener.  The update
+                // won't be immediate but it should be fast enough for most
+                // applications (except for tight loops checking the window
+                // state, which are probably a bad idea for several reasons).
             }
             
             std::call_once(
                 target_reference -> window -> frame_task_submit_flag,
                 [ target_reference = this -> target_reference ](){
-                    // DEBUG:
-                    std::cout << "submitting frame task...\n";
                     yavsg::submit_task( std::make_unique< yavsg::frame_task >(
                         target_reference
                     ) );
-                    // DEBUG:
-                    std::cout << "submitted frame task\n";
                 }
             );
             
@@ -485,9 +481,6 @@ namespace // Window cleaup task ////////////////////////////////////////////////
         {
             SDL_GL_DeleteContext( gl_context );
             SDL_DestroyWindow( sdl_window );
-            
-            // DEBUG:
-            std::cout << "window closed\n";
             
             return false;
         }
