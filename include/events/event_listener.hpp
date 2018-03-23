@@ -9,6 +9,16 @@
 #include <utility>      // std::size_t
 
 
+/*
+Internally, the event listener system uses a task to poll events.  This task
+loops through the currently available events and submits a task for each
+callback registered to that event type.  This prevents event polling from
+causing hangups due to a long-running event callback and from it taking up too
+much time in its worker in general.  Additionally, it prevents deadlocks when an
+event callback wishes to change the event handling system.
+*/
+
+
 namespace yavsg
 {
     using listener_id = std::size_t;
