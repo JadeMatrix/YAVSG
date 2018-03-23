@@ -15,55 +15,7 @@
 namespace yavsg
 {
     frame_task::frame_task( std::shared_ptr< window_reference > wr ) :
-        window_ref{ wr },
-        camera_look_listener{
-            [ window_ref = this -> window_ref ](
-                const SDL_MouseMotionEvent& e
-            ){
-                std::unique_lock< std::mutex > window_reference_lock(
-                    window_ref -> reference_mutex
-                );
-                if( !window_ref -> window )
-                    return;
-                std::unique_lock< std::mutex > window_lock(
-                    window_ref -> window -> state_mutex
-                );
-                
-                window_ref -> window -> main_scene.main_camera.increment_pitch_yaw(
-                    static_cast< float >( e.yrel ) / -4.0f,
-                    static_cast< float >( e.xrel ) / -4.0f
-                );
-            }
-        },
-        focal_adjust_listener{
-            [ window_ref = this -> window_ref ](
-                const SDL_MouseWheelEvent& e
-            ){
-                std::unique_lock< std::mutex > window_reference_lock(
-                    window_ref -> reference_mutex
-                );
-                if( !window_ref -> window )
-                    return;
-                std::unique_lock< std::mutex > window_lock(
-                    window_ref -> window -> state_mutex
-                );
-                
-                auto new_focal_point = (
-                    static_cast< float >( e.y )
-                    / 4.0f
-                    + window_ref -> window -> main_scene.main_camera.focal_point()
-                );
-                auto near = window_ref -> window -> main_scene.main_camera.near_point();
-                auto  far = window_ref -> window -> main_scene.main_camera. far_point();
-                if( new_focal_point < near )
-                    new_focal_point = near + 0.1f;
-                else if( new_focal_point > far )
-                    new_focal_point = far - 0.1f;
-                window_ref -> window -> main_scene.main_camera.focal_point(
-                    new_focal_point
-                );
-            }
-        }
+        window_ref{ wr }
     {
         std::unique_lock< std::mutex > window_reference_lock(
             window_ref -> reference_mutex

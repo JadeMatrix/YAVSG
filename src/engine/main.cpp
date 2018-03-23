@@ -81,6 +81,49 @@ int main( int argc, char* argv[] )
         ) );
         
         SDL_SetRelativeMouseMode( SDL_TRUE );
+        
+        yavsg::event_listener< SDL_MouseMotionEvent > camera_look_listener{
+            [ window_ref = test_window -> reference() ](
+                const SDL_MouseMotionEvent& e
+            ){
+                std::unique_lock< std::mutex > window_reference_lock(
+                    window_ref -> reference_mutex
+                );
+                if( !window_ref -> window )
+                    return;
+                
+                window_ref -> window -> main_scene.main_camera.increment_pitch_yaw(
+                    static_cast< float >( e.yrel ) / -4.0f,
+                    static_cast< float >( e.xrel ) / -4.0f
+                );
+            }
+        };
+        yavsg::event_listener< SDL_MouseWheelEvent > focal_adjust_listener{
+            [ window_ref = test_window -> reference() ](
+                const SDL_MouseWheelEvent& e
+            ){
+                std::unique_lock< std::mutex > window_reference_lock(
+                    window_ref -> reference_mutex
+                );
+                if( !window_ref -> window )
+                    return;
+                
+                auto new_focal_point = (
+                    static_cast< float >( e.y )
+                    / 4.0f
+                    + window_ref -> window -> main_scene.main_camera.focal_point()
+                );
+                auto near = window_ref -> window -> main_scene.main_camera.near_point();
+                auto  far = window_ref -> window -> main_scene.main_camera. far_point();
+                if( new_focal_point < near )
+                    new_focal_point = near + 0.1f;
+                else if( new_focal_point > far )
+                    new_focal_point = far - 0.1f;
+                window_ref -> window -> main_scene.main_camera.focal_point(
+                    new_focal_point
+                );
+            }
+        };
         yavsg::event_listener< SDL_KeyboardEvent > center_window_listener{
             [ test_window ]( const SDL_KeyboardEvent& e ){
                 if( e.type == SDL_KEYUP && e.keysym.sym == SDLK_c )

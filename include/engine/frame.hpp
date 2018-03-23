@@ -38,9 +38,6 @@ namespace yavsg
         std::unique_ptr< fb_type > buffer_A;
         std::unique_ptr< fb_type > buffer_B;
         
-        event_listener< SDL_MouseMotionEvent > camera_look_listener;
-        event_listener< SDL_MouseWheelEvent  > focal_adjust_listener;
-        
     public:
         frame_task( std::shared_ptr< window_reference > );
         ~frame_task();
