@@ -178,9 +178,12 @@ namespace yavsg
             }
         };
         
-        read_reference read()
+        read_reference read() const
         {
-            return read_reference( *this );
+            return read_reference{ const_cast< render_object_manager<
+                AttributeBuffer,
+                Material
+            >& >( *this ) };
         }
         
         write_reference write()
