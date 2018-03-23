@@ -85,6 +85,7 @@ namespace yavsg
         void center();
         void maximize();
         
+        std::shared_ptr< window_reference >   reference();
         gl::write_only_framebuffer& default_framebuffer();
         
         scene main_scene;

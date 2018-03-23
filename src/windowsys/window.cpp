@@ -704,6 +704,11 @@ namespace yavsg // Window implementation ///////////////////////////////////////
         ) );
     }
     
+    std::shared_ptr< window_reference > window::reference()
+    {
+        return self_reference;
+    }
+    
     gl::write_only_framebuffer& window::default_framebuffer()
     {
         std::unique_lock< std::mutex > lock( state_mutex );
