@@ -30,11 +30,9 @@ namespace yavsg
                 window_ref -> window -> state_mutex
             );
             
-            scene_steps = std::vector< render_step* >{
-                new obj_render_step()
-            };
-            postprocess_steps = std::vector< postprocess_step_type* >{
-                new debug_4up_postprocess_step(
+            scene_steps.push_back( std::make_unique< obj_render_step >() );
+            postprocess_steps.push_back(
+                std::make_unique< debug_4up_postprocess_step >(
                     nullptr,
                     std::make_unique< multi_postprocess_step >(
                         std::vector< std::string >{
@@ -51,16 +49,19 @@ namespace yavsg
                             "buffer_analysis"
                         }
                     )
-                ),
-                // std::make_unique< dof_postprocess_step >(
-                //     ors -> main_camera
-                // ),
-                // std::make_unique< multi_postprocess_step >(
-                //     std::vector< std::string >{
-                //         "linear_to_sRGB"
-                //     }
-                // )
-            };
+                )
+            );
+            // postprocess_steps.push_back(
+            //     std::make_unique< dof_postprocess_step >(
+            //         // FIXME: unsafe
+            //         window_ref -> window -> main_scene.main_camera
+            //     )
+            // );
+            // postprocess_steps.push_back(
+            //     std::make_unique< multi_postprocess_step >(
+            //         std::vector< std::string >{ "linear_to_sRGB" }
+            //     )
+            // );
             
             start_time = std::chrono::high_resolution_clock::now();
             previous_time = start_time;
@@ -69,10 +70,7 @@ namespace yavsg
     
     frame_task::~frame_task()
     {
-        for( auto step : postprocess_steps )
-            delete step;
-        for( auto step : scene_steps )
-            delete step;
+        
     }
     
     task_flags_type frame_task::flags() const
@@ -146,7 +144,7 @@ namespace yavsg
         target_buffer -> bind();
         
         // Run all scene render steps against the same framebuffer
-        for( auto step : scene_steps )
+        for( auto& step : scene_steps )
         {
             // Reset viewport to default before running step
             glViewport(
@@ -168,7 +166,7 @@ namespace yavsg
                 postprocess_step_iter == postprocess_steps.begin();
             
             // Get the current step before advancing the iterator
-            auto step = *postprocess_step_iter;
+            auto& step = *( postprocess_step_iter -> get() );
             // The last postprocess step should target the window's
             // default framebuffer
             if( ++postprocess_step_iter == postprocess_steps.end() )
@@ -188,7 +186,7 @@ namespace yavsg
                 target_buffer -> height()
             );
             
-            step -> run(
+            step.run(
                 *static_cast< fb_type* >( source_buffer ),
                 *                         target_buffer
             );

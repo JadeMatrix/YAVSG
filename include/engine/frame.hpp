@@ -29,8 +29,8 @@ namespace yavsg
     protected:
         std::shared_ptr< window_reference > window_ref;
         
-        std::vector<      render_step     * > scene_steps;
-        std::vector< postprocess_step_type* > postprocess_steps;
+        std::vector< std::unique_ptr<      render_step      > > scene_steps;
+        std::vector< std::unique_ptr< postprocess_step_type > > postprocess_steps;
         
         std::chrono::high_resolution_clock::time_point    start_time;
         std::chrono::high_resolution_clock::time_point previous_time;
