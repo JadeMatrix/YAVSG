@@ -131,6 +131,23 @@ _SDL2_ADD_COMPONENT_LIBRARY(
     NAMES "SDL2_test"
     DOC "Location of `libSDL2_test`"
 )
+_SDL2_ADD_COMPONENT_LIBRARY(
+    image
+    SHARED
+    NAMES
+        "libSDL2_image.so"
+        "libSDL2_image.dll"
+        "libSDL2_image.dylib"
+    DOC "Location of `libSDL2_image` (shared)"
+)
+_SDL2_ADD_COMPONENT_LIBRARY(
+    image-static
+    STATIC
+    NAMES
+        "libSDL2_image.a"
+        "libSDL2_image.lib"
+    DOC "Location of `libSDL2_image` (static)"
+)
 
 
 INCLUDE( FindPackageHandleStandardArgs )
