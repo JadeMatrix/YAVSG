@@ -1,0 +1,56 @@
+MACRO( FIND_ORIGINAL_PACKAGE PACKAGE )
+    CMAKE_PARSE_ARGUMENTS(
+        FIND_ORIGINAL_PACKAGE
+        "SKIP_VERSION"
+        ""
+        ""
+        ${ARGN}
+    )
+    
+    MACRO( PUSH_VAR VAR )
+        SET( PREV_${VAR} "${${VAR}}" )
+        UNSET( ${VAR} )
+    ENDMACRO()
+    MACRO( POP_VAR VAR )
+        SET( ${VAR} "${PREV_${VAR}}" )
+        UNSET( PREV_${VAR} )
+    ENDMACRO()
+    
+    IF( FIND_ORIGINAL_PACKAGE_SKIP_VERSION )
+        FOREACH( VAR IN ITEMS
+            VERSION
+            VERSION_MAJOR
+            VERSION_MINOR
+            VERSION_PATCH
+            VERSION_TWEAK
+            VERSION_COUNT
+        )
+            PUSH_VAR( ${CMAKE_FIND_PACKAGE_NAME}_FIND_${VAR} )
+        ENDFOREACH()
+    ENDIF()
+    
+    SET( PREV_CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" )
+    UNSET( CMAKE_MODULE_PATH )
+    
+    # Use any existing Find or Config script
+    FIND_PACKAGE( "${PACKAGE}" )
+    
+    SET( CMAKE_MODULE_PATH "${PREV_CMAKE_MODULE_PATH}" )
+    UNSET( PREV_CMAKE_MODULE_PATH )
+    
+    IF( FIND_ORIGINAL_PACKAGE_SKIP_VERSION )
+        FOREACH( VAR IN ITEMS
+            VERSION
+            VERSION_MAJOR
+            VERSION_MINOR
+            VERSION_PATCH
+            VERSION_TWEAK
+            VERSION_COUNT
+        )
+            POP_VAR( ${CMAKE_FIND_PACKAGE_NAME}_FIND_${VAR} )
+        ENDFOREACH()
+    ENDIF()
+    
+    UNSET( FIND_ORIGINAL_PACKAGE_SKIP_VERSION　)
+    UNSET( FIND_ORIGINAL_PACKAGE_UNPARSED_ARGUMENTS )
+ENDMACRO()
