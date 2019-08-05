@@ -6,7 +6,7 @@ FOREACH( LIBRARY IN ITEMS
     "math"
     # "rendering"
     "sdl"
-    # "tasking"
+    "tasking"
     "units"
     # "windowsys"
 )

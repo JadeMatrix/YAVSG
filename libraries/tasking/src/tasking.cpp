@@ -1,8 +1,8 @@
-#include "../../include/tasking/tasking.hpp"
+#include <yavsg/tasking/tasking.hpp>
 
 // yavsg::stop_task_system_task
-#include "../../include/tasking/utility_tasks.hpp"
-#include "../../include/gl/error.hpp"   // yavsg::gl::summary_error
+#include <yavsg/tasking/utility_tasks.hpp>
+#include <yavsg/gl/error.hpp>   // yavsg::gl::summary_error
 
 #include <atomic>
 #include <condition_variable>

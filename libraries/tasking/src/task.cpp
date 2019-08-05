@@ -1,4 +1,4 @@
-#include "../../include/tasking/task.hpp"
+#include <yavsg/tasking/task.hpp>
 
 
 namespace yavsg
