@@ -3,7 +3,8 @@
 #define YAVSG_GL_ATTRIBUTE_BUFFER_HPP
 
 
-#include "_gl_base.hpp"
+#include <yavsg/gl_wrap.hpp>
+
 #include "error.hpp"
 
 #include <array>

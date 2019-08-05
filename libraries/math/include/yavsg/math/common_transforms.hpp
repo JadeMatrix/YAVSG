@@ -7,7 +7,8 @@
 #include "quaternion.hpp"
 #include "trigonometry.hpp"
 #include "vector.hpp"
-#include "../units/angular.hpp"
+
+#include <yavsg/units/angular.hpp>
 
 
 namespace yavsg // Views ///////////////////////////////////////////////////////

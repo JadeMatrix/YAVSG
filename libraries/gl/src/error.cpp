@@ -1,7 +1,7 @@
-#include "../../include/gl/error.hpp"
+#include <yavsg/gl/error.hpp>
 
 // GL_STACK_OVERFLOW, GL_STACK_UNDERFLOW, GL_TABLE_TOO_LARGE
-#include "../../include/sdl/sdl_utils.hpp"
+#include <yavsg/sdl/sdl.hpp>
 
 
 namespace yavsg { namespace gl

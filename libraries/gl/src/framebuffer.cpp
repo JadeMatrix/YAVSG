@@ -1,7 +1,8 @@
-#include "../../include/gl/framebuffer.hpp"
+#include <yavsg/gl/framebuffer.hpp>
 
 // For yavsg::gl::write_only_framebuffer::dump_BMP()
-#include "../../include/sdl/_sdl_base.hpp"
+#include <yavsg/sdl/sdl.hpp>
+
 #include <fstream>
 #include <iomanip>  // std::setw(), std::setfill()
 #include <limits>   // std::numeric_limits

@@ -3,7 +3,7 @@
 #define YAVSG_MATH_TRIGONOMETRY_HPP
 
 
-#include "../units/angular.hpp"
+#include <yavsg/units/angular.hpp>
 
 #include <cmath>
 

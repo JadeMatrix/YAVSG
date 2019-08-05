@@ -1,4 +1,4 @@
-#include "../../include/sdl/sdl_utils.hpp"
+#include <yavsg/sdl/utils.hpp>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>

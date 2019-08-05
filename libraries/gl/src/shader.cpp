@@ -1,6 +1,6 @@
-#include "../../include/gl/shader.hpp"
+#include <yavsg/gl/shader.hpp>
 
-#include "../../include/gl/error.hpp"
+#include <yavsg/gl/error.hpp>
 
 #include <exception>
 #include <fstream>

@@ -3,7 +3,7 @@
 #define YAVSG_SDL_UTILS_HPP
 
 
-#include "_sdl_base.hpp"
+#include "sdl.hpp"
 
 
 namespace yavsg

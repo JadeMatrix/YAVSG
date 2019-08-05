@@ -6,7 +6,8 @@
 #include "vector.hpp"
 #include "scalar_operations.hpp"
 #include "trigonometry.hpp"
-#include "../units/angular.hpp"
+
+#include <yavsg/units/angular.hpp>
 
 #include <initializer_list>
 #include <ostream>

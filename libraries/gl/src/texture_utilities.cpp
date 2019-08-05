@@ -1,8 +1,7 @@
-#include "../../include/gl/texture_utilities.hpp"
+#include <yavsg/gl/texture_utilities.hpp>
 
-#include "../../include/gl/_gl_base.hpp"
-#include "../../include/gl/error.hpp"
-#include "../../include/math/scalar_operations.hpp" // yavsg::power()
+#include <yavsg/gl/error.hpp>
+#include <yavsg/math/scalar_operations.hpp> // yavsg::power()
 
 #include <algorithm>
 #include <exception>

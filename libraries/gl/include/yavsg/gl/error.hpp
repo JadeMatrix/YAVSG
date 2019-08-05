@@ -3,7 +3,7 @@
 #define YAVSG_GL_BUFFER_HPP
 
 
-#include "_gl_base.hpp"
+#include <yavsg/gl_wrap.hpp>
 
 #include <exception>
 #include <ostream>

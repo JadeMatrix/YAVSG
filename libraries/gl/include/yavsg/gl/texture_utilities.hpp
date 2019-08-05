@@ -3,8 +3,8 @@
 #define YAVSG_GL_TEXTURE_UTILITIES_HPP
 
 
-#include "_gl_base.hpp"
-#include "../sdl/_sdl_base.hpp"
+#include <yavsg/gl_wrap.hpp>
+#include <yavsg/sdl/sdl.hpp>
 
 #include <string>
 #include <utility>  // std::size_t
