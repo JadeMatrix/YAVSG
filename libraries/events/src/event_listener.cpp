@@ -1,9 +1,9 @@
-#include "../../include/events/event_listener.hpp"
+#include <yavsg/events/event_listener.hpp>
 
-#include "../../include/sdl/_sdl_base.hpp"
-#include "../../include/tasking/task.hpp"
-#include "../../include/tasking/tasking.hpp"
-#include "../../include/tasking/utility_tasks.hpp"
+#include <yavsg/sdl/sdl.hpp>
+#include <yavsg/tasking/task.hpp>
+#include <yavsg/tasking/tasking.hpp>
+#include <yavsg/tasking/utility_tasks.hpp>
 
 #include <map>
 #include <mutex>    // std::mutex, std::once_flag, std::call_once()

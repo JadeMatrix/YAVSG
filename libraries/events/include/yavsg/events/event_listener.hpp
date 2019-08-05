@@ -3,7 +3,7 @@
 #define YAVSG_EVENTS_EVENT_LISTENER_HPP
 
 
-#include "../tasking/task.hpp"
+#include <yavsg/tasking/task.hpp>
 
 #include <functional>   // std::function
 #include <utility>      // std::size_t

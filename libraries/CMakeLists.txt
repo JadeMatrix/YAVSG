@@ -1,6 +1,6 @@
 FOREACH( LIBRARY IN ITEMS
     # "engine"
-    # "events"
+    "events"
     "gl"
     "gl_wrap"
     "math"
