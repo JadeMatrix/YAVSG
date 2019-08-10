@@ -3,10 +3,11 @@
 #define YAVSG_RENDERING_TEXTURE_REFERENCE_HPP
 
 
-#include "../gl/texture.hpp"
-#include "../tasking/task.hpp"
-#include "../tasking/tasking.hpp"
+#include <yavsg/gl/texture.hpp>
+#include <yavsg/tasking/task.hpp>
+#include <yavsg/tasking/tasking.hpp>
 
+// TODO: Don't have this in the header
 #include <SDL2/SDL_image.h>
 
 #include <exception>    // std::invalid_argument

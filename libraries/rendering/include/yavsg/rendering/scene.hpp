@@ -1,12 +1,12 @@
 #pragma once
-#ifndef YAVSG_ENGINE_SCENE_HPP
-#define YAVSG_ENGINE_SCENE_HPP
+#ifndef YAVSG_RENDERING_SCENE_HPP
+#define YAVSG_RENDERING_SCENE_HPP
 
 
-#include "../rendering/material.hpp"
-#include "../rendering/camera.hpp"
-#include "../rendering/render_object_manager.hpp"
-#include "../rendering/texture_reference.hpp"
+#include "material.hpp"
+#include "camera.hpp"
+#include "render_object_manager.hpp"
+#include "texture_reference.hpp"
 
 #include <utility>  // std::size_t
 #include <tuple>    // std::tuple_size

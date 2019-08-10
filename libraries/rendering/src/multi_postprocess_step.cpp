@@ -1,7 +1,7 @@
-#include "../../include/engine/multi_postprocess_step.hpp"
+#include <yavsg/rendering/multi_postprocess_step.hpp>
 
-#include "../../include/gl/error.hpp"
-#include "../../include/rendering/shader_variable_names.hpp"
+#include <yavsg/gl/error.hpp>
+#include <yavsg/rendering/shader_variable_names.hpp>
 
 #include <exception>
 #include <fstream>
@@ -58,7 +58,7 @@ namespace yavsg
         } )
         {
             auto filename = (
-                "../src/shaders/postprocess/"
+                "../YAVSG/src/shaders/postprocess/"
                 + function_name
                 + ".frag"
             );
@@ -100,7 +100,7 @@ namespace yavsg
         multi_program{ {
             gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                "../src/shaders/postprocess.vert"
+                "../YAVSG/src/shaders/postprocess.vert"
             ).id,
             generate_fragment_shader( function_names ).id
         } },

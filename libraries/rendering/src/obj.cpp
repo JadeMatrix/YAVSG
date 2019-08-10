@@ -1,7 +1,7 @@
-#include "../../include/engine/obj.hpp"
+#include <yavsg/rendering/obj.hpp>
 
-#include "../../include/math/quaternion.hpp"
-#include "../../include/math/vector.hpp"
+#include <yavsg/math/quaternion.hpp>
+#include <yavsg/math/vector.hpp>
 
 #include <tiny_obj_loader.h>
 

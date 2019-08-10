@@ -1,6 +1,6 @@
-#include "../../include/rendering/camera.hpp"
+#include <yavsg/rendering/camera.hpp>
 
-#include "../../include/math/trigonometry.hpp"
+#include <yavsg/math/trigonometry.hpp>
 
 
 namespace

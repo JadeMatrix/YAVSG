@@ -1,14 +1,15 @@
 #pragma once
-#ifndef YAVSG_ENGINE_OBJ_RENDER_STEP_HPP
-#define YAVSG_ENGINE_OBJ_RENDER_STEP_HPP
+#ifndef YAVSG_RENDERING_OBJ_RENDER_STEP_HPP
+#define YAVSG_RENDERING_OBJ_RENDER_STEP_HPP
 
 
-#include "../engine/scene.hpp"
-#include "../gl/attribute_buffer.hpp"
-#include "../gl/shader_program.hpp"
-#include "../gl/texture.hpp"
-#include "../math/vector.hpp"
-#include "../rendering/render_step.hpp"
+#include "render_step.hpp"
+#include "scene.hpp"
+
+#include <yavsg/gl/attribute_buffer.hpp>
+#include <yavsg/gl/shader_program.hpp>
+#include <yavsg/gl/texture.hpp>
+#include <yavsg/math/vector.hpp>
 
 #include <string>
 

@@ -1,8 +1,8 @@
-#include "../../include/engine/basic_postprocess_step.hpp"
+#include <yavsg/rendering/basic_postprocess_step.hpp>
 
-#include "../../include/gl/error.hpp"
-#include "../../include/gl/shader.hpp"
-#include "../../include/rendering/shader_variable_names.hpp"
+#include <yavsg/gl/error.hpp>
+#include <yavsg/gl/shader.hpp>
+#include <yavsg/rendering/shader_variable_names.hpp>
 
 
 namespace yavsg
@@ -13,7 +13,7 @@ namespace yavsg
         postprocess_program( {
             yavsg::gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                "../src/shaders/postprocess.vert"
+                "../YAVSG/src/shaders/postprocess.vert"
             ).id,
             yavsg::gl::shader::from_file(
                 GL_FRAGMENT_SHADER,

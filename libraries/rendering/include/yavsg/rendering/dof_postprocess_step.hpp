@@ -1,15 +1,16 @@
 #pragma once
-#ifndef YAVSG_ENGINE_DOF_POSTPROCESS_STEP_HPP
-#define YAVSG_ENGINE_DOF_POSTPROCESS_STEP_HPP
+#ifndef YAVSG_RENDERING_DOF_POSTPROCESS_STEP_HPP
+#define YAVSG_RENDERING_DOF_POSTPROCESS_STEP_HPP
 
 
-#include "../gl/attribute_buffer.hpp"
-#include "../gl/framebuffer.hpp"
-#include "../gl/shader_program.hpp"
-#include "../gl/texture.hpp"
-#include "../math/vector.hpp"
-#include "../rendering/camera.hpp"
-#include "../rendering/render_step.hpp"
+#include "camera.hpp"
+#include "render_step.hpp"
+
+#include <yavsg/gl/attribute_buffer.hpp>
+#include <yavsg/gl/framebuffer.hpp>
+#include <yavsg/gl/shader_program.hpp>
+#include <yavsg/gl/texture.hpp>
+#include <yavsg/math/vector.hpp>
 
 
 namespace yavsg

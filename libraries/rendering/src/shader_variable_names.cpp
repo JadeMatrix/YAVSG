@@ -1,4 +1,4 @@
-#include "../../include/rendering/shader_variable_names.hpp"
+#include <yavsg/rendering/shader_variable_names.hpp>
 
 
 namespace

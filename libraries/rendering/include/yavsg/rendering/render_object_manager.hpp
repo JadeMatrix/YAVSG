@@ -3,12 +3,12 @@
 #define YAVSG_RENDERING_RENDER_OBJECT_MANAGER_HPP
 
 
-#include "../gl/_gl_base.hpp"
-#include "../gl/attribute_buffer.hpp"
-#include "../math/basic_transforms.hpp"
-#include "../math/matrix.hpp"
-#include "../math/quaternion.hpp"
-#include "../math/vector.hpp"
+#include <yavsg/gl_wrap.hpp>
+#include <yavsg/gl/attribute_buffer.hpp>
+#include <yavsg/math/basic_transforms.hpp>
+#include <yavsg/math/matrix.hpp>
+#include <yavsg/math/quaternion.hpp>
+#include <yavsg/math/vector.hpp>
 
 #include <mutex>
 #include <vector>

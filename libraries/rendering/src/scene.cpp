@@ -1,4 +1,4 @@
-#include "../../include/engine/scene.hpp"
+#include <yavsg/rendering/scene.hpp>
 
 
 namespace yavsg

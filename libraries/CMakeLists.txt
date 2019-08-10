@@ -1,10 +1,9 @@
 FOREACH( LIBRARY IN ITEMS
-    # "engine"
     "events"
     "gl"
     "gl_wrap"
     "math"
-    # "rendering"
+    "rendering"
     "sdl"
     "tasking"
     "units"

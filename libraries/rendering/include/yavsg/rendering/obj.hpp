@@ -1,12 +1,13 @@
 #pragma once
-#ifndef YAVSG_ENGINE_OBJ_HPP
-#define YAVSG_ENGINE_OBJ_HPP
+#ifndef YAVSG_RENDERING_OBJ_HPP
+#define YAVSG_RENDERING_OBJ_HPP
 
 
-#include "../engine/scene.hpp"
-#include "../rendering/render_object_manager.hpp"
-#include "../tasking/task.hpp"
-#include "../tasking/tasking.hpp"
+#include "render_object_manager.hpp"
+#include "scene.hpp"
+
+#include <yavsg/tasking/task.hpp>
+#include <yavsg/tasking/tasking.hpp>
 
 
 namespace yavsg

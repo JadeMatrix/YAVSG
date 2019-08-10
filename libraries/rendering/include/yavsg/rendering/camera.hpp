@@ -3,12 +3,12 @@
 #define YAVSG_RENDERING_CAMERA_HPP
 
 
-#include "../math/matrix.hpp"
-#include "../math/vector.hpp"
-#include "../math/basic_transforms.hpp"
-#include "../math/common_transforms.hpp"
-#include "../math/quaternion.hpp"
-#include "../units/angular.hpp"
+#include <yavsg/math/matrix.hpp>
+#include <yavsg/math/vector.hpp>
+#include <yavsg/math/basic_transforms.hpp>
+#include <yavsg/math/common_transforms.hpp>
+#include <yavsg/math/quaternion.hpp>
+#include <yavsg/units/angular.hpp>
 
 #include <mutex>
 

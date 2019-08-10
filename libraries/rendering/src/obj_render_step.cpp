@@ -1,11 +1,11 @@
-#include "../../include/engine/obj_render_step.hpp"
+#include <yavsg/rendering/obj_render_step.hpp>
 
-#include "../../include/gl/error.hpp"
-#include "../../include/gl/shader.hpp"
-#include "../../include/gl/texture.hpp"
-#include "../../include/math/common_transforms.hpp"
-#include "../../include/rendering/shader_variable_names.hpp"
-#include "../../include/tasking/tasking.hpp"
+#include <yavsg/gl/error.hpp>
+#include <yavsg/gl/shader.hpp>
+#include <yavsg/gl/texture.hpp>
+#include <yavsg/math/common_transforms.hpp>
+#include <yavsg/rendering/shader_variable_names.hpp>
+#include <yavsg/tasking/tasking.hpp>
 
 #include <array>
 
@@ -16,11 +16,11 @@ namespace yavsg
         scene_program( {
             gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                "../src/shaders/obj_scene.vert"
+                "../YAVSG/src/shaders/obj_scene.vert"
             ).id,
             gl::shader::from_file(
                 GL_FRAGMENT_SHADER,
-                "../src/shaders/obj_scene.frag"
+                "../YAVSG/src/shaders/obj_scene.frag"
             ).id
         } ),
         first_run{ true }

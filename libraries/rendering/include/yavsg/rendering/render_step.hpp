@@ -3,8 +3,9 @@
 #define YAVSG_RENDERING_RENDER_STEP_HPP
 
 
-#include "../engine/scene.hpp"
-#include "../gl/framebuffer.hpp"
+#include "scene.hpp"
+
+#include <yavsg/gl/framebuffer.hpp>
 
 #include <utility>  // std::size_t
 

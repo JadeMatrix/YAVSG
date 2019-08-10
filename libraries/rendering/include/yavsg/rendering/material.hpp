@@ -5,8 +5,9 @@
 
 #include "shader_variable_names.hpp"
 #include "texture_reference.hpp"
-#include "../gl/shader_program.hpp"
-#include "../gl/texture.hpp"
+
+#include <yavsg/gl/shader_program.hpp>
+#include <yavsg/gl/texture.hpp>
 
 #include <string>
 #include <tuple>
