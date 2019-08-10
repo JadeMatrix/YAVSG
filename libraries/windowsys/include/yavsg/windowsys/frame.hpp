@@ -1,12 +1,13 @@
 #pragma once
-#ifndef YAVSG_ENGINE_FRAME_HPP
-#define YAVSG_ENGINE_FRAME_HPP
+#ifndef YAVSG_WINDOWSYS_FRAME_HPP
+#define YAVSG_WINDOWSYS_FRAME_HPP
 
 
-#include "../events/event_listener.hpp"
-#include "../rendering/render_step.hpp"
-#include "../tasking/task.hpp"
-#include "../windowsys/window.hpp"
+#include "window.hpp"
+
+#include <yavsg/events/event_listener.hpp>
+#include <yavsg/rendering/render_step.hpp>
+#include <yavsg/tasking/task.hpp>
 
 #include <chrono>
 #include <memory>   // std::unique_ptr, std::shared_ptr

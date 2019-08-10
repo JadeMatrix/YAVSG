@@ -3,12 +3,12 @@
 #define YAVSG_WINDOWSYS_WINDOW_HPP
 
 
-#include "../engine/scene.hpp"
-#include "../events/event_listener.hpp"
-#include "../gl/framebuffer.hpp"
-#include "../sdl/_sdl_base.hpp"
-#include "../units/dpi.hpp"
-#include "../units/unit.hpp"    // yavsg::ratio
+#include <yavsg/events/event_listener.hpp>
+#include <yavsg/gl/framebuffer.hpp>
+#include <yavsg/rendering/scene.hpp>
+#include <yavsg/sdl/sdl.hpp>
+#include <yavsg/units/dpi.hpp>
+#include <yavsg/units/unit.hpp> // yavsg::ratio
 
 #include <memory>               // std::unique_ptr, std::shared_ptr
 #include <mutex>                // std::mutex, std::once_flag, std::call_once()

@@ -1,13 +1,13 @@
-#include "../../include/engine/frame.hpp"
+#include <yavsg/windowsys/frame.hpp>
 
-#include "../../include/engine/4up_postprocess_step.hpp"
-#include "../../include/engine/basic_postprocess_step.hpp"
-#include "../../include/engine/dof_postprocess_step.hpp"
-#include "../../include/engine/multi_postprocess_step.hpp"
-#include "../../include/engine/obj_render_step.hpp"
-#include "../../include/gl/framebuffer.hpp"
-#include "../../include/tasking/tasking.hpp"
-#include "../../include/tasking/utility_tasks.hpp"
+#include <yavsg/gl/framebuffer.hpp>
+#include <yavsg/rendering/4up_postprocess_step.hpp>
+#include <yavsg/rendering/basic_postprocess_step.hpp>
+#include <yavsg/rendering/dof_postprocess_step.hpp>
+#include <yavsg/rendering/multi_postprocess_step.hpp>
+#include <yavsg/rendering/obj_render_step.hpp>
+#include <yavsg/tasking/tasking.hpp>
+#include <yavsg/tasking/utility_tasks.hpp>
 
 #include <iostream> // std::cerr
 #include <numeric>  // std::accumulate

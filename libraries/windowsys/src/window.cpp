@@ -1,8 +1,8 @@
-#include "../../include/windowsys/window.hpp"
+#include <yavsg/windowsys/window.hpp>
 
-#include "../../include/engine/frame.hpp"
-#include "../../include/tasking/task.hpp"
-#include "../../include/tasking/tasking.hpp"
+#include <yavsg/windowsys/frame.hpp>
+#include <yavsg/tasking/task.hpp>
+#include <yavsg/tasking/tasking.hpp>
 
 #include <cmath>        // std::isnan()
 #include <exception>    // std::runtime_error, std::invalid_argument

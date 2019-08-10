@@ -7,7 +7,7 @@ FOREACH( LIBRARY IN ITEMS
     "sdl"
     "tasking"
     "units"
-    # "windowsys"
+    "windowsys"
 )
     ADD_SUBDIRECTORY( "${LIBRARY}/" )
 ENDFOREACH()
