@@ -108,7 +108,7 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
                 int
             >::type = 0
         > void bind_target(
-            StrID target_name_id
+            const StrID& target_name_id
         );
     };
 } }
