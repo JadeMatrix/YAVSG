@@ -1,6 +1,6 @@
 #pragma once
-#ifndef YAVSG_MATH_CONSTANTS_HPP
-#define YAVSG_MATH_CONSTANTS_HPP
+#ifndef YAVSG_UNITS_CONSTANTS_HPP
+#define YAVSG_UNITS_CONSTANTS_HPP
 
 
 namespace yavsg

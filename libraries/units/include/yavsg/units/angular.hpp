@@ -3,9 +3,9 @@
 #define YAVSG_UNITS_ANGULAR_HPP
 
 
+#include "constants.hpp"
 #include "unit.hpp"
 #include "prefixes.hpp"
-#include "../math/constants.hpp"
 
 #include <string>
 
