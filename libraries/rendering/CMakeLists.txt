@@ -12,11 +12,13 @@ TARGET_SOURCES( rendering PRIVATE
 )
 TARGET_INCLUDE_DIRECTORIES( rendering PUBLIC "include/" )
 
+FIND_PACKAGE( SDL2 2.0.8 REQUIRED COMPONENTS image )
 TARGET_LINK_LIBRARIES( rendering
     PUBLIC
         tinyobjloader
         gl
         gl_wrap
         math
+        SDL2::image # FIXME:For texture_reference.hpp
         tasking
 )
