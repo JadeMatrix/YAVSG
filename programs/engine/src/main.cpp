@@ -1,18 +1,18 @@
-#include "../../include/gl/_gl_base.hpp" // For GLEW initialization, if any
+#include <yavsg/gl_wrap.hpp>    // For GLEW initialization, if any
 
-#include "../../include/gl/error.hpp"
-#include "../../include/sdl/sdl_utils.hpp"
-#include "../../include/tasking/tasking.hpp"
+#include <yavsg/gl/error.hpp>
+#include <yavsg/sdl/utils.hpp>
+#include <yavsg/tasking/tasking.hpp>
 
 // DEVEL:
-#include "../../include/engine/frame.hpp"
-#include "../../include/events/event_listener.hpp"
-#include "../../include/sdl/_sdl_base.hpp"
-#include "../../include/tasking/tasking.hpp"
-#include "../../include/tasking/utility_tasks.hpp"
-#include "../../include/windowsys/window.hpp"
-#include "../../include/engine/obj.hpp"
-#include "../../include/units/angular.hpp"
+#include <yavsg/windowsys/frame.hpp>
+#include <yavsg/events/event_listener.hpp>
+#include <yavsg/sdl/sdl.hpp>
+#include <yavsg/tasking/tasking.hpp>
+#include <yavsg/tasking/utility_tasks.hpp>
+#include <yavsg/windowsys/window.hpp>
+#include <yavsg/rendering/obj.hpp>
+#include <yavsg/units/angular.hpp>
 
 #include <exception>
 #include <iostream>
@@ -76,8 +76,8 @@ int main( int argc, char* argv[] )
         
         submit_task( std::make_unique< yavsg::load_obj_task >(
             test_window -> main_scene.object_manager,
-            "../local/Crytek Sponza Atrium/sponza.obj",
-            "../local/Crytek Sponza Atrium/"
+            "../Crytek Sponza Atrium/sponza.obj",
+            "../Crytek Sponza Atrium/"
         ) );
         
         SDL_SetRelativeMouseMode( SDL_TRUE );

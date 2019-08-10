@@ -17,4 +17,4 @@ SET( CMAKE_MODULE_PATH
 )
 
 ADD_SUBDIRECTORY( "libraries/" )
-# ADD_SUBDIRECTORY( "programs/" )
+ADD_SUBDIRECTORY( "programs/" )
