@@ -4,7 +4,6 @@ TARGET_SOURCES( windowsys PRIVATE
     "src/window.cpp"
 )
 TARGET_INCLUDE_DIRECTORIES( windowsys PUBLIC "include/" )
-
 TARGET_LINK_LIBRARIES( windowsys
     PUBLIC
         events
@@ -14,3 +13,4 @@ TARGET_LINK_LIBRARIES( windowsys
         units
         tasking
 )
+TARGET_COMPILE_OPTIONS( windowsys PRIVATE ${YAVSG_COMPILE_OPTIONS} )

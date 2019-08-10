@@ -3,5 +3,5 @@ TARGET_SOURCES( events PRIVATE
     "src/event_listener.cpp"
 )
 TARGET_INCLUDE_DIRECTORIES( events PUBLIC "include/" )
-
 TARGET_LINK_LIBRARIES( events PUBLIC sdl tasking )
+TARGET_COMPILE_OPTIONS( events PRIVATE ${YAVSG_COMPILE_OPTIONS} )

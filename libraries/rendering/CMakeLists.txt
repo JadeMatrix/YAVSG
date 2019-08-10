@@ -22,3 +22,5 @@ TARGET_LINK_LIBRARIES( rendering
         SDL2::image # FIXME:For texture_reference.hpp
         tasking
 )
+
+TARGET_COMPILE_OPTIONS( rendering PRIVATE ${YAVSG_COMPILE_OPTIONS} )

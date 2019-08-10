@@ -10,3 +10,4 @@ TARGET_LINK_LIBRARIES( engine
     units
     windowsys
 )
+TARGET_COMPILE_OPTIONS( engine PRIVATE ${YAVSG_COMPILE_OPTIONS} )
