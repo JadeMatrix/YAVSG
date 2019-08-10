@@ -32,7 +32,7 @@ namespace yavsg
         } )
             if( !substep.step )
                 substep.step = std::make_unique< basic_postprocess_step >(
-                    "../YAVSG/src/shaders/postprocess.frag"
+                    "../YAVSG/shaders/postprocess.frag"
                 );
     }
     

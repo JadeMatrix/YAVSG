@@ -58,7 +58,7 @@ namespace yavsg
         } )
         {
             auto filename = (
-                "../YAVSG/src/shaders/postprocess/"
+                "../YAVSG/shaders/postprocess/"
                 + function_name
                 + ".frag"
             );
@@ -100,7 +100,7 @@ namespace yavsg
         multi_program{ {
             gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                "../YAVSG/src/shaders/postprocess.vert"
+                "../YAVSG/shaders/postprocess.vert"
             ).id,
             generate_fragment_shader( function_names ).id
         } },

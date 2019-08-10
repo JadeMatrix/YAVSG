@@ -16,11 +16,11 @@ namespace yavsg
         scene_program( {
             gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                "../YAVSG/src/shaders/obj_scene.vert"
+                "../YAVSG/shaders/obj_scene.vert"
             ).id,
             gl::shader::from_file(
                 GL_FRAGMENT_SHADER,
-                "../YAVSG/src/shaders/obj_scene.frag"
+                "../YAVSG/shaders/obj_scene.frag"
             ).id
         } ),
         first_run{ true }

@@ -13,7 +13,7 @@ namespace yavsg
         postprocess_program( {
             yavsg::gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                "../YAVSG/src/shaders/postprocess.vert"
+                "../YAVSG/shaders/postprocess.vert"
             ).id,
             yavsg::gl::shader::from_file(
                 GL_FRAGMENT_SHADER,
