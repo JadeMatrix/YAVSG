@@ -3,6 +3,7 @@
 // For yavsg::gl::write_only_framebuffer::dump_BMP()
 #include <yavsg/sdl/sdl.hpp>
 
+#include <assert.h>
 #include <fstream>
 #include <iomanip>  // std::setw(), std::setfill()
 #include <limits>   // std::numeric_limits
@@ -29,11 +30,18 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
         std::size_t width,
         std::size_t height
     ) :
-        gl_id(   gl_id  ),
-        num_color_targets( num_color_targets ),
-        _width(  width  ),
-        _height( height )
+        _width ( width  ),
+        _height( height ),
+        gl_id  ( gl_id  ),
+        num_color_targets( num_color_targets )
     {
+        /*
+        _width
+        _height
+        _alpha_blending
+        gl_id
+        num_color_targets
+        */
         alpha_blending( alpha_blend_mode::DISABLED );
     }
     
@@ -177,6 +185,11 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
         const std::string& descriptive_name
     )
     {
+        assert( _width  < std::numeric_limits< GLsizei >::max() );
+        assert( _height < std::numeric_limits< GLsizei >::max() );
+        auto w = static_cast< GLsizei >( _width  );
+        auto h = static_cast< GLsizei >( _height );
+        
         char* pixel_data = new char[ _width * _height * 4 ];
         
         try
@@ -184,8 +197,8 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
             glReadPixels(
                 0,
                 0,
-                _width,
-                _height,
+                w,
+                h,
                 GL_RGBA,
                 GL_UNSIGNED_INT_8_8_8_8,
                 pixel_data
@@ -197,14 +210,14 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
             
             auto surface = SDL_CreateRGBSurfaceFrom(
                 pixel_data,
-                _width,
-                _height,
+                w,
+                h,
                 4 * 8,
-                4 * _width,
-                0xFF << ( 3 * 8 ),
-                0xFF << ( 2 * 8 ),
-                0xFF << ( 1 * 8 ),
-                0xFF << ( 0 * 8 )
+                4 * w,
+                0xFFu << ( 3 * 8 ),
+                0xFFu << ( 2 * 8 ),
+                0xFFu << ( 1 * 8 ),
+                0xFFu << ( 0 * 8 )
             );
             
             if( !surface )

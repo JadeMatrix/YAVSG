@@ -31,20 +31,28 @@ namespace yavsg { namespace gl
             glGetShaderiv( id, GL_COMPILE_STATUS, &status );
             if( status != GL_TRUE )
             {
-                GLsizei log_buffer_length = 1024;
+                constexpr GLsizei log_buffer_length = 1024;
                 char log_buffer[ log_buffer_length ];
-                glGetShaderInfoLog(
-                    id,
-                    log_buffer_length,
-                    &log_buffer_length,
-                    log_buffer
-                );
-                std::string shader_error_string = (
-                    "failed to compile shader:\n"
-                    + std::string( log_buffer, log_buffer_length )
-                );
-                glDeleteShader( id );
-                throw std::runtime_error( shader_error_string );
+                GLsizei got_buffer_length;
+                std::string log;
+                
+                while( true )
+                {
+                    glGetShaderInfoLog(
+                        id,
+                        log_buffer_length,
+                        &got_buffer_length,
+                        log_buffer
+                    );
+                    if( got_buffer_length <= 0 )
+                        break;
+                    log += std::string(
+                        log_buffer,
+                        static_cast< std::size_t >( got_buffer_length )
+                    );
+                }
+                
+                throw std::runtime_error( "failed to compile shader:\n" + log );
             }
         }
         catch( ... )

@@ -4,10 +4,12 @@
 #include <yavsg/math/scalar_operations.hpp> // yavsg::power()
 
 #include <algorithm>
+#include <assert.h>
 #include <exception>
 #include <limits>
-#include <mutex>    // std::mutex, std::once_flag, std::call_once()
-#include <utility>  // std::swap()
+#include <mutex>        // std::mutex, std::once_flag, std::call_once()
+#include <type_traits>  // std::conditional, std::is_floating_point
+#include <utility>      // std::swap()
 
 
 namespace // Anisotropic filtering support /////////////////////////////////////
@@ -41,11 +43,23 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
 {
     template< typename T > T linearize_sample( T sample )
     {
+        using f = typename std::conditional<
+            std::is_floating_point< T >::value,
+            T,
+            double
+        >::type;
+        auto f_sample = static_cast< f >( sample );
+        
         // See http://docs.gl/gl3/glTexImage2D
-        if( sample <= 0.04045f )
-            return sample / 12.92f;
+        if( f_sample <= static_cast< f >( 0.04045 ) )
+            return f_sample / static_cast< f >( 12.92 );
         else
-            return yavsg::power( ( sample + 0.055f ) / 1.055f, 2.4 );
+            return yavsg::power(
+                (
+                    f_sample + static_cast< f >( 0.055 )
+                ) / static_cast< f >( 1.055 ),
+                static_cast< f >( 2.4 )
+            );
     }
     
     template< typename T >
@@ -267,6 +281,7 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             if( upload_data.gl_incoming_format != GL_RGBA )
                 modified_flags |= texture_flag::DISABLE_PREMULTIPLIED_ALPHA;
             
+            // TODO: set premultiply as a std::function, call after switch
             switch( upload_data.gl_incoming_type )
             {
             case GL_BYTE:
@@ -534,8 +549,8 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             SDL_FreeSurface( converted_surface );
         }
         
-        std::size_t width  = sdl_surface -> w;
-        std::size_t height = sdl_surface -> h;
+        std::size_t width  = static_cast< std::size_t >( sdl_surface -> w );
+        std::size_t height = static_cast< std::size_t >( sdl_surface -> h );
         
         // Copy data; need to do this because the data may/will be freed
         // elsewhere and be freed with `delete[]`, but SDL allocates with
@@ -576,12 +591,17 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             + " for yavsg::gl::upload_texture_data()"
         );
         
+        assert( upload_data.width  <= std::numeric_limits< GLsizei >::max() );
+        assert( upload_data.height <= std::numeric_limits< GLsizei >::max() );
+        auto data_width  = static_cast< GLsizei >( upload_data.width  );
+        auto data_height = static_cast< GLsizei >( upload_data.height );
+        
         glTexImage2D(   // Loads starting at 0,0 as bottom left
             GL_TEXTURE_2D,
             0,                              // LoD, 0 = base
             upload_data.gl_internal_format, // Internal format
-            upload_data.width,              // Width
-            upload_data.height,             // Height
+            data_width,                     // Width
+            data_height,                    // Height
             0,                              // Border; must be 0
             upload_data.gl_incoming_format, // Incoming format
             upload_data.gl_incoming_type,   // Pixel type
