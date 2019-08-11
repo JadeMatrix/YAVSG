@@ -8,6 +8,7 @@
 #include <iomanip>  // std::setw(), std::setfill()
 #include <limits>   // std::numeric_limits
 #include <sstream>
+#include <vector>
 
 
 namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
@@ -181,6 +182,7 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
         return _alpha_blending;
     }
     
+    // TODO: make this a debug function
     void write_only_framebuffer::dump_BMP(
         const std::string& descriptive_name
     )
@@ -190,74 +192,65 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
         auto w = static_cast< GLsizei >( _width  );
         auto h = static_cast< GLsizei >( _height );
         
-        char* pixel_data = new char[ _width * _height * 4 ];
+        // TODO: make class member & only realloc when buffer size increases
+        std::vector< char > pixels( _width * _height * 4 );
         
-        try
-        {
-            glReadPixels(
-                0,
-                0,
-                w,
-                h,
-                GL_RGBA,
-                GL_UNSIGNED_INT_8_8_8_8,
-                pixel_data
+        glReadPixels(
+            0,
+            0,
+            w,
+            h,
+            GL_RGBA,
+            GL_UNSIGNED_INT_8_8_8_8,
+            pixels.data()
+        );
+        YAVSG_GL_THROW_FOR_ERRORS(
+            "couldn't read framebuffer pixels for"
+            " yavsg::gl::base_framebuffer::dump_BMP()"
+        );
+        
+        auto surface = SDL_CreateRGBSurfaceFrom(
+            pixels.data(),
+            w,
+            h,
+            4 * 8,
+            4 * w,
+            0xFFu << ( 3 * 8 ),
+            0xFFu << ( 2 * 8 ),
+            0xFFu << ( 1 * 8 ),
+            0xFFu << ( 0 * 8 )
+        );
+        
+        if( !surface )
+            throw std::runtime_error(
+                "couldn't create SDL surface from pixels for"
+                " yavsg::gl::base_framebuffer::dump_BMP(): "
+                + std::string( SDL_GetError() )
             );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't read framebuffer pixels for"
-                " yavsg::gl::base_framebuffer::dump_BMP()"
+        
+        static std::size_t nth = 0;
+        
+        std::stringstream filename;
+        filename
+            << std::setw( std::numeric_limits< std::size_t >::digits10 + 1 )
+            << std::setfill( '0' )
+            << nth
+            << " - "
+            << descriptive_name
+            << ".bmp"
+        ;
+        
+        ++nth;
+        
+        auto save_error = SDL_SaveBMP( surface, filename.str().c_str() );
+        SDL_FreeSurface( surface );
+        
+        if( save_error )
+            throw std::runtime_error(
+                "couldn't open file `"
+                + filename.str()
+                + "` for yavsg::gl::base_framebuffer::dump_BMP(): "
+                + std::string( SDL_GetError() )
             );
-            
-            auto surface = SDL_CreateRGBSurfaceFrom(
-                pixel_data,
-                w,
-                h,
-                4 * 8,
-                4 * w,
-                0xFFu << ( 3 * 8 ),
-                0xFFu << ( 2 * 8 ),
-                0xFFu << ( 1 * 8 ),
-                0xFFu << ( 0 * 8 )
-            );
-            
-            if( !surface )
-                throw std::runtime_error(
-                    "couldn't create SDL surface from pixels for"
-                    " yavsg::gl::base_framebuffer::dump_BMP(): "
-                    + std::string( SDL_GetError() )
-                );
-            
-            static std::size_t nth = 0;
-            
-            std::stringstream filename;
-            filename
-                << std::setw( std::numeric_limits< std::size_t >::digits10 + 1 )
-                << std::setfill( '0' )
-                << nth
-                << " - "
-                << descriptive_name
-                << ".bmp"
-            ;
-            
-            ++nth;
-            
-            auto save_error = SDL_SaveBMP( surface, filename.str().c_str() );
-            SDL_FreeSurface( surface );
-            
-            if( save_error )
-                throw std::runtime_error(
-                    "couldn't open file `"
-                    + filename.str()
-                    + "` for yavsg::gl::base_framebuffer::dump_BMP(): "
-                    + std::string( SDL_GetError() )
-                );
-            
-            delete[] pixel_data;
-        }
-        catch( ... )
-        {
-            delete[] pixel_data;
-            throw;
-        }
     }
 } }
