@@ -5,6 +5,9 @@
 #include <yavsg/rendering/basic_postprocess_step.hpp>
 #include <yavsg/rendering/shader_variable_names.hpp>
 
+#include <assert.h>
+#include <limits>
+
 
 namespace yavsg
 {
@@ -60,8 +63,8 @@ namespace yavsg
         struct substep_info
         {
             child_type* step;
-            int x_offset_factor;
-            int y_offset_factor;
+            unsigned char x_offset_factor;
+            unsigned char y_offset_factor;
         };
         
         for( auto substep : {
@@ -74,11 +77,14 @@ namespace yavsg
             auto half_width  = target. width() / 2;
             auto half_height = target.height() / 2;
             
+            assert( half_height < std::numeric_limits< GLint >::max() );
+            assert( half_width  < std::numeric_limits< GLint >::max() );
+            
             glViewport(
-                substep.x_offset_factor * half_width,
-                substep.y_offset_factor * half_height,
-                half_width,
-                half_height
+                static_cast< GLint >( substep.x_offset_factor * half_width  ),
+                static_cast< GLint >( substep.y_offset_factor * half_height ),
+                static_cast< GLint >(                           half_width  ),
+                static_cast< GLint >(                           half_height )
             );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't set viewport for "
@@ -92,10 +98,10 @@ namespace yavsg
             );
             
             glScissor(
-                substep.x_offset_factor * half_width,
-                substep.y_offset_factor * half_height,
-                half_width,
-                half_height
+                static_cast< GLint >( substep.x_offset_factor * half_width  ),
+                static_cast< GLint >( substep.y_offset_factor * half_height ),
+                static_cast< GLint >(                           half_width  ),
+                static_cast< GLint >(                           half_height )
             );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't set scissor for "

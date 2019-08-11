@@ -166,9 +166,9 @@ namespace yavsg // Specializable bind delegation ///////////////////////////////
     {
         template< class IndexableNames >
         static void bind(
-            gl::shader_program< AttributeBuffer, Framebuffer >& program,
-            const IndexableNames& names,
-            const TupleType& values
+            gl::shader_program< AttributeBuffer, Framebuffer >&,
+            const IndexableNames&,
+            const TupleType&
         ) {}
     };
 }

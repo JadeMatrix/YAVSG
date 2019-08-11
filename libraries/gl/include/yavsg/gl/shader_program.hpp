@@ -64,10 +64,10 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
             std::size_t count
         );
         
-        bool has_attribute( const std::string& name                  );
-        bool has_attribute( const std::string& name, GLint& location );
-        bool has_uniform  ( const std::string& name                  );
-        bool has_uniform  ( const std::string& name, GLint& location );
+        bool has_attribute( const std::string& name                   );
+        bool has_attribute( const std::string& name, GLuint& location );
+        bool has_uniform  ( const std::string& name                   );
+        bool has_uniform  ( const std::string& name, GLint & location );
         
         // Return true if the variable exists & could be linked, false if it
         // does not exist, and throws `yavsg::gl::summary_error` if the variable
@@ -219,20 +219,30 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             );
             if( link_status != GL_TRUE )
             {
-                GLsizei log_buffer_length = 1024;
+                constexpr GLsizei log_buffer_length = 1024;
                 char log_buffer[ log_buffer_length ];
-                glGetProgramInfoLog(
-                    gl_program_id,
-                    log_buffer_length,
-                    &log_buffer_length,
-                    log_buffer
-                );
-                std::string program_error_string = (
-                    "failed to link shader program:\n"
-                    + std::string( log_buffer, log_buffer_length )
-                );
-                glDeleteProgram( gl_program_id );
-                throw std::runtime_error( program_error_string );
+                GLsizei got_buffer_length;
+                std::string log;
+                
+                while( true )
+                {
+                    glGetProgramInfoLog(
+                        gl_program_id,
+                        log_buffer_length,
+                        &got_buffer_length,
+                        log_buffer
+                    );
+                    if( got_buffer_length <= 0 )
+                        break;
+                    log += std::string(
+                        log_buffer,
+                        static_cast< std::size_t >( got_buffer_length )
+                    );
+                }
+                
+                throw std::runtime_error{
+                    "failed to link shader program:\n" + log
+                };
             }
         }
         catch( ... )
@@ -366,14 +376,14 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         const std::string& name
     )
     {
-        GLint location;
+        GLuint location;
         return has_attribute( name, location );
     }
     
     template< class AttributeBuffer, class Framebuffer >
     bool shader_program< AttributeBuffer, Framebuffer >::has_attribute(
         const std::string& name,
-        GLint& location
+        GLuint& location
     )
     {
         GLint result = glGetAttribLocation( gl_program_id, name.c_str() );
@@ -389,7 +399,7 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
             return false;
         else
         {
-            location = result;
+            location = static_cast< GLuint >( result );
             return true;
         }
     }
@@ -434,7 +444,7 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         const attribute_buffer_type& dummy_attributes
     )
     {
-        GLint attribute_location;
+        GLuint attribute_location;
         if( !has_attribute( attribute_name, attribute_location ) )
             return false;
         
