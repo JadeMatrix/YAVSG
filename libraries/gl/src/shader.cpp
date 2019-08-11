@@ -52,7 +52,7 @@ namespace yavsg { namespace gl
                     );
                 }
                 
-                throw std::runtime_error( "failed to compile shader:\n" + log );
+                throw std::runtime_error{ "failed to compile shader:\n" + log };
             }
         }
         catch( ... )
