@@ -8,7 +8,9 @@
 #include "error.hpp"
 
 #include <array>
+#include <assert.h>
 #include <cstdint>  // std::uintptr_t
+#include <limits>
 #include <tuple>
 #include <vector>
 
@@ -179,8 +181,6 @@ namespace yavsg { namespace gl // Index buffer implementation //////////////////
             + " for yavsg::gl::index_buffer::upload_data()"
         );
         
-        auto elements_ptr = static_cast< const GLuint* >( &indices[ 0 ] );
-        
         auto buffer_len = indices.size() * sizeof( GLuint );
         assert( buffer_len < std::numeric_limits< GLsizeiptr >::max() );
         auto buffer_len_glsip = static_cast< GLsizeiptr >( buffer_len );
@@ -188,7 +188,7 @@ namespace yavsg { namespace gl // Index buffer implementation //////////////////
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,
             buffer_len_glsip,
-            elements_ptr,
+            indices.data(),
             GL_STATIC_DRAW // TODO: GL_DYNAMIC_DRAW, GL_STREAM_DRAW
         );
         YAVSG_GL_THROW_FOR_ERRORS(
@@ -196,7 +196,7 @@ namespace yavsg { namespace gl // Index buffer implementation //////////////////
             + std::to_string( indices.size() )
             + " buffer elements at "
             + std::to_string(
-                reinterpret_cast< std::uintptr_t >( elements_ptr )
+                reinterpret_cast< std::uintptr_t >( indices.data() )
             )
             + " for yavsg::gl::index_buffer::upload_data()"
         );
