@@ -8,7 +8,8 @@
 #include <exception>
 #include <limits>
 #include <mutex>        // std::mutex, std::once_flag, std::call_once()
-#include <type_traits>  // std::conditional, std::is_floating_point
+#include <type_traits>  // std::conditional, std::is_floating_point,
+                        // std::enable_if
 #include <utility>      // std::swap()
 
 
@@ -62,19 +63,16 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
             );
     }
     
-    template< typename T >
-    bool premultiply(
+    template< typename T > auto premultiply(
         const  void* data,
                void* preprocessed_data,
         std::size_t  sample_count,
         std::size_t  channels,
-        yavsg::gl::texture_flags_type flags,
-        
-        typename std::enable_if<
-            std::is_integral< T >::value,
-            T
-        >::type* = nullptr
-    )
+        yavsg::gl::texture_flags_type flags
+    ) -> typename std::enable_if<
+        std::is_integral< T >::value,
+        bool
+    >::type
     {
         bool has_varying_alpha = false;
         bool multiply_alpha = !(
@@ -133,19 +131,16 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
         return has_varying_alpha;
     }
     
-    template< typename T >
-    bool premultiply(
+    template< typename T > auto premultiply(
         const  void* data,
                void* preprocessed_data,
         std::size_t  sample_count,
         std::size_t  channels,
-        yavsg::gl::texture_flags_type flags,
-        
-        typename std::enable_if<
-            std::is_floating_point< T >::value,
-            T
-        >::type* = nullptr
-    )
+        yavsg::gl::texture_flags_type flags
+    ) -> typename std::enable_if<
+        std::is_floating_point< T >::value,
+        bool
+    >::type
     {
         bool has_varying_alpha = false;
         bool multiply_alpha = !(
@@ -253,7 +248,7 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
         ) )
         {
             std::size_t channels;
-            std::unique_ptr< char > preprocessed_data;
+            std::unique_ptr< char[] > preprocessed_data;
             
             switch( upload_data.gl_incoming_format )
             {
@@ -281,116 +276,52 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             if( upload_data.gl_incoming_format != GL_RGBA )
                 modified_flags |= texture_flag::DISABLE_PREMULTIPLIED_ALPHA;
             
-            // TODO: set premultiply as a std::function, call after switch
+            std::function< bool(
+                const void*,
+                void*,
+                std::size_t,
+                std::size_t,
+                yavsg::gl::texture_flags_type
+            ) > type_premultiply;
+            std::size_t type_size;
+            
             switch( upload_data.gl_incoming_type )
             {
             case GL_BYTE:
-                preprocessed_data = std::unique_ptr< char >( new char[
-                    sample_count * channels * sizeof( GLbyte )
-                ] );
-                internal_has_alpha = premultiply< GLbyte >(
-                    upload_data.data.get(),
-                    preprocessed_data.get(),
-                    sample_count,
-                    channels,
-                    modified_flags
-                );
+                type_size = sizeof( GLbyte );
+                type_premultiply = premultiply< GLbyte >;
                 break;
             case GL_UNSIGNED_BYTE:
-                preprocessed_data = std::unique_ptr< char >( new char[
-                    sample_count * channels * sizeof( GLubyte )
-                ] );
-                internal_has_alpha = premultiply< GLubyte >(
-                    upload_data.data.get(),
-                    preprocessed_data.get(),
-                    sample_count,
-                    channels,
-                    modified_flags
-                );
+                type_size = sizeof( GLubyte );
+                type_premultiply = premultiply< GLubyte >;
                 break;
             case GL_SHORT:
-                preprocessed_data = std::unique_ptr< char >( new char[
-                    sample_count * channels * sizeof( GLshort )
-                ] );
-                internal_has_alpha = premultiply< GLshort >(
-                    upload_data.data.get(),
-                    preprocessed_data.get(),
-                    sample_count,
-                    channels,
-                    modified_flags
-                );
+                type_size = sizeof( GLshort );
+                type_premultiply = premultiply< GLshort >;
                 break;
             case GL_UNSIGNED_SHORT:
-                preprocessed_data = std::unique_ptr< char >( new char[
-                    sample_count * channels * sizeof( GLushort )
-                ] );
-                internal_has_alpha = premultiply< GLushort >(
-                    upload_data.data.get(),
-                    preprocessed_data.get(),
-                    sample_count,
-                    channels,
-                    modified_flags
-                );
+                type_size = sizeof( GLushort );
+                type_premultiply = premultiply< GLushort >;
                 break;
             case GL_INT:
-                preprocessed_data = std::unique_ptr< char >( new char[
-                    sample_count * channels * sizeof( GLint )
-                ] );
-                internal_has_alpha = premultiply< GLint >(
-                    upload_data.data.get(),
-                    preprocessed_data.get(),
-                    sample_count,
-                    channels,
-                    modified_flags
-                );
+                type_size = sizeof( GLint );
+                type_premultiply = premultiply< GLint >;
                 break;
             case GL_UNSIGNED_INT:
-                preprocessed_data = std::unique_ptr< char >( new char[
-                    sample_count * channels * sizeof( GLuint )
-                ] );
-                internal_has_alpha = premultiply< GLuint >(
-                    upload_data.data.get(),
-                    preprocessed_data.get(),
-                    sample_count,
-                    channels,
-                    modified_flags
-                );
+                type_size = sizeof( GLuint );
+                type_premultiply = premultiply< GLuint >;
                 break;
             // case GL_HALF_FLOAT:
-            //     preprocessed_data = std::unique_ptr< char >( new char[
-            //         sample_count * channels * sizeof( GLhalf )
-            //     ] );
-            //     internal_has_alpha = premultiply< GLhalf >(
-            //         upload_data.data.get(),
-            //         preprocessed_data.get(),
-            //         sample_count,
-            //         channels,
-            //         modified_flags
-            //     );
+            //     type_size = sizeof( GLhalf );
+            //     type_premultiply = premultiply< GLhalf >;
             //     break;
             case GL_FLOAT:
-                preprocessed_data = std::unique_ptr< char >( new char[
-                    sample_count * channels * sizeof( GLfloat )
-                ] );
-                internal_has_alpha = premultiply< GLfloat >(
-                    upload_data.data.get(),
-                    preprocessed_data.get(),
-                    sample_count,
-                    channels,
-                    modified_flags
-                );
+                type_size = sizeof( GLfloat );
+                type_premultiply = premultiply< GLfloat >;
                 break;
             // case GL_DOUBLE:
-            //     preprocessed_data = std::unique_ptr< char >( new char[
-            //         sample_count * channels * sizeof( GLdouble )
-            //     ] );
-            //     internal_has_alpha = premultiply< GLdouble >(
-            //         upload_data.data.get(),
-            //         preprocessed_data.get(),
-            //         sample_count,
-            //         channels,
-            //         modified_flags
-            //     );
+            //     type_size = sizeof( GLdouble );
+            //     type_premultiply = premultiply< GLdouble >;
             //     break;
             default:
                 throw std::runtime_error(
@@ -399,6 +330,17 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
                     + " for yavsg::gl::process_texture_data()"
                 );
             }
+            
+            preprocessed_data = std::unique_ptr< char[] >( new char[
+                sample_count * channels * type_size
+            ] );
+            internal_has_alpha = type_premultiply(
+                upload_data.data.get(),
+                preprocessed_data.get(),
+                sample_count,
+                channels,
+                modified_flags
+            );
             
             std::swap( upload_data.data, preprocessed_data );
         }
@@ -572,7 +514,7 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
                 height,
                 incoming_format,
                 incoming_type,
-                std::unique_ptr< char >{ sdl_surface_data }
+                std::unique_ptr< char[] >{ sdl_surface_data }
             },
             flags
         );

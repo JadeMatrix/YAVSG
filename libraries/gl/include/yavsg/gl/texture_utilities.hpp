@@ -124,12 +124,12 @@ namespace yavsg { namespace gl // Upload utilities /////////////////////////////
 {
     struct texture_upload_data
     {
-        GLint                   gl_internal_format;
-        std::size_t             width;
-        std::size_t             height;
-        GLenum                  gl_incoming_format;
-        GLenum                  gl_incoming_type;
-        std::unique_ptr< char > data;
+        GLint                     gl_internal_format;
+        std::size_t               width;
+        std::size_t               height;
+        GLenum                    gl_incoming_format;
+        GLenum                    gl_incoming_type;
+        std::unique_ptr< char[] > data;
     };
     
     texture_upload_data process_texture_data(
