@@ -110,7 +110,7 @@ namespace yavsg { namespace gl // Vertex buffer implementation /////////////////
         );
         
         auto vertices_len = vertices.size() * sizeof( tuple_type );
-        assert( vertices_len < std::numeric_limits< GLsizeiptr >::max() );
+        assert( vertices_len <= std::numeric_limits< GLsizeiptr >::max() );
         auto vertices_len_glsip = static_cast< GLsizeiptr >( vertices_len );
         
         glBufferData(
@@ -182,7 +182,7 @@ namespace yavsg { namespace gl // Index buffer implementation //////////////////
         );
         
         auto buffer_len = indices.size() * sizeof( GLuint );
-        assert( buffer_len < std::numeric_limits< GLsizeiptr >::max() );
+        assert( buffer_len <= std::numeric_limits< GLsizeiptr >::max() );
         auto buffer_len_glsip = static_cast< GLsizeiptr >( buffer_len );
         
         glBufferData(

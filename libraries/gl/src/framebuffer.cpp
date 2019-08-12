@@ -187,8 +187,8 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
         const std::string& descriptive_name
     )
     {
-        assert( _width  < std::numeric_limits< GLsizei >::max() );
-        assert( _height < std::numeric_limits< GLsizei >::max() );
+        assert( _width  <= std::numeric_limits< GLsizei >::max() );
+        assert( _height <= std::numeric_limits< GLsizei >::max() );
         auto w = static_cast< GLsizei >( _width  );
         auto h = static_cast< GLsizei >( _height );
         

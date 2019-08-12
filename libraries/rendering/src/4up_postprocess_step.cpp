@@ -77,8 +77,8 @@ namespace yavsg
             auto half_width  = target. width() / 2;
             auto half_height = target.height() / 2;
             
-            assert( half_height < std::numeric_limits< GLint >::max() );
-            assert( half_width  < std::numeric_limits< GLint >::max() );
+            assert( half_height <= std::numeric_limits< GLint >::max() );
+            assert( half_width  <= std::numeric_limits< GLint >::max() );
             
             glViewport(
                 static_cast< GLint >( substep.x_offset_factor * half_width  ),
