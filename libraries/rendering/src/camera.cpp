@@ -27,11 +27,11 @@ namespace yavsg
         float focal_point,
         float   far_point
     ) :
-          _position(    position ),
-        _near_point(  near_point ),
-         _far_point(   far_point ),
-               _fov(          90 ),
-        _relative_focus( focal_point * vector< float, 3 >{ 1, 0, 0 } )
+        _position( position ),
+        _relative_focus( focal_point * vector< float, 3 >{ 1, 0, 0 } ),
+        _near_point( near_point ),
+        _far_point (  far_point ),
+        _fov( 90 )
     {}
     
     vector< float, 3 > camera::position() const
