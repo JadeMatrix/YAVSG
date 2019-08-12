@@ -97,13 +97,6 @@ namespace yavsg
     multi_postprocess_step::multi_postprocess_step(
         const std::vector< std::string > function_names
     ) :
-        multi_program{ {
-            gl::shader::from_file(
-                GL_VERTEX_SHADER,
-                "../YAVSG/shaders/postprocess.vert"
-            ).id,
-            generate_fragment_shader( function_names ).id
-        } },
         vertices{ {
             { { -1.0f,  1.0f }, { 0.0f, 0.0f } }, //    top left
             { {  1.0f,  1.0f }, { 1.0f, 0.0f } }, //    top right
@@ -113,6 +106,14 @@ namespace yavsg
         indices{ {
             0, 1, 2,
             2, 3, 0
+        } },
+        multi_program{ {
+            // FIXME: this creates references to temporaries
+            gl::shader::from_file(
+                GL_VERTEX_SHADER,
+                "../YAVSG/shaders/postprocess.vert"
+            ).id,
+            generate_fragment_shader( function_names ).id
         } }
     {
         multi_program.link_attribute< 0 >(
