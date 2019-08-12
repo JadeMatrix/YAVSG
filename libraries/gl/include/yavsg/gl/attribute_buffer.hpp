@@ -113,14 +113,10 @@ namespace yavsg { namespace gl // Vertex buffer implementation /////////////////
         assert( vertices_len < std::numeric_limits< GLsizeiptr >::max() );
         auto vertices_len_glsip = static_cast< GLsizeiptr >( vertices_len );
         
-        auto elements_ptr = static_cast< const tuple_type* >(
-            &vertices[ 0 ]
-        );
-        
         glBufferData(
             GL_ARRAY_BUFFER,
             vertices_len_glsip,
-            elements_ptr,
+            vertices.data(),
             GL_STATIC_DRAW // TODO: GL_DYNAMIC_DRAW, GL_STREAM_DRAW
         );
         YAVSG_GL_THROW_FOR_ERRORS(
@@ -128,7 +124,7 @@ namespace yavsg { namespace gl // Vertex buffer implementation /////////////////
             + std::to_string( vertices.size() )
             + " buffer elements at "
             + std::to_string(
-                reinterpret_cast< std::uintptr_t >( elements_ptr )
+                reinterpret_cast< std::uintptr_t >( vertices.data() )
             )
             + " for yavsg::gl::attribute_buffer::upload_data()"
         );
