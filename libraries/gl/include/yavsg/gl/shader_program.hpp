@@ -13,7 +13,9 @@
 // #include "../rendering/shader_variable_names.hpp"
 
 #include <tuple>
+#include <assert.h>
 #include <exception>
+#include <limits>
 #include <type_traits>  // std::enable_if
 
 
@@ -353,10 +355,11 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
         
         if( count + start > indices.size() )
             count = indices.size() - start;
+        assert( count <= std::numeric_limits< GLsizei >::max() );
         
         glDrawElements(
             GL_TRIANGLES, // TODO: other primitive types
-            count,
+            static_cast< GLsizei >( count ),
             GL_UNSIGNED_INT,
             reinterpret_cast< void* >( start * sizeof( GLuint ) )
         );
