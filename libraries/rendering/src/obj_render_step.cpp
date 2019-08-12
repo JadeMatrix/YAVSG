@@ -13,6 +13,7 @@
 namespace yavsg
 {
     obj_render_step::obj_render_step() :
+        first_run{ true },
         scene_program( {
             gl::shader::from_file(
                 GL_VERTEX_SHADER,
@@ -22,8 +23,7 @@ namespace yavsg
                 GL_FRAGMENT_SHADER,
                 "../YAVSG/shaders/obj_scene.frag"
             ).id
-        } ),
-        first_run{ true }
+        } )
     {
         scene_program.bind_target< 0 >(
             shader_string_id::FRAGMENT_OUT_COLOR

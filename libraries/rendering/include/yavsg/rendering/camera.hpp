@@ -119,7 +119,6 @@ namespace yavsg // Template member function implementations ////////////////////
         std::lock_guard< std::recursive_mutex > _lock(
             const_cast< std::recursive_mutex& >( _mutex )
         );
-        auto ar = static_cast< ratio< T > >( aspect_ratio );
         return perspective< T >(
             _fov,
             aspect_ratio,
