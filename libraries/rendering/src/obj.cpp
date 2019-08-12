@@ -5,9 +5,11 @@
 
 #include <tiny_obj_loader.h>
 
+#include <assert.h>
 #include <algorithm>    // std::max()
 #include <exception>
 #include <iostream>     // std::cerr for tinyobj warnings
+#include <limits>
 #include <vector>
 
 
@@ -119,29 +121,35 @@ namespace yavsg
                             + std::to_string( vertex_count )
                         );
                     
-                    auto& group_indices = indices[
+                    assert( obj_shape.mesh.material_ids[ face ] >= 0 );
+                    assert( static_cast< decltype( indices )::size_type >(
                         obj_shape.mesh.material_ids[ face ]
+                    ) <= indices.size() );
+                    auto& group_indices = indices[
+                        static_cast< decltype( indices )::size_type >(
+                            obj_shape.mesh.material_ids[ face ]
+                        )
                     ];
                     
                     for( size_t i = 0; i < vertex_count; ++i )
                     {
                         auto index = obj_shape.mesh.indices[ index_offset + i ];
                         
-                        auto vx = obj_attributes.vertices[ 3 * index.vertex_index + 0 ];
-                        auto vy = obj_attributes.vertices[ 3 * index.vertex_index + 1 ];
-                        auto vz = obj_attributes.vertices[ 3 * index.vertex_index + 2 ];
+                        auto vx = obj_attributes.vertices[ static_cast< std::size_t >( 3 * index.vertex_index + 0 ) ];
+                        auto vy = obj_attributes.vertices[ static_cast< std::size_t >( 3 * index.vertex_index + 1 ) ];
+                        auto vz = obj_attributes.vertices[ static_cast< std::size_t >( 3 * index.vertex_index + 2 ) ];
                         
-                        auto nx = obj_attributes.normals[ 3 * index.normal_index + 0 ];
-                        auto ny = obj_attributes.normals[ 3 * index.normal_index + 1 ];
-                        auto nz = obj_attributes.normals[ 3 * index.normal_index + 2 ];
+                        auto nx = obj_attributes.normals[ static_cast< std::size_t >( 3 * index.normal_index + 0 ) ];
+                        auto ny = obj_attributes.normals[ static_cast< std::size_t >( 3 * index.normal_index + 1 ) ];
+                        auto nz = obj_attributes.normals[ static_cast< std::size_t >( 3 * index.normal_index + 2 ) ];
                         
                         // Colors use index.vertex_index
-                        auto cr = obj_attributes.colors[ 3 * index.vertex_index + 0 ];
-                        auto cb = obj_attributes.colors[ 3 * index.vertex_index + 1 ];
-                        auto cg = obj_attributes.colors[ 3 * index.vertex_index + 2 ];
+                        auto cr = obj_attributes.colors[ static_cast< std::size_t >( 3 * index.vertex_index + 0 ) ];
+                        auto cb = obj_attributes.colors[ static_cast< std::size_t >( 3 * index.vertex_index + 1 ) ];
+                        auto cg = obj_attributes.colors[ static_cast< std::size_t >( 3 * index.vertex_index + 2 ) ];
                         
-                        auto tu = obj_attributes.texcoords[ 2 * index.texcoord_index + 0 ];
-                        auto tv = obj_attributes.texcoords[ 2 * index.texcoord_index + 1 ];
+                        auto tu = obj_attributes.texcoords[ static_cast< std::size_t >( 2 * index.texcoord_index + 0 ) ];
+                        auto tv = obj_attributes.texcoords[ static_cast< std::size_t >( 2 * index.texcoord_index + 1 ) ];
                         
                         vertices.push_back( {
                             { vx, vz, vy }, // { vx, vy, vz },
@@ -149,7 +157,13 @@ namespace yavsg
                             { cr, cb, cg },
                             { tu, tv }
                         } );
-                        group_indices.push_back( vertices.size() - 1 );
+                        assert(
+                            vertices.size() - 1
+                            <= std::numeric_limits< GLuint >::max()
+                        );
+                        group_indices.push_back(
+                            static_cast< GLuint >( vertices.size() - 1 )
+                        );
                         
                         if( vx > obj_max_x )
                             obj_max_x = vx;
