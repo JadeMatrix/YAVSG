@@ -9,6 +9,7 @@
 
 // See https://gist.github.com/cbmeeks/5587a11e7856baf819b7
 #ifdef __APPLE__
+    #define GL_SILENCE_DEPRECATION
     #include <OpenGL/gl3.h>
     #include <OpenGL/gl3ext.h>
 #else
