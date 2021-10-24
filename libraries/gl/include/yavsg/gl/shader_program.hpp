@@ -12,10 +12,10 @@
 #include <yavsg/math/vector.hpp>
 // #include "../rendering/shader_variable_names.hpp"
 
-#include <tuple>
 #include <assert.h>
 #include <exception>
 #include <limits>
+#include <tuple>
 #include <type_traits>  // std::enable_if
 
 

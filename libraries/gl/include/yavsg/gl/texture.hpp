@@ -35,7 +35,7 @@ namespace yavsg { namespace gl
         texture(
             std::size_t                    width,
             std::size_t                    height,
-            std::unique_ptr< char >        data,
+            std::unique_ptr< char[] >      data,
             const texture_filter_settings& settings,
             texture_flags_type             flags
         );
@@ -141,7 +141,7 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
     texture< DataType, Channels >::texture(
         std::size_t                    width,
         std::size_t                    height,
-        std::unique_ptr< char >        data,
+        std::unique_ptr< char[] >      data,
         const texture_filter_settings& settings,
         texture_flags_type             flags
     ) : texture()

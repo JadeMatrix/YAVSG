@@ -192,17 +192,19 @@ namespace yavsg { namespace gl // Framebuffer color target init ////////////////
             std::size_t nth = 0
         )
         {
-            std::tuple< FirstColorTargetType > first_target( { FirstColorTargetType{
-                width,
-                height,
-                nullptr,
-                {
-                    texture_filter_settings::magnify_mode::LINEAR,
-                    texture_filter_settings::minify_mode::LINEAR,
-                    texture_filter_settings::mipmap_type::NONE,
-                },
-                texture_flag::ALLOCATE_ONLY
-            } } );
+            std::tuple< FirstColorTargetType > first_target( {
+                FirstColorTargetType{
+                    width,
+                    height,
+                    nullptr,
+                    {
+                        texture_filter_settings::magnify_mode::LINEAR,
+                        texture_filter_settings::minify_mode::LINEAR,
+                        texture_filter_settings::mipmap_type::NONE,
+                    },
+                    texture_flag::ALLOCATE_ONLY
+                }
+            } );
             
             FirstColorTargetType& t = std::get< 0 >( first_target );
             
@@ -242,17 +244,19 @@ namespace yavsg { namespace gl // Framebuffer color target init ////////////////
             std::size_t nth = 0
         )
         {
-            std::tuple< LastColorTargetType > last_target( { LastColorTargetType{
-                width,
-                height,
-                nullptr,
-                {
-                    texture_filter_settings::magnify_mode::LINEAR,
-                    texture_filter_settings::minify_mode::LINEAR,
-                    texture_filter_settings::mipmap_type::NONE,
-                },
-                texture_flag::ALLOCATE_ONLY
-            } } );
+            std::tuple< LastColorTargetType > last_target( {
+                LastColorTargetType{
+                    width,
+                    height,
+                    nullptr,
+                    {
+                        texture_filter_settings::magnify_mode::LINEAR,
+                        texture_filter_settings::minify_mode::LINEAR,
+                        texture_filter_settings::mipmap_type::NONE,
+                    },
+                    texture_flag::ALLOCATE_ONLY
+                }
+            } );
             
             LastColorTargetType& t = std::get< 0 >( last_target );
             

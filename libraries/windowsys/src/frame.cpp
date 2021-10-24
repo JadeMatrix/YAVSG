@@ -147,11 +147,19 @@ namespace yavsg
         for( auto& step : scene_steps )
         {
             // Reset viewport to default before running step
+            assert(
+                target_buffer -> width()
+                <= std::numeric_limits< GLsizei >::max()
+            );
+            assert(
+                target_buffer -> height()
+                <= std::numeric_limits< GLsizei >::max()
+            );
             glViewport(
                 0,
                 0,
-                target_buffer -> width(),
-                target_buffer -> height()
+                static_cast< GLsizei >( target_buffer -> width()  ),
+                static_cast< GLsizei >( target_buffer -> height() )
             );
             
             step -> run( window_ref -> window -> main_scene, *target_buffer );
@@ -161,9 +169,6 @@ namespace yavsg
         while( postprocess_step_iter != postprocess_steps.end() )
         {
             std::swap( source_buffer, target_buffer);
-            
-            bool is_first_step =
-                postprocess_step_iter == postprocess_steps.begin();
             
             // Get the current step before advancing the iterator
             auto& step = *( postprocess_step_iter -> get() );
@@ -179,11 +184,19 @@ namespace yavsg
             target_buffer -> bind();
             
             // Reset viewport to default before running step
+            assert(
+                target_buffer -> width()
+                <= std::numeric_limits< GLsizei >::max()
+            );
+            assert(
+                target_buffer -> height()
+                <= std::numeric_limits< GLsizei >::max()
+            );
             glViewport(
                 0,
                 0,
-                target_buffer -> width(),
-                target_buffer -> height()
+                static_cast< GLsizei >( target_buffer -> width()  ),
+                static_cast< GLsizei >( target_buffer -> height() )
             );
             
             step.run(
