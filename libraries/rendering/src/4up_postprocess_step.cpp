@@ -3,6 +3,7 @@
 #include <yavsg/gl/error.hpp>
 #include <yavsg/gl/shader.hpp>
 #include <yavsg/rendering/basic_postprocess_step.hpp>
+#include <yavsg/rendering/shader_utils.hpp> // shaders_dir
 #include <yavsg/rendering/shader_variable_names.hpp>
 
 #include <assert.h>
@@ -35,7 +36,7 @@ namespace yavsg
         } )
             if( !substep.step )
                 substep.step = std::make_unique< basic_postprocess_step >(
-                    "../YAVSG/shaders/postprocess.frag"
+                    shaders_dir() + "/postprocess.frag"
                 );
     }
     

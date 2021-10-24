@@ -8,6 +8,7 @@ TARGET_SOURCES( rendering PRIVATE
     "src/obj.cpp"
     "src/obj_render_step.cpp"
     "src/scene.cpp"
+    "src/shader_utils.cpp"
     "src/shader_variable_names.cpp"
 )
 TARGET_INCLUDE_DIRECTORIES( rendering PUBLIC "include/" )

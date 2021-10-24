@@ -28,6 +28,16 @@ namespace
 
 int main( int argc, char* argv[] )
 {
+    if( argc < 3 )
+    {
+        std::cerr
+            << "usage: env YAVSG_SHADERS_DIR=<shaders-dir> "
+            << argv[ 0 ]
+            << " <shaders-dir> <obj-file> <materials-dir>\n"
+        ;
+        return -1;
+    }
+
     try
     {
         yavsg::SDL_manager sdl;
@@ -76,8 +86,8 @@ int main( int argc, char* argv[] )
         
         submit_task( std::make_unique< yavsg::load_obj_task >(
             test_window -> main_scene.object_manager,
-            "../Crytek Sponza Atrium/sponza.obj",
-            "../Crytek Sponza Atrium/"
+            argv[ 1 ],
+            argv[ 2 ]
         ) );
         
         SDL_SetRelativeMouseMode( SDL_TRUE );

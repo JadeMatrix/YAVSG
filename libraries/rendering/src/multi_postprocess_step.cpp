@@ -1,6 +1,7 @@
 #include <yavsg/rendering/multi_postprocess_step.hpp>
 
 #include <yavsg/gl/error.hpp>
+#include <yavsg/rendering/shader_utils.hpp> // shaders_dir
 #include <yavsg/rendering/shader_variable_names.hpp>
 
 #include <exception>
@@ -58,7 +59,8 @@ namespace yavsg
         } )
         {
             auto filename = (
-                "../YAVSG/shaders/postprocess/"
+                shaders_dir()
+                + "/postprocess/"
                 + function_name
                 + ".frag"
             );
@@ -111,7 +113,7 @@ namespace yavsg
             // FIXME: this creates references to temporaries
             gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                "../YAVSG/shaders/postprocess.vert"
+                shaders_dir() + "/postprocess.vert"
             ).id,
             generate_fragment_shader( function_names ).id
         } }

@@ -4,6 +4,7 @@
 #include <yavsg/gl/shader.hpp>
 #include <yavsg/gl/texture.hpp>
 #include <yavsg/math/common_transforms.hpp>
+#include <yavsg/rendering/shader_utils.hpp> // shaders_dir
 #include <yavsg/rendering/shader_variable_names.hpp>
 #include <yavsg/tasking/tasking.hpp>
 
@@ -17,11 +18,11 @@ namespace yavsg
         scene_program( {
             gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                "../YAVSG/shaders/obj_scene.vert"
+                shaders_dir() + "/obj_scene.vert"
             ).id,
             gl::shader::from_file(
                 GL_FRAGMENT_SHADER,
-                "../YAVSG/shaders/obj_scene.frag"
+                shaders_dir() + "/obj_scene.frag"
             ).id
         } )
     {

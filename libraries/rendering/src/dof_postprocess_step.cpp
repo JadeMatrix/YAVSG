@@ -2,6 +2,7 @@
 
 #include <yavsg/gl/error.hpp>
 #include <yavsg/gl/shader.hpp>
+#include <yavsg/rendering/shader_utils.hpp> // shaders_dir
 #include <yavsg/rendering/shader_variable_names.hpp>
 
 
@@ -11,11 +12,11 @@ namespace yavsg
         postprocess_program( {
             yavsg::gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                "../YAVSG/shaders/postprocess.vert"
+                shaders_dir() + "/postprocess.vert"
             ).id,
             yavsg::gl::shader::from_file(
                 GL_FRAGMENT_SHADER,
-                "../YAVSG/shaders/dof.frag"
+                shaders_dir() + "/dof.frag"
             ).id
         } ),
         vertices( {
