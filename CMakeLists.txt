@@ -9,49 +9,25 @@ SET( CMAKE_BUILD_TYPE Debug )
 
 SET( CMAKE_CXX_STANDARD          17 )
 SET( CMAKE_CXX_STANDARD_REQUIRED ON )
-IF(
-       "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
-    OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
-    OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"
-    OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel"
+
+
+LIST( APPEND CMAKE_MODULE_PATH
+    "${PROJECT_SOURCE_DIR}/dependencies/JadeMatrix-CMake-Modules/CMakeModules/"
 )
-    SET( YAVSG_COMPILE_OPTIONS
-        # "-Werror"
-        "-Wall"
-        "-Wextra"
-        "-Wshadow"
-        "-Wnon-virtual-dtor"
-        "-Wold-style-cast"
-        "-Wcast-align"
-        "-Wunused"
-        "-Woverloaded-virtual"
-        "-Wpedantic"
-        "-Wconversion"
-        "-Wsign-conversion"
-        "-Wnull-dereference"
-        "-Wdouble-promotion"
-        "-Wformat=2"
-    )
-    IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        LIST( APPEND YAVSG_COMPILE_OPTIONS
-            "-Wduplicated-cond"
-            "-Wduplicated-branches"
-            "-Wlogical-op"
-            "-Wuseless-cast"
-        )
-    ENDIF()
-ELSEIF( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC" )
-    SET( YAVSG_COMPILE_OPTIONS
-        # "/WX"
-        "/Wall"
-    )
+INCLUDE( JadeMatrix-CMake-Modules/Util/CompileWarnings
+    OPTIONAL
+    RESULT_VARIABLE JMCMM_INCLUDED
+)
+IF( NOT JMCMM_INCLUDED )
+    FIND_PACKAGE( JadeMatrix-CMake-Modules 1.4 REQUIRED )
+    INCLUDE( JadeMatrix-CMake-Modules/Util/CompileWarnings )
 ENDIF()
 
 
-SET( CMAKE_MODULE_PATH
-    ${CMAKE_MODULE_PATH}
-    "${PROJECT_SOURCE_DIR}/CMakeModules/"
-)
+SET_ALL_COMPILE_WARNINGS( YAVSG_COMPILE_OPTIONS ASSEMBLE_ONLY )
+
+
+LIST( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules/" )
 
 ADD_SUBDIRECTORY( "libraries/" )
 ADD_SUBDIRECTORY( "programs/" )
