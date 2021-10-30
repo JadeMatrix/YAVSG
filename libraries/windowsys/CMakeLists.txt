@@ -13,4 +13,4 @@ TARGET_LINK_LIBRARIES( windowsys
         units
         tasking
 )
-TARGET_COMPILE_OPTIONS( windowsys PRIVATE ${YAVSG_COMPILE_OPTIONS} )
+SET_ALL_COMPILE_WARNINGS( windowsys )
