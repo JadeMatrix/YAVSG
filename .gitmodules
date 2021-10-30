@@ -1,0 +1,3 @@
+[submodule "dependencies/JadeMatrix-CMake-Modules"]
+	path = dependencies/JadeMatrix-CMake-Modules
+	url = ../JadeMatrix-CMake-Modules.git
