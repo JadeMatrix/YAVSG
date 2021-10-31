@@ -12,7 +12,7 @@ SET( CMAKE_CXX_STANDARD_REQUIRED ON )
 
 
 LIST( APPEND CMAKE_MODULE_PATH
-    "${PROJECT_SOURCE_DIR}/dependencies/JadeMatrix-CMake-Modules/CMakeModules/"
+    "${PROJECT_SOURCE_DIR}/dependencies/JadeMatrix/JadeMatrix-CMake-Modules/CMakeModules/"
 )
 INCLUDE( JadeMatrix-CMake-Modules/Util/CompileWarnings
     OPTIONAL
