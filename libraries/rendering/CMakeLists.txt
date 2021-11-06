@@ -13,8 +13,6 @@ TARGET_SOURCES( rendering PRIVATE
 )
 TARGET_INCLUDE_DIRECTORIES( rendering PUBLIC "include/" )
 
-FIND_PACKAGE( SDL2 2.0.8 REQUIRED COMPONENTS image )
-FIND_PACKAGE( tinyobjloader 1.0.4 EXACT REQUIRED COMPONENTS tinyobjloader )
 TARGET_LINK_LIBRARIES( rendering
     PUBLIC
         tinyobjloader
