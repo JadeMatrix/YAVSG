@@ -24,7 +24,7 @@ INCLUDE( JadeMatrix-CMake-Modules/Util/CompileWarnings
     RESULT_VARIABLE JMCMM_INCLUDED
 )
 IF( NOT JMCMM_INCLUDED )
-    FIND_PACKAGE( JadeMatrix-CMake-Modules 1.4 REQUIRED )
+    FIND_PACKAGE( JadeMatrix-CMake-Modules 1.5 REQUIRED )
     INCLUDE( JadeMatrix-CMake-Modules/Util/CompileWarnings )
 ENDIF()
 
