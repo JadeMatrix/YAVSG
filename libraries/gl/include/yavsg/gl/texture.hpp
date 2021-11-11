@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_GL_TEXTURE_HPP
-#define YAVSG_GL_TEXTURE_HPP
 
 
 #include "error.hpp"
@@ -190,6 +188,3 @@ namespace JadeMatrix::yavsg::gl // Texture class implementation ////////////////
         set_bound_texture_filtering( settings );
     }
 }
-
-
-#endif

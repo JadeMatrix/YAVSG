@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_UNITS_UNIT_HPP
-#define YAVSG_UNITS_UNIT_HPP
 
 
 #include <ostream>
@@ -792,6 +790,3 @@ namespace JadeMatrix::yavsg // Stream formatting operators /////////////////////
         return out << static_cast< T >( u );
     }
 }
-
-
-#endif

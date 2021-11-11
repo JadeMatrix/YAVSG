@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_MATH_TRIGONOMETRY_HPP
-#define YAVSG_MATH_TRIGONOMETRY_HPP
 
 
 #include <yavsg/units/angular.hpp>
@@ -43,6 +41,3 @@ namespace JadeMatrix::yavsg
         return std::atan2( static_cast< T >( r1 ), static_cast< T >( r2 ) );
     }
 }
-
-
-#endif

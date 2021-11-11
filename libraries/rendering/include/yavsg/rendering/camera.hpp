@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_CAMERA_HPP
-#define YAVSG_RENDERING_CAMERA_HPP
 
 
 #include <yavsg/math/matrix.hpp>
@@ -127,6 +125,3 @@ namespace JadeMatrix::yavsg // Template member function implementations ////////
         );
     }
 }
-
-
-#endif

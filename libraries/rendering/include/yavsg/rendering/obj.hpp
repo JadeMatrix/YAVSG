@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_OBJ_HPP
-#define YAVSG_RENDERING_OBJ_HPP
 
 
 #include "render_object_manager.hpp"
@@ -50,6 +48,3 @@ namespace JadeMatrix::yavsg
         bool operator()();
     };
 }
-
-
-#endif

@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_MATH_COMMON_TRANSFORMS_HPP
-#define YAVSG_MATH_COMMON_TRANSFORMS_HPP
 
 
 #include "matrix.hpp"
@@ -151,6 +149,3 @@ namespace JadeMatrix::yavsg // Projections /////////////////////////////////////
         };
     }
 }
-
-
-#endif

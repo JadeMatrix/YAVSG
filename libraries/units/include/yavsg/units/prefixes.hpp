@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_UNITS_PREFIXES_HPP
-#define YAVSG_UNITS_PREFIXES_HPP
 
 
 #include "unit.hpp"
@@ -131,6 +129,3 @@ namespace JadeMatrix::yavsg // Helper for defining prefixed units //////////////
     template< typename T > using femto##PLURAL = femto< float, SINGULAR##_traits< float > >; \
     template< typename T > using  atto##PLURAL =  atto< float, SINGULAR##_traits< float > >;
 }
-
-
-#endif

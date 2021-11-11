@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_MATH_BASIC_TRANSFORMS_HPP
-#define YAVSG_MATH_BASIC_TRANSFORMS_HPP
 
 
 #include "matrix.hpp"
@@ -108,6 +106,3 @@ namespace JadeMatrix::yavsg // Translation operations //////////////////////////
         return m;
     }
 }
-
-
-#endif

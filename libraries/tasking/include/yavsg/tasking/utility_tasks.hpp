@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_TASKING_UTILITY_TASKS_HPP
-#define YAVSG_TASKING_UTILITY_TASKS_HPP
 
 
 #include "task.hpp"
@@ -48,6 +46,3 @@ namespace JadeMatrix::yavsg
         }
     };
 }
-
-
-#endif

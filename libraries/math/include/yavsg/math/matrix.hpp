@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_MATH_MATRIX_HPP
-#define YAVSG_MATH_MATRIX_HPP
 
 
 #include <array>
@@ -511,6 +509,3 @@ namespace JadeMatrix::yavsg // Stream formatting operators & pretty-string /////
         return matrix_string;
     }
 }
-
-
-#endif

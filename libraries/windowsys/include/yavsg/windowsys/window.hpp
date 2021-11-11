@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_WINDOWSYS_WINDOW_HPP
-#define YAVSG_WINDOWSYS_WINDOW_HPP
 
 
 #include <yavsg/events/event_listener.hpp>
@@ -111,6 +109,3 @@ namespace JadeMatrix::yavsg::dpi
         return static_cast< T >( px ) / static_cast< T >( state.scale_factor );
     }
 }
-
-
-#endif

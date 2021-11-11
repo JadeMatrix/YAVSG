@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_EVENTS_EVENT_LISTENER_HPP
-#define YAVSG_EVENTS_EVENT_LISTENER_HPP
 
 
 #include <yavsg/tasking/task.hpp>
@@ -46,6 +44,3 @@ namespace JadeMatrix::yavsg
         }
     };
 }
-
-
-#endif

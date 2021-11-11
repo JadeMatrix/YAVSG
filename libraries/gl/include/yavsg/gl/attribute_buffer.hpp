@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_GL_ATTRIBUTE_BUFFER_HPP
-#define YAVSG_GL_ATTRIBUTE_BUFFER_HPP
 
 
 #include <yavsg/gl_wrap.hpp>
@@ -214,6 +212,3 @@ namespace JadeMatrix::yavsg::gl // Index buffer implementation /////////////////
         return gl_id;
     }
 }
-
-
-#endif

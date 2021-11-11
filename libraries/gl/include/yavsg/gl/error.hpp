@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_GL_BUFFER_HPP
-#define YAVSG_GL_BUFFER_HPP
 
 
 #include <yavsg/gl_wrap.hpp>
@@ -50,6 +48,3 @@ namespace JadeMatrix::yavsg::gl
     // Utility function for use in `catch()` blocks
     void print_summary_error_codes( std::ostream&, const summary_error& );
 }
-
-
-#endif

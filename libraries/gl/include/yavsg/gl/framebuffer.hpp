@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_GL_FRAMEBUFFER_HPP
-#define YAVSG_GL_FRAMEBUFFER_HPP
 
 
 #include "error.hpp"
@@ -498,6 +496,3 @@ namespace JadeMatrix::yavsg::gl // Framebuffer implementation //////////////////
         return std::get< Nth >( _color_buffers );
     }
 }
-
-
-#endif

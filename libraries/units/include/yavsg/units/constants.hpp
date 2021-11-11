@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_UNITS_CONSTANTS_HPP
-#define YAVSG_UNITS_CONSTANTS_HPP
 
 
 namespace JadeMatrix::yavsg::constants
@@ -9,6 +7,3 @@ namespace JadeMatrix::yavsg::constants
     template< typename T > constexpr T circle_degrees = static_cast< T >( 360                    );
     template< typename T > constexpr T hour_minutes   = static_cast< T >( 60L                    );
 }
-
-
-#endif

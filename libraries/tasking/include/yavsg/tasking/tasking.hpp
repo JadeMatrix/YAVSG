@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_TASKING_TASKING_HPP
-#define YAVSG_TASKING_TASKING_HPP
 
 
 #include "task.hpp"
@@ -36,6 +34,3 @@ namespace JadeMatrix::yavsg
     // called)
     void       stop_task_system( bool dequeue_all = false );
 }
-
-
-#endif

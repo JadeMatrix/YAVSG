@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_DOF_POSTPROCESS_STEP_HPP
-#define YAVSG_RENDERING_DOF_POSTPROCESS_STEP_HPP
 
 
 #include "camera.hpp"
@@ -43,6 +41,3 @@ namespace JadeMatrix::yavsg
         );
     };
 }
-
-
-#endif

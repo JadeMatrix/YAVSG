@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_MATERIAL_HPP
-#define YAVSG_RENDERING_MATERIAL_HPP
 
 
 #include "shader_variable_names.hpp"
@@ -214,6 +212,3 @@ namespace JadeMatrix::yavsg // Material descriptor /////////////////////////////
         }
     };
 }
-
-
-#endif

@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_SCENE_HPP
-#define YAVSG_RENDERING_SCENE_HPP
 
 
 #include "material.hpp"
@@ -85,6 +83,3 @@ namespace JadeMatrix::yavsg
         scene();
     };
 }
-
-
-#endif

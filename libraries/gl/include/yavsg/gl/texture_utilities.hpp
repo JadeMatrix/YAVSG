@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_GL_TEXTURE_UTILITIES_HPP
-#define YAVSG_GL_TEXTURE_UTILITIES_HPP
 
 
 #include <yavsg/gl_wrap.hpp>
@@ -153,6 +151,3 @@ namespace JadeMatrix::yavsg::gl // Upload utilities ////////////////////////////
         const texture_filter_settings& settings
     );
 }
-
-
-#endif

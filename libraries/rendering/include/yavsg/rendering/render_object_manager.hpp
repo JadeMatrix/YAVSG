@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_RENDER_OBJECT_MANAGER_HPP
-#define YAVSG_RENDERING_RENDER_OBJECT_MANAGER_HPP
 
 
 #include <yavsg/gl_wrap.hpp>
@@ -192,6 +190,3 @@ namespace JadeMatrix::yavsg
         }
     };
 }
-
-
-#endif

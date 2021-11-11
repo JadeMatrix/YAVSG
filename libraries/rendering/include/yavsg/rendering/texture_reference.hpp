@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_TEXTURE_REFERENCE_HPP
-#define YAVSG_RENDERING_TEXTURE_REFERENCE_HPP
 
 
 #include <yavsg/gl/texture.hpp>
@@ -378,6 +376,3 @@ namespace JadeMatrix::yavsg // Task implementations ////////////////////////////
         return false;
     }
 }
-
-
-#endif

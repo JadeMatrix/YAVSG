@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_SHADER_VARIABLE_NAMES_HPP
-#define YAVSG_RENDERING_SHADER_VARIABLE_NAMES_HPP
 
 
 #include <string>
@@ -103,6 +101,3 @@ namespace JadeMatrix::yavsg
     
     const std::string& shader_string( shader_string_id );
 }
-
-
-#endif

@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_MATH_VECTOR_HPP
-#define YAVSG_MATH_VECTOR_HPP
 
 
 #include "matrix.hpp"
@@ -359,6 +357,3 @@ namespace JadeMatrix::yavsg // Stream formatting operator //////////////////////
         return out;
     }
 }
-
-
-#endif

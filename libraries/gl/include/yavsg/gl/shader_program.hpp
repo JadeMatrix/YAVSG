@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_GL_SHADER_PROGRAM_HPP
-#define YAVSG_GL_SHADER_PROGRAM_HPP
 
 
 #include <yavsg/gl_wrap.hpp>
@@ -748,6 +746,3 @@ namespace JadeMatrix::yavsg::gl // Uniform-set specializations /////////////////
     
     #undef SHADER_PROGRAM_DEFINE_UNIFORM_YAVSG_NONSQUARE_MATRIX_SPECIALIZATION
 }
-
-
-#endif

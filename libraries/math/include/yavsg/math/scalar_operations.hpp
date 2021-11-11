@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_MATH_SCALAR_OPERATIONS_HPP
-#define YAVSG_MATH_SCALAR_OPERATIONS_HPP
 
 
 // http://en.cppreference.com/w/cpp/header/cmath
@@ -177,6 +175,3 @@ namespace JadeMatrix::yavsg // Power functions /////////////////////////////////
     //     return newtons_method< __int128 >( v );
     // }
 }
-
-
-#endif

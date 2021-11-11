@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_MULTI_POSTPROCESS_STEP_HPP
-#define YAVSG_RENDERING_MULTI_POSTPROCESS_STEP_HPP
 
 
 #include "render_step.hpp"
@@ -51,6 +49,3 @@ namespace JadeMatrix::yavsg
         );
     };
 }
-
-
-#endif

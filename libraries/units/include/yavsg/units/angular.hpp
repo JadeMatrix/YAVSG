@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_UNITS_ANGULAR_HPP
-#define YAVSG_UNITS_ANGULAR_HPP
 
 
 #include "constants.hpp"
@@ -167,6 +165,3 @@ namespace JadeMatrix::yavsg // Prefixed versions of angular units //////////////
     ALL_PREFIXES_FOR_UNIT( radian   , radians    )
     ALL_PREFIXES_FOR_UNIT( arcminute, arcminutes )
 }
-
-
-#endif

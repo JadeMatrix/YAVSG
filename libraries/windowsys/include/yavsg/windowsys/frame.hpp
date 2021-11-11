@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_WINDOWSYS_FRAME_HPP
-#define YAVSG_WINDOWSYS_FRAME_HPP
 
 
 #include "window.hpp"
@@ -52,6 +50,3 @@ namespace JadeMatrix::yavsg
         bool operator()();
     };
 }
-
-
-#endif

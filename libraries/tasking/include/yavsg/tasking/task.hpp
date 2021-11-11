@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_TASKING_TASK_HPP
-#define YAVSG_TASKING_TASK_HPP
 
 
 #include <utility>  // std::size_t
@@ -33,6 +31,3 @@ namespace JadeMatrix::yavsg
         virtual bool operator()() = 0;
     };
 }
-
-
-#endif

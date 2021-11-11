@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_UNITS_DPI_HPP
-#define YAVSG_UNITS_DPI_HPP
 
 
 #include "unit.hpp"
@@ -74,6 +72,3 @@ namespace JadeMatrix::yavsg::dpi // Prefixed versions of DPI units /////////////
     ALL_PREFIXES_FOR_UNIT( pixel, pixels )
     ALL_PREFIXES_FOR_UNIT( point, points )
 }
-
-
-#endif

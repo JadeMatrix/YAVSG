@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_MATH_QUATERNION_HPP
-#define YAVSG_MATH_QUATERNION_HPP
 
 
 #include "vector.hpp"
@@ -206,6 +204,3 @@ namespace JadeMatrix::yavsg // Stream formatting operator //////////////////////
         ;
     }
 }
-
-
-#endif

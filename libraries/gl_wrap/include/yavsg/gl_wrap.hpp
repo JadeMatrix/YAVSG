@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_GL_WRAP_GL_HPP
-#define YAVSG_GL_WRAP_GL_HPP
 
 
 // As including OpenGL can be finnicky (order-dependent, breaks on multiple-
@@ -14,7 +12,4 @@
     #include <OpenGL/gl3ext.h>
 #else
     #include <GL/glew.h>
-#endif
-
-
 #endif

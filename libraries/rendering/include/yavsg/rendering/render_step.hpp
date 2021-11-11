@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_RENDER_STEP_HPP
-#define YAVSG_RENDERING_RENDER_STEP_HPP
 
 
 #include "scene.hpp"
@@ -32,6 +30,3 @@ namespace JadeMatrix::yavsg
         ) = 0;
     };
 }
-
-
-#endif

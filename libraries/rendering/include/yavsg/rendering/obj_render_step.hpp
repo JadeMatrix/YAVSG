@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_OBJ_RENDER_STEP_HPP
-#define YAVSG_RENDERING_OBJ_RENDER_STEP_HPP
 
 
 #include "render_step.hpp"
@@ -34,6 +32,3 @@ namespace JadeMatrix::yavsg
         virtual void run( const scene&, gl::write_only_framebuffer& );
     };
 }
-
-
-#endif
