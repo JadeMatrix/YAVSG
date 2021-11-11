@@ -1,7 +1,7 @@
 #include <yavsg/rendering/scene.hpp>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     scene::scene() :
         main_camera(

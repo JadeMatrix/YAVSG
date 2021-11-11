@@ -14,14 +14,14 @@ namespace
     std::once_flag poll_events_task_submitted_flag;
     
     std::mutex listeners_mutex;
-    yavsg::listener_id next_listener_id = 1;
+    JadeMatrix::yavsg::listener_id next_listener_id = 1;
     
     #define DEFINE_LISTENER_MAP_FOR( EVENT, MAPNAME ) \
     std::map< \
-        yavsg::listener_id, \
+        JadeMatrix::yavsg::listener_id, \
         std::pair< \
             std::function< void( const EVENT& ) >, \
-            yavsg::task_flags_type \
+            JadeMatrix::yavsg::task_flags_type \
         > \
     > MAPNAME;
     
@@ -60,22 +60,24 @@ namespace // Event consumer task ///////////////////////////////////////////////
     { \
         auto callback = callback_pair.second.first; \
         auto event    = window_event.EVENT_MEMBER; \
-        yavsg::submit_task( std::make_unique< yavsg::callback_task >( \
-            [ callback, event ](){ \
-                callback( event ); \
-                return false; \
-            }, \
-            callback_pair.second.second \
-        ) ); \
+        JadeMatrix::yavsg::submit_task( \
+            std::make_unique< JadeMatrix::yavsg::callback_task >( \
+                [ callback, event ](){ \
+                    callback( event ); \
+                    return false; \
+                }, \
+                callback_pair.second.second \
+            ) \
+        ); \
     }
     
-    class poll_events_task : public yavsg::task
+    class poll_events_task : public JadeMatrix::yavsg::task
     {
     public:
-        virtual yavsg::task_flags_type flags() const
+        virtual JadeMatrix::yavsg::task_flags_type flags() const
         {
             // SDL needs to poll events on the main thread
-            return yavsg::task_flag::MAIN_THREAD;
+            return JadeMatrix::yavsg::task_flag::MAIN_THREAD;
         }
         
         virtual bool operator()()
@@ -218,7 +220,7 @@ namespace // Event consumer task ///////////////////////////////////////////////
 }
 
 
-namespace yavsg // Listener constructor implementations ////////////////////////
+namespace JadeMatrix::yavsg // Listener constructor implementations ////////////
 {
     #define DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( EVENT, MAPNAME ) \
     template<> \
@@ -267,7 +269,7 @@ namespace yavsg // Listener constructor implementations ////////////////////////
 }
 
 
-namespace yavsg // Listener destructor implementations /////////////////////////
+namespace JadeMatrix::yavsg // Listener destructor implementations /////////////
 {
     #define DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( EVENT, MAPNAME ) \
     template<> \

@@ -10,7 +10,7 @@
 #include <yavsg/tasking/tasking.hpp>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class load_obj_task : public yavsg::task
     {

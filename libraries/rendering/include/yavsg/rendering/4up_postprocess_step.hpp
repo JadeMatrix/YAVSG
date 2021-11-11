@@ -16,7 +16,7 @@
 #include <string>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class debug_4up_postprocess_step : public postprocess_step<
         gl::texture< GLfloat, 3 >

@@ -6,7 +6,7 @@
 #include <string>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     std::string shaders_dir();
 }

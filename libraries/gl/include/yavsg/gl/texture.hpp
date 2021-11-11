@@ -11,7 +11,7 @@
 #include <type_traits>  // std::enable_if
 
 
-namespace yavsg { namespace gl
+namespace JadeMatrix::yavsg::gl
 {
     template<
         typename DataType,
@@ -107,10 +107,10 @@ namespace yavsg { namespace gl
             + " for yavsg::gl::unbind_texture()"
         );
     }
-} }
+}
 
 
-namespace yavsg { namespace gl // Texture class implementation /////////////////
+namespace JadeMatrix::yavsg::gl // Texture class implementation ////////////////
 {
     template< typename DataType, std::size_t Channels >
     texture< DataType, Channels >::texture()
@@ -189,7 +189,7 @@ namespace yavsg { namespace gl // Texture class implementation /////////////////
         
         set_bound_texture_filtering( settings );
     }
-} }
+}
 
 
 #endif

@@ -14,7 +14,7 @@
 // TODO: Return values decltype()ed once unit implementation is finished
 
 
-namespace yavsg // Rotation operations /////////////////////////////////////////
+namespace JadeMatrix::yavsg // Rotation operations /////////////////////////////
 {
     template< typename M, typename V >
     constexpr
@@ -71,7 +71,7 @@ namespace yavsg // Rotation operations /////////////////////////////////////////
 }
 
 
-namespace yavsg // Scaling operations //////////////////////////////////////////
+namespace JadeMatrix::yavsg // Scaling operations //////////////////////////////
 {
     template< typename M, typename V >
     constexpr
@@ -95,7 +95,7 @@ namespace yavsg // Scaling operations //////////////////////////////////////////
 }
 
 
-namespace yavsg // Translation operations //////////////////////////////////////
+namespace JadeMatrix::yavsg // Translation operations //////////////////////////
 {
     template< typename M, typename V >
     constexpr

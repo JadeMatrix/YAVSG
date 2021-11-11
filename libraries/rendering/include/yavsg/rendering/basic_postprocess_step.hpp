@@ -14,28 +14,26 @@
 #include <string>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
-    class basic_postprocess_step : public yavsg::postprocess_step<
-        yavsg::gl::texture< GLfloat, 3 >
+    class basic_postprocess_step : public postprocess_step<
+        gl::texture< GLfloat, 3 >
     >
     {
     public:
-        using attribute_buffer_type = yavsg::gl::attribute_buffer<
-            yavsg::vector< GLfloat, 2 >,
-            yavsg::vector< GLfloat, 2 >
+        using attribute_buffer_type = gl::attribute_buffer<
+            vector< GLfloat, 2 >,
+            vector< GLfloat, 2 >
         >;
-        using source_type = yavsg::gl::framebuffer<
-            yavsg::gl::texture< GLfloat, 3 >
-        >;
-        using program_type = yavsg::gl::shader_program<
+        using source_type = gl::framebuffer< gl::texture< GLfloat, 3 > >;
+        using program_type = gl::shader_program<
             attribute_buffer_type,
             source_type
         >;
         
         program_type            postprocess_program;
         attribute_buffer_type   vertices;
-        yavsg::gl::index_buffer indices;
+        gl::index_buffer indices;
         
         basic_postprocess_step(
             const std::string& fragment_shader_filename

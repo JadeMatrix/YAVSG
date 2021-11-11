@@ -19,7 +19,7 @@
 #include <type_traits>  // std::enable_if
 
 
-namespace yavsg { namespace gl // Shader program ///////////////////////////////
+namespace JadeMatrix::yavsg::gl // Shader program //////////////////////////////
 {
     // Helper function to allow partial specialization of
     // shader_program<>::set_uniform<>()
@@ -113,10 +113,10 @@ namespace yavsg { namespace gl // Shader program ///////////////////////////////
             const StrID& target_name_id
         );
     };
-} }
+}
 
 
-namespace yavsg { namespace gl // Attribute traits /////////////////////////////
+namespace JadeMatrix::yavsg::gl // Attribute traits ////////////////////////////
 {
     template< typename T > struct attribute_traits {};
     
@@ -144,10 +144,10 @@ namespace yavsg { namespace gl // Attribute traits /////////////////////////////
         static const GLenum component_type
             = attribute_traits< T >::component_type;
     };
-} }
+}
 
 
-namespace yavsg { namespace gl // Shader program implementations ///////////////
+namespace JadeMatrix::yavsg::gl // Shader program implementations //////////////
 {
     template< class AttributeBuffer, class Framebuffer >
     void shader_program< AttributeBuffer, Framebuffer >::use_program()
@@ -581,10 +581,10 @@ namespace yavsg { namespace gl // Shader program implementations ///////////////
     {
         return bind_target< Nth >( shader_string( target_name_id ) );
     }
-} }
+}
 
 
-namespace yavsg { namespace gl // Uniform-set specializations //////////////////
+namespace JadeMatrix::yavsg::gl // Uniform-set specializations /////////////////
 {
     #define SHADER_PROGRAM_DEFINE_BASIC_UNIFORM_SPECIALIZATION( \
         TYPE, \
@@ -747,7 +747,7 @@ namespace yavsg { namespace gl // Uniform-set specializations //////////////////
     SHADER_PROGRAM_DEFINE_UNIFORM_YAVSG_NONSQUARE_MATRIX_SPECIALIZATION( 4, 3, GLfloat, f )
     
     #undef SHADER_PROGRAM_DEFINE_UNIFORM_YAVSG_NONSQUARE_MATRIX_SPECIALIZATION
-} }
+}
 
 
 #endif

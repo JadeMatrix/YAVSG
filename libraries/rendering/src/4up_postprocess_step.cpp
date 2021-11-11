@@ -10,7 +10,7 @@
 #include <limits>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     debug_4up_postprocess_step::debug_4up_postprocess_step(
         std::unique_ptr< child_type > top_left,

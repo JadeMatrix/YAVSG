@@ -11,7 +11,7 @@
 #include <vector>
 
 
-namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
+namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
 {
     write_only_framebuffer& write_only_framebuffer::operator =(
         write_only_framebuffer&& o
@@ -253,4 +253,4 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
                 + std::string( SDL_GetError() )
             );
     }
-} }
+}

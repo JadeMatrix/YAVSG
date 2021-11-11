@@ -13,7 +13,7 @@
 #include <vector>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     task_flags_type load_obj_task::flags() const
     {

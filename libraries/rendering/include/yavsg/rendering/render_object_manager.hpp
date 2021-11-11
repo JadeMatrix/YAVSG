@@ -14,7 +14,7 @@
 #include <vector>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     // TODO: More abstract for different implementations? Or just make more
     // efficient?

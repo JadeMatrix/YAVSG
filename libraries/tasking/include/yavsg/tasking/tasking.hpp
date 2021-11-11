@@ -11,7 +11,7 @@
 // TODO: tasking.hpp, task.hpp, then general utility tast files
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     void submit_task( std::unique_ptr< task > );
     

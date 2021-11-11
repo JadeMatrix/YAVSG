@@ -38,13 +38,13 @@ namespace // Window dimension utilities ////////////////////////////////////////
     static const std::size_t sdl_max_window_size   = 16384;
     static const std::size_t     min_window_size   =     1;
     
-    bool clamp_window_dimensions( yavsg::window_state& state )
+    bool clamp_window_dimensions( JadeMatrix::yavsg::window_state& state )
     {
         bool clamped = false;
         
         struct dim_info
         {
-            yavsg::dpi::points< float >& value;
+            JadeMatrix::yavsg::dpi::points< float >& value;
             std::size_t          default_value;
         };
         
@@ -70,7 +70,9 @@ namespace // Window dimension utilities ////////////////////////////////////////
         return clamped;
     }
     
-    std::string window_state_repr( const yavsg::window_state& state )
+    std::string window_state_repr(
+        const JadeMatrix::yavsg::window_state& state
+    )
     {
         std::stringstream ss;
         
@@ -96,22 +98,22 @@ namespace // Window dimension utilities ////////////////////////////////////////
         
         switch( state.arranged )
         {
-        case yavsg::window_arrange_state::INVALID:
+        case JadeMatrix::yavsg::window_arrange_state::INVALID:
             ss << "invalid";
             break;
-        case yavsg::window_arrange_state::NORMAL:
+        case JadeMatrix::yavsg::window_arrange_state::NORMAL:
             ss << "normal";
             break;
-        case yavsg::window_arrange_state::FULLSCREEN_NATIVE:
+        case JadeMatrix::yavsg::window_arrange_state::FULLSCREEN_NATIVE:
             ss << "native fullscreen";
             break;
-        case yavsg::window_arrange_state::FULLSCREEN_CUSTOM:
+        case JadeMatrix::yavsg::window_arrange_state::FULLSCREEN_CUSTOM:
             ss << "custom fullscreen";
             break;
-        case yavsg::window_arrange_state::MINIMIZED:
+        case JadeMatrix::yavsg::window_arrange_state::MINIMIZED:
             ss << "minimized";
             break;
-        case yavsg::window_arrange_state::HIDDEN:
+        case JadeMatrix::yavsg::window_arrange_state::HIDDEN:
             ss << "hidden";
             break;
         }
@@ -121,7 +123,7 @@ namespace // Window dimension utilities ////////////////////////////////////////
 }
 
 
-namespace yavsg // Window update task //////////////////////////////////////////
+namespace JadeMatrix::yavsg // Window update task //////////////////////////////
 {
     using update_window_flags_type = std::size_t;
     namespace update_window_flag
@@ -135,13 +137,13 @@ namespace yavsg // Window update task //////////////////////////////////////////
     class update_window_task : public task
     {
     protected:
-        std::shared_ptr< yavsg::window_reference > target_reference;
+        std::shared_ptr< window_reference > target_reference;
         window_state             new_state;
         update_window_flags_type update_flags;
         
     public:
         update_window_task(
-            std::shared_ptr< yavsg::window_reference > r,
+            std::shared_ptr< window_reference > r,
             const window_state&      state,
             update_window_flags_type f = update_window_flag::NONE
         ) :
@@ -150,9 +152,9 @@ namespace yavsg // Window update task //////////////////////////////////////////
             update_flags{     f     }
         {}
         
-        virtual yavsg::task_flags_type flags() const
+        virtual task_flags_type flags() const
         {
-            return yavsg::task_flag::MAIN_THREAD;
+            return task_flag::MAIN_THREAD;
         }
         
         virtual bool operator()()
@@ -171,7 +173,7 @@ namespace yavsg // Window update task //////////////////////////////////////////
                     target_reference -> window -> state_mutex
                 );
                 
-                using arng_state = yavsg::window_arrange_state;
+                using arng_state = window_arrange_state;
                 
                 if( new_state.arranged == arng_state::INVALID )
                     throw std::invalid_argument(
@@ -446,7 +448,7 @@ namespace yavsg // Window update task //////////////////////////////////////////
             std::call_once(
                 target_reference -> window -> frame_task_submit_flag,
                 [ target_reference = this -> target_reference ](){
-                    yavsg::submit_task( std::make_unique< yavsg::frame_task >(
+                    submit_task( std::make_unique< yavsg::frame_task >(
                         target_reference
                     ) );
                 }
@@ -460,7 +462,7 @@ namespace yavsg // Window update task //////////////////////////////////////////
 
 namespace // Window cleaup task ////////////////////////////////////////////////
 {
-    class cleanup_window_task : public yavsg::task
+    class cleanup_window_task : public JadeMatrix::yavsg::task
     {
     protected:
         SDL_Window*   sdl_window;
@@ -472,9 +474,9 @@ namespace // Window cleaup task ////////////////////////////////////////////////
             gl_context{ g }
         {}
         
-        virtual yavsg::task_flags_type flags() const
+        virtual JadeMatrix::yavsg::task_flags_type flags() const
         {
-            return yavsg::task_flag::MAIN_THREAD;
+            return JadeMatrix::yavsg::task_flag::MAIN_THREAD;
         }
         
         virtual bool operator()()
@@ -488,7 +490,7 @@ namespace // Window cleaup task ////////////////////////////////////////////////
 }
 
 
-namespace yavsg // Window implementation ///////////////////////////////////////
+namespace JadeMatrix::yavsg // Window implementation ///////////////////////////
 {
     // NOT thread-safe
     void window::update_internal_state()

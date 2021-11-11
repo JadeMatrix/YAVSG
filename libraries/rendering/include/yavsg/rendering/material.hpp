@@ -22,7 +22,7 @@
 // as they aren't meaningful in themselves anyways.
 
 
-namespace yavsg // Binding attributes //////////////////////////////////////////
+namespace JadeMatrix::yavsg // Binding attributes //////////////////////////////
 {
     template< typename T, class AttributeBuffer, class Framebuffer >
     struct bind_attributes
@@ -103,7 +103,7 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
 }
 
 
-namespace yavsg // Specializable bind delegation ///////////////////////////////
+namespace JadeMatrix::yavsg // Specializable bind delegation ///////////////////
 {
     template<
         std::size_t FirstActiveTexture,
@@ -174,7 +174,7 @@ namespace yavsg // Specializable bind delegation ///////////////////////////////
 }
 
 
-namespace yavsg // Material descriptor /////////////////////////////////////////
+namespace JadeMatrix::yavsg // Material descriptor /////////////////////////////
 {
     template< typename... Attributes > class material
     {

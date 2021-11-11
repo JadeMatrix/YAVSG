@@ -14,7 +14,7 @@
 #include <vector>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class frame_task : public task
     {

@@ -6,7 +6,7 @@
 #include <yavsg/rendering/shader_variable_names.hpp>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     dof_postprocess_step::dof_postprocess_step( const camera& sc ) :
         postprocess_program( {

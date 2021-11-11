@@ -15,7 +15,7 @@
 #include <vector>
 
 
-namespace yavsg { namespace gl
+namespace JadeMatrix::yavsg::gl
 {
     template< typename... Attributes > class attribute_buffer
     {
@@ -66,10 +66,10 @@ namespace yavsg { namespace gl
         // TODO: Determine if there's a more opaque way to access this
         GLuint gl_buffer_id();
     };
-} }
+}
 
 
-namespace yavsg { namespace gl // Vertex buffer implementation /////////////////
+namespace JadeMatrix::yavsg::gl // Vertex buffer implementation ////////////////
 {
     template< typename... Attributes >
     attribute_buffer< Attributes... >::attribute_buffer(
@@ -143,11 +143,11 @@ namespace yavsg { namespace gl // Vertex buffer implementation /////////////////
     {
         return gl_id;
     }
-} }
+}
 
 
 // TODO: in CPP
-namespace yavsg { namespace gl // Index buffer implementation //////////////////
+namespace JadeMatrix::yavsg::gl // Index buffer implementation /////////////////
 {
     inline index_buffer::index_buffer( const std::vector< GLuint >& indices )
     {
@@ -213,7 +213,7 @@ namespace yavsg { namespace gl // Index buffer implementation //////////////////
     {
         return gl_id;
     }
-} }
+}
 
 
 #endif

@@ -6,7 +6,7 @@
 #include <string>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     // Standard declarations in shaders
 #if 0

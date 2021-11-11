@@ -11,7 +11,7 @@
 #include <vector>
 
 
-namespace yavsg { namespace gl
+namespace JadeMatrix::yavsg::gl
 {
     class summary_error : public std::runtime_error
     {
@@ -49,7 +49,7 @@ namespace yavsg { namespace gl
     
     // Utility function for use in `catch()` blocks
     void print_summary_error_codes( std::ostream&, const summary_error& );
-} }
+}
 
 
 #endif

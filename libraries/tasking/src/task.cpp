@@ -1,7 +1,7 @@
 #include <yavsg/tasking/task.hpp>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     task::~task() {}
     

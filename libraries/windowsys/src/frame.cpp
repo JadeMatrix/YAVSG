@@ -13,7 +13,7 @@
 #include <numeric>  // std::accumulate
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     frame_task::frame_task( std::shared_ptr< window_reference > wr ) :
         window_ref{ wr },

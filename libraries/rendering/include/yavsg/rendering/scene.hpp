@@ -12,7 +12,7 @@
 #include <tuple>    // std::tuple_size
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class scene
     {

@@ -11,7 +11,7 @@
 #include <array>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     obj_render_step::obj_render_step() :
         first_run{ true },

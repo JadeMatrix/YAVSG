@@ -5,9 +5,13 @@
 
 namespace
 {
-    static const auto max_biaxis_pitch = yavsg::degrees< float >{ 89.999f };
+    static const auto max_biaxis_pitch = JadeMatrix::yavsg::degrees< float >{
+        89.999f
+    };
     
-    yavsg::degrees< float > clamp_pitch( yavsg::degrees< float > pitch )
+    JadeMatrix::yavsg::degrees< float > clamp_pitch(
+        JadeMatrix::yavsg::degrees< float > pitch
+    )
     {
         if( pitch > max_biaxis_pitch )
             return max_biaxis_pitch;
@@ -19,7 +23,7 @@ namespace
 }
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     camera::camera(
         const vector< float, 3 >& position,

@@ -13,7 +13,7 @@
 #include <mutex>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class camera
     {
@@ -85,7 +85,7 @@ namespace yavsg
 }
 
 
-namespace yavsg // Template member function implementations ////////////////////
+namespace JadeMatrix::yavsg // Template member function implementations ////////
 {
     template< typename T > vector< T, 3 > camera::points() const
     {

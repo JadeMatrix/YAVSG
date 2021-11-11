@@ -19,7 +19,7 @@ event callback wishes to change the event handling system.
 */
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     using listener_id = std::size_t;
     

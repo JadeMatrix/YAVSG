@@ -43,7 +43,7 @@ void main()
 }
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     gl::shader multi_postprocess_step::generate_fragment_shader(
         const std::vector< std::string > function_names

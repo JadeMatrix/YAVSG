@@ -8,7 +8,7 @@
 #include <string>
 
 
-namespace yavsg // Declarations ////////////////////////////////////////////////
+namespace JadeMatrix::yavsg // Declarations ////////////////////////////////////
 {
     template< typename T, class Base_Traits, long long Factor > struct mul_prefix_traits;
     template< typename T, class Base_Traits, long long Factor > struct div_prefix_traits;
@@ -53,7 +53,7 @@ namespace yavsg // Declarations ////////////////////////////////////////////////
 }
 
 
-namespace yavsg // Unit string specializations /////////////////////////////////
+namespace JadeMatrix::yavsg // Unit string specializations /////////////////////
 {
     #define PREFIX_UNIT_STRING_SPECIALIZATION( FACTOR, FACTOR_OPERAND, OPERAND_CLASS, NAME_PREFIX, SYMBOL_PREFIX ) \
     template< \
@@ -110,7 +110,7 @@ namespace yavsg // Unit string specializations /////////////////////////////////
 }
 
 
-namespace yavsg // Helper for defining prefixed units //////////////////////////
+namespace JadeMatrix::yavsg // Helper for defining prefixed units //////////////
 {
     #define ALL_PREFIXES_FOR_UNIT( SINGULAR, PLURAL ) \
     template< typename T > using   exa##PLURAL =   exa< float, SINGULAR##_traits< float > >; \

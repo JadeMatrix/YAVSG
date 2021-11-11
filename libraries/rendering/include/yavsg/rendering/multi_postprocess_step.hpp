@@ -16,7 +16,7 @@
 #include <vector>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class multi_postprocess_step : public postprocess_step<
         gl::texture< GLfloat, 3 >

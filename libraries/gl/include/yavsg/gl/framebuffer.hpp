@@ -14,14 +14,14 @@
 #include <utility>      // std::size_t
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class SDL_window_manager;
     class window;
 }
 
 
-namespace yavsg { namespace gl // Depth/stencil texture attributes /////////////
+namespace JadeMatrix::yavsg::gl // Depth/stencil texture attributes ////////////
 {
     template< typename DepthType > struct depth_stecil_dummy
     {
@@ -72,10 +72,10 @@ namespace yavsg { namespace gl // Depth/stencil texture attributes /////////////
         static const GLenum gl_incoming_format = GL_DEPTH_STENCIL;
         static const GLenum gl_incoming_type   = GL_UNSIGNED_INT_24_8;
     };
-} }
+}
 
 
-namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
+namespace JadeMatrix::yavsg::gl // Framebuffer classes /////////////////////////
 {
     enum class alpha_blend_mode
     {
@@ -175,10 +175,10 @@ namespace yavsg { namespace gl // Framebuffer classes //////////////////////////
             color_buffers_type
         >::type& color_buffer() const;
     };
-} }
+}
 
 
-namespace yavsg { namespace gl // Framebuffer color target init ////////////////
+namespace JadeMatrix::yavsg::gl // Framebuffer color target init ///////////////
 {
     template<
         class FirstColorTargetType,
@@ -280,10 +280,10 @@ namespace yavsg { namespace gl // Framebuffer color target init ////////////////
             return last_target;
         }
     };
-} }
+}
 
 
-namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
+namespace JadeMatrix::yavsg::gl // Framebuffer implementation //////////////////
 {
     template< class... ColorTargetTypes >
     GLuint framebuffer< ColorTargetTypes... >::framebuffer_init()
@@ -497,7 +497,7 @@ namespace yavsg { namespace gl // Framebuffer implementation ///////////////////
     {
         return std::get< Nth >( _color_buffers );
     }
-} }
+}
 
 
 #endif

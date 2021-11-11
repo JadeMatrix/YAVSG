@@ -6,7 +6,7 @@
 #include "sdl.hpp"
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class SDL_manager
     {

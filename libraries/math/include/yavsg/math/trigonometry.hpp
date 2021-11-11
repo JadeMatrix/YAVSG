@@ -8,7 +8,7 @@
 #include <cmath>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     template< typename T > ratio< T > sin( const radians< T >& r )
     {

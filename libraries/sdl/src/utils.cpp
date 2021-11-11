@@ -8,7 +8,7 @@
 #include <string>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     SDL_manager::SDL_manager()
     {

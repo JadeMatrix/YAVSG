@@ -16,7 +16,7 @@
 #include <utility>              // std::size_t
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     enum class window_arrange_state
     {
@@ -93,7 +93,7 @@ namespace yavsg
 }
 
 
-namespace yavsg { namespace dpi
+namespace JadeMatrix::yavsg::dpi
 {
     template< typename T > pixels< T > to_pixels(
         const points< T >   pt,
@@ -110,7 +110,7 @@ namespace yavsg { namespace dpi
     {
         return static_cast< T >( px ) / static_cast< T >( state.scale_factor );
     }
-} }
+}
 
 
 #endif

@@ -25,7 +25,7 @@ namespace
     std::mutex queues_mutex;
     std::condition_variable queues_condition;
     
-    using task_ptr_type   = std::unique_ptr< yavsg::task >;
+    using task_ptr_type   = std::unique_ptr< JadeMatrix::yavsg::task >;
     using task_queue_type = std::list< task_ptr_type >;
     task_queue_type    main_hipri_queue;
     task_queue_type    main_lopri_queue;
@@ -34,7 +34,7 @@ namespace
 }
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     void submit_task( std::unique_ptr< task > t )
     {
@@ -227,7 +227,7 @@ namespace yavsg
 }
 
 
-namespace yavsg // stop_task_system_task ///////////////////////////////////////
+namespace JadeMatrix::yavsg // stop_task_system_task ///////////////////////////
 {
     bool stop_task_system_task::operator()()
     {

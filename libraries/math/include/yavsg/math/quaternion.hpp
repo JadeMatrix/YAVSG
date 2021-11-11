@@ -13,7 +13,7 @@
 #include <ostream>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     template< typename T > class quaternion;
     template< typename T > class versor;
@@ -174,7 +174,7 @@ namespace yavsg
 }
 
 
-namespace yavsg // Quaternion multiplication ///////////////////////////////////
+namespace JadeMatrix::yavsg // Quaternion multiplication ///////////////////////
 {
     template< typename L, typename R >
     constexpr
@@ -191,7 +191,7 @@ namespace yavsg // Quaternion multiplication ///////////////////////////////////
 }
 
 
-namespace yavsg // Stream formatting operator //////////////////////////////////
+namespace JadeMatrix::yavsg // Stream formatting operator //////////////////////
 {
     template< typename T >
     std::ostream& operator<<( std::ostream& out, const quaternion< T >& q )

@@ -11,7 +11,7 @@
 #include <memory>   // std::unique_ptr
 
 
-namespace yavsg // Class prototypes ////////////////////////////////////////////
+namespace JadeMatrix::yavsg // Class prototypes ////////////////////////////////
 {
     namespace gl
     {
@@ -38,7 +38,7 @@ namespace yavsg // Class prototypes ////////////////////////////////////////////
 }
 
 
-namespace yavsg { namespace gl // Texture format traits ////////////////////////
+namespace JadeMatrix::yavsg::gl // Texture format traits ///////////////////////
 {
     template< typename DataType, std::size_t Channels >
     struct texture_format_traits {};
@@ -76,10 +76,10 @@ namespace yavsg { namespace gl // Texture format traits ////////////////////////
     
     #undef DECLARE_TEXTURE_FORMAT_TRAITS
     #undef DECLARE_TEXTURE_FORMAT_TRAITS_SINGLE
-} }
+}
 
 
-namespace yavsg { namespace gl // Texture configuration types //////////////////
+namespace JadeMatrix::yavsg::gl // Texture configuration types /////////////////
 {
     static const GLuint default_texture_gl_id = 0x00;
     
@@ -117,10 +117,10 @@ namespace yavsg { namespace gl // Texture configuration types //////////////////
         // for now)
         static const texture_flags_type        KEEP_UNUSED_CHANNELS = 0x01 << 3;
     }
-} }
+}
 
 
-namespace yavsg { namespace gl // Upload utilities /////////////////////////////
+namespace JadeMatrix::yavsg::gl // Upload utilities ////////////////////////////
 {
     struct texture_upload_data
     {
@@ -152,7 +152,7 @@ namespace yavsg { namespace gl // Upload utilities /////////////////////////////
     void set_bound_texture_filtering(
         const texture_filter_settings& settings
     );
-} }
+}
 
 
 #endif

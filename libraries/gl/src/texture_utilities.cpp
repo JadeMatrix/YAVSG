@@ -55,7 +55,7 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
         if( f_sample <= static_cast< f >( 0.04045 ) )
             return f_sample / static_cast< f >( 12.92 );
         else
-            return yavsg::power(
+            return JadeMatrix::yavsg::power(
                 (
                     f_sample + static_cast< f >( 0.055 )
                 ) / static_cast< f >( 1.055 ),
@@ -68,7 +68,7 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
                void* preprocessed_data,
         std::size_t  sample_count,
         std::size_t  channels,
-        yavsg::gl::texture_flags_type flags
+        JadeMatrix::yavsg::gl::texture_flags_type flags
     ) -> typename std::enable_if<
         std::is_integral< T >::value,
         bool
@@ -77,11 +77,11 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
         bool has_varying_alpha = false;
         bool multiply_alpha = !(
             flags
-            & yavsg::gl::texture_flag::DISABLE_PREMULTIPLIED_ALPHA
+            & JadeMatrix::yavsg::gl::texture_flag::DISABLE_PREMULTIPLIED_ALPHA
         );
         bool linearize = !(
             flags
-            & yavsg::gl::texture_flag::LINEAR_INPUT
+            & JadeMatrix::yavsg::gl::texture_flag::LINEAR_INPUT
         );
         
         auto  in_data = static_cast< const T* >(              data );
@@ -136,7 +136,7 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
                void* preprocessed_data,
         std::size_t  sample_count,
         std::size_t  channels,
-        yavsg::gl::texture_flags_type flags
+        JadeMatrix::yavsg::gl::texture_flags_type flags
     ) -> typename std::enable_if<
         std::is_floating_point< T >::value,
         bool
@@ -145,11 +145,11 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
         bool has_varying_alpha = false;
         bool multiply_alpha = !(
             flags
-            & yavsg::gl::texture_flag::DISABLE_PREMULTIPLIED_ALPHA
+            & JadeMatrix::yavsg::gl::texture_flag::DISABLE_PREMULTIPLIED_ALPHA
         );
         bool linearize = !(
             flags
-            & yavsg::gl::texture_flag::LINEAR_INPUT
+            & JadeMatrix::yavsg::gl::texture_flag::LINEAR_INPUT
         );
         
         auto  in_data = static_cast< const T* >(              data );
@@ -191,7 +191,7 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
 }
 
 
-namespace yavsg { namespace gl // Texture data processing implementation ///////
+namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
 {
     texture_upload_data process_texture_data(
         texture_upload_data upload_data,
@@ -652,4 +652,4 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             }
         }
     }
-} }
+}

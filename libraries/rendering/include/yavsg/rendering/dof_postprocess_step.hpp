@@ -13,7 +13,7 @@
 #include <yavsg/math/vector.hpp>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class dof_postprocess_step : public postprocess_step<
         gl::texture< GLfloat, 3 >

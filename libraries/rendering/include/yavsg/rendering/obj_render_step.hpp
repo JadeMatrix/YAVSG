@@ -14,7 +14,7 @@
 #include <string>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class obj_render_step : public render_step
     {

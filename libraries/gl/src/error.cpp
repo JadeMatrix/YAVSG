@@ -4,7 +4,7 @@
 #include <yavsg/sdl/sdl.hpp>
 
 
-namespace yavsg { namespace gl
+namespace JadeMatrix::yavsg::gl
 {
     void print_summary_error_codes( std::ostream& out, const summary_error& e )
     {
@@ -52,4 +52,4 @@ namespace yavsg { namespace gl
         else
             out << "  (none)" << std::endl;
     }
-} }
+}

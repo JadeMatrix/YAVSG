@@ -10,7 +10,7 @@
 #include <string>
 
 
-namespace yavsg // Declarations ////////////////////////////////////////////////
+namespace JadeMatrix::yavsg // Declarations ////////////////////////////////////
 {
     template< typename T > struct    degree_traits;
     template< typename T > struct    radian_traits;
@@ -22,7 +22,7 @@ namespace yavsg // Declarations ////////////////////////////////////////////////
 }
 
 
-namespace yavsg // Degrees /////////////////////////////////////////////////////
+namespace JadeMatrix::yavsg // Degrees /////////////////////////////////////////
 {
     template< typename T > struct degree_traits
     {
@@ -69,7 +69,7 @@ namespace yavsg // Degrees /////////////////////////////////////////////////////
 }
 
 
-namespace yavsg // Radians /////////////////////////////////////////////////////
+namespace JadeMatrix::yavsg // Radians /////////////////////////////////////////
 {
     template< typename T > struct radian_traits
     {
@@ -116,7 +116,7 @@ namespace yavsg // Radians /////////////////////////////////////////////////////
 }
 
 
-namespace yavsg // Arcminutes //////////////////////////////////////////////////
+namespace JadeMatrix::yavsg // Arcminutes //////////////////////////////////////
 {
     template< typename T > struct arcminute_traits
     {
@@ -161,7 +161,7 @@ namespace yavsg // Arcminutes //////////////////////////////////////////////////
 }
 
 
-namespace yavsg // Prefixed versions of angular units //////////////////////////
+namespace JadeMatrix::yavsg // Prefixed versions of angular units //////////////
 {
     ALL_PREFIXES_FOR_UNIT( degree   , degrees    )
     ALL_PREFIXES_FOR_UNIT( radian   , radians    )

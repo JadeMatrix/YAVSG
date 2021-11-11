@@ -6,7 +6,7 @@
 #include <fstream>
 
 
-namespace yavsg { namespace gl
+namespace JadeMatrix::yavsg::gl
 {
     shader::shader( GLenum shader_type, const std::string& source )
     {
@@ -98,4 +98,4 @@ namespace yavsg { namespace gl
             );
         }
     }
-} }
+}

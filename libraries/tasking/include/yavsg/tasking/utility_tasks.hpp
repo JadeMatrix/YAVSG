@@ -8,7 +8,7 @@
 #include <functional>   // std::function
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     // This just triggers worker shutdown internally -- stop_task_system() must
     // still be called as normal

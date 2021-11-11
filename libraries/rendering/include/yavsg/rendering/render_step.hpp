@@ -10,7 +10,7 @@
 #include <utility>  // std::size_t
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class render_step
     {

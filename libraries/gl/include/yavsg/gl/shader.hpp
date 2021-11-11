@@ -8,7 +8,7 @@
 #include <string>
 
 
-namespace yavsg { namespace gl
+namespace JadeMatrix::yavsg::gl
 {
     class shader
     {
@@ -23,7 +23,7 @@ namespace yavsg { namespace gl
             const std::string& filename
         );
     };
-} }
+}
 
 
 #endif

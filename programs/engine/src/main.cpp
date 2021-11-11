@@ -23,6 +23,8 @@ namespace
 {
     const std::size_t window_width  = 1280;
     const std::size_t window_height = 720;
+    
+    namespace yavsg = JadeMatrix::yavsg;
 }
 
 

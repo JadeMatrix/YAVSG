@@ -17,7 +17,7 @@
 #include <memory>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     template< typename DataType, std::size_t Channels > class texture_reference
     {
@@ -71,7 +71,7 @@ namespace yavsg
 }
 
 
-namespace yavsg // Tasks ///////////////////////////////////////////////////////
+namespace JadeMatrix::yavsg // Tasks ///////////////////////////////////////////
 {
     template<
         typename DataType,
@@ -186,7 +186,7 @@ namespace yavsg // Tasks ///////////////////////////////////////////////////////
 }
 
 
-namespace yavsg // Texture reference shared data implementation ////////////////
+namespace JadeMatrix::yavsg // Texture reference shared data implementation ////
 {
     template< typename DataType, std::size_t Channels >
     texture_reference< DataType, Channels >::shared_data::shared_data() :
@@ -207,7 +207,7 @@ namespace yavsg // Texture reference shared data implementation ////////////////
 }
 
 
-namespace yavsg // Texture reference implementation ////////////////////////////
+namespace JadeMatrix::yavsg // Texture reference implementation ////////////////
 {
     template< typename DataType, std::size_t Channels >
     texture_reference< DataType, Channels >::texture_reference()
@@ -278,7 +278,7 @@ namespace yavsg // Texture reference implementation ////////////////////////////
 }
 
 
-namespace yavsg // Texture reference static methods implementation /////////////
+namespace JadeMatrix::yavsg // Texture reference static methods implementation /
 {
     template< typename DataType, std::size_t Channels >
     texture_reference<
@@ -310,7 +310,7 @@ namespace yavsg // Texture reference static methods implementation /////////////
 }
 
 
-namespace yavsg // Task implementations ////////////////////////////////////////
+namespace JadeMatrix::yavsg // Task implementations ////////////////////////////
 {
     template<
         typename DataType,

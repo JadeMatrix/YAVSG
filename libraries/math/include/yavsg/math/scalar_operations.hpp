@@ -9,7 +9,7 @@
 #include <type_traits>
 
 
-namespace yavsg // Power functions /////////////////////////////////////////////
+namespace JadeMatrix::yavsg // Power functions /////////////////////////////////
 {
     template< typename T > T sqrt( const T& value )
     {

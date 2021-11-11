@@ -6,7 +6,7 @@
 #include <yavsg/rendering/shader_variable_names.hpp>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     basic_postprocess_step::basic_postprocess_step(
         const std::string& fragment_shader_filename

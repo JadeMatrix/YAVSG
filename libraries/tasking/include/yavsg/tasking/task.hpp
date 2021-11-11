@@ -6,7 +6,7 @@
 #include <utility>  // std::size_t
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     using task_flags_type = std::size_t;
     namespace task_flag

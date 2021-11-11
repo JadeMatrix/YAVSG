@@ -43,7 +43,7 @@ namespace
 }
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     const std::string& shader_string( shader_string_id id )
     {
