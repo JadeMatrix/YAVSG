@@ -1,14 +1,22 @@
 #include <yavsg/windowsys/window.hpp>
 
+#include <yavsg/logging.hpp>
 #include <yavsg/windowsys/frame.hpp>
 #include <yavsg/tasking/task.hpp>
 #include <yavsg/tasking/tasking.hpp>
 
 #include <cmath>        // std::isnan()
 #include <exception>    // std::runtime_error, std::invalid_argument
-#include <iostream>     // std::cerr
 #include <limits>       // std::numeric_limits
 #include <sstream>      // std::stringstream
+
+
+namespace
+{
+    using namespace std::string_view_literals;
+    
+    auto const log_ = JadeMatrix::yavsg::log_handle();
+}
 
 
 namespace // OpenGL initialization utilities ///////////////////////////////////
@@ -183,26 +191,24 @@ namespace JadeMatrix::yavsg // Window update task //////////////////////////////
                 auto requested_width  = new_state.width;
                 auto requested_height = new_state.height;
                 if( clamp_window_dimensions( new_state ) )
-                    std::cerr
-                        << "requested window width,height "
-                        << requested_width
-                        << ","
-                        << requested_height
-                        << " was clamped to "
-                        << new_state.width
-                        << ","
-                        << new_state.height
-                        << std::endl
-                    ;
+                {
+                    log_.verbose(
+                        "Requested window width,height {},{} was clamped to "
+                            "{},{}"sv,
+                        static_cast< float >( requested_width  ),
+                        static_cast< float >( requested_height ),
+                        static_cast< float >( new_state.width  ),
+                        static_cast< float >( new_state.height )
+                    );
+                }
                 
                 int x, y;
                 if( update_flags & update_window_flag::CENTER )
                 {
                     x = y = SDL_WINDOWPOS_CENTERED;
-                    std::cerr
-                        << "requested window x,y ignored because centering"
-                        << std::endl
-                    ;
+                    log_.warning(
+                        "Requested window x,y ignored because centering"sv
+                    );
                 }
                 else
                 {
@@ -429,13 +435,12 @@ namespace JadeMatrix::yavsg // Window update task //////////////////////////////
                         != target_reference -> window -> current_state.scale_factor
                     )
                 )
-                    std::cerr << (
-                        "ignoring change of window scale factor to "
-                        + std::to_string( static_cast< float >(
-                            new_state.scale_factor
-                        ) )
-                        + "\n"
+                {
+                    log_.warning(
+                        "Ignoring change of window scale factor to {}"sv,
+                        static_cast< float >( new_state.scale_factor )
                     );
+                }
                 
                 // Dont' need to call the window's `update_internal_state()` as
                 // the above SDL calls will trigger `SDL_WindowEvent`s that will

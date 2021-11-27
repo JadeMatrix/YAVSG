@@ -12,5 +12,7 @@ TARGET_LINK_LIBRARIES( windowsys
         sdl
         units
         tasking
+    PRIVATE
+        logging
 )
 SET_ALL_COMPILE_WARNINGS( windowsys )

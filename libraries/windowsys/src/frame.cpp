@@ -1,6 +1,7 @@
 #include <yavsg/windowsys/frame.hpp>
 
 #include <yavsg/gl/framebuffer.hpp>
+#include <yavsg/logging.hpp>
 #include <yavsg/rendering/4up_postprocess_step.hpp>
 #include <yavsg/rendering/basic_postprocess_step.hpp>
 #include <yavsg/rendering/dof_postprocess_step.hpp>
@@ -9,8 +10,15 @@
 #include <yavsg/tasking/tasking.hpp>
 #include <yavsg/tasking/utility_tasks.hpp>
 
-#include <iostream> // std::cerr
 #include <numeric>  // std::accumulate
+
+
+namespace
+{
+    using namespace std::string_view_literals;
+    
+    auto const log_ = JadeMatrix::yavsg::log_handle();
+}
 
 
 namespace JadeMatrix::yavsg
@@ -98,8 +106,8 @@ namespace JadeMatrix::yavsg
         
         if( window_state.arranged == window_arrange_state::INVALID )
         {
-            std::cerr << (
-                "skipping frame because window isn't fully initialized\n"
+            log_.warning(
+                "Skipping frame because window isn't fully initialized\n"sv
             );
             // Requeue & check again later
             return true;
@@ -221,11 +229,9 @@ namespace JadeMatrix::yavsg
         
         // DEBUG:
         if( current_frame_time == 0 )
-            std::cout << (
-                "current framerate: "
-                + std::to_string( latest_frame_rate )
-                + "\n"
-            );
+        {
+            log_.verbose( "Current framerate: {}"sv, latest_frame_rate );
+        }
         
         previous_time = current_time;
         

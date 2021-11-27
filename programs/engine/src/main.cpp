@@ -7,6 +7,7 @@
 // DEVEL:
 #include <yavsg/windowsys/frame.hpp>
 #include <yavsg/events/event_listener.hpp>
+#include <yavsg/logging.hpp>
 #include <yavsg/sdl/sdl.hpp>
 #include <yavsg/tasking/tasking.hpp>
 #include <yavsg/tasking/utility_tasks.hpp>
@@ -15,7 +16,9 @@
 #include <yavsg/units/angular.hpp>
 
 #include <exception>
-#include <iostream>
+#include <iostream> // std::clog
+#include <sstream>
+#include <string_view>
 #include <utility>  // std::size_t
 
 
@@ -25,6 +28,10 @@ namespace
     const std::size_t window_height = 720;
     
     namespace yavsg = JadeMatrix::yavsg;
+    
+    using namespace std::string_view_literals;
+    
+    auto const log_ = yavsg::log_handle();
 }
 
 
@@ -32,11 +39,11 @@ int main( int argc, char* argv[] )
 {
     if( argc < 3 )
     {
-        std::cerr
-            << "usage: env YAVSG_SHADERS_DIR=<shaders-dir> "
-            << argv[ 0 ]
-            << " <shaders-dir> <obj-file> <materials-dir>\n"
-        ;
+        log_.error(
+            "Usage: env YAVSG_SHADERS_DIR=<shaders-dir> {} <obj-file> "
+                "<materials-dir>"sv,
+            argv[ 0 ]
+        );
         return -1;
     }
 
@@ -46,7 +53,7 @@ int main( int argc, char* argv[] )
         
         yavsg::event_listener< SDL_QuitEvent > quit_listener{
             []( const SDL_QuitEvent& e ){
-                std::cout << "quitting...\n";
+                log_.info( "Quitting..."sv );
                 yavsg::submit_task(
                     std::make_unique< yavsg::stop_task_system_task >()
                 );
@@ -140,7 +147,7 @@ int main( int argc, char* argv[] )
             [ test_window ]( const SDL_KeyboardEvent& e ){
                 if( e.type == SDL_KEYUP && e.keysym.sym == SDLK_c )
                 {
-                    std::cout << "centering window...\n";
+                    log_.info( "Centering window..."sv );
                     test_window -> center();
                 }
             }
@@ -148,19 +155,19 @@ int main( int argc, char* argv[] )
         yavsg::event_listener< SDL_KeyboardEvent > break_listener{
             []( const SDL_KeyboardEvent& e ){
                 if( e.type == SDL_KEYUP && e.keysym.sym == SDLK_SPACE )
-                    std::cout << "\n--------------------------------------\n\n";
+                    std::clog << "\n--------------------------------------\n\n";
             }
         };
         yavsg::event_listener< SDL_KeyboardEvent > close_window_listener{
             [ test_window ]( const SDL_KeyboardEvent& e ){
                 if( e.type == SDL_KEYUP && e.keysym.sym == SDLK_ESCAPE )
                 {
-                    std::cout << "closing window...\n";
+                    log_.info( "Closing window..."sv );
                     delete test_window;
                     SDL_Event quit_event;
                     quit_event.quit.type = SDL_QUIT;
                     SDL_PushEvent( &quit_event );
-                    std::cout << "quit event pushed\n";
+                    log_.info( "Quit event pushed"sv );
                 }
             },
             yavsg::task_flag::MAIN_THREAD
@@ -169,37 +176,30 @@ int main( int argc, char* argv[] )
         // TODO: Figure out why quit events don't work in single-threaded mode
         // yavsg::initialize_task_system( static_cast< std::size_t >( 0 ) );
         yavsg::initialize_task_system( true );
-        std::cout << "task system initialized, becoming worker...\n";
+        log_.info( "task system initialized, becoming worker..."sv );
         yavsg::become_task_worker( yavsg::task_flag::MAIN_THREAD );
         yavsg::stop_task_system( true );
-        std::cout << "task system stopped\n";
+        log_.info( "task system stopped"sv );
         
         return 0;
     }
     catch( const yavsg::gl::summary_error& e )
     {
-        std::cerr
-            << "program exiting due to OpenGL error: "
-            << e.what()
-            << "; codes:"
-            << std::endl
-        ;
-        yavsg::gl::print_summary_error_codes( std::cerr, e );
+        std::stringstream codes;
+        yavsg::gl::print_summary_error_codes( codes, e );
+        log_.error(
+            "Program exiting due to OpenGL error: {}; codes:{}"sv,
+            e.what(),
+            codes.str()
+        );
     }
     catch( const std::exception& e )
     {
-        std::cerr
-            << "program exiting: "
-            << e.what()
-            << std::endl
-        ;
+        log_.error( "Program exiting: {}"sv, e.what() );
     }
     catch( ... )
     {
-        std::cerr
-            << "program exiting due to uncaught non-std::exception"
-            << std::endl
-        ;
+        log_.error( "Program exiting due to uncaught non-std::exception"sv );
     }
     
     return -1;

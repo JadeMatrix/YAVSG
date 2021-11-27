@@ -1,5 +1,6 @@
 #include <yavsg/rendering/obj.hpp>
 
+#include <yavsg/logging.hpp>
 #include <yavsg/math/quaternion.hpp>
 #include <yavsg/math/vector.hpp>
 
@@ -8,9 +9,17 @@
 #include <assert.h>
 #include <algorithm>    // std::max()
 #include <exception>
-#include <iostream>     // std::cerr for tinyobj warnings
 #include <limits>
+#include <string_view>
 #include <vector>
+
+
+namespace
+{
+    using namespace std::string_view_literals;
+    
+    auto const log_ = JadeMatrix::yavsg::log_handle();
+}
 
 
 namespace JadeMatrix::yavsg
@@ -44,7 +53,25 @@ namespace JadeMatrix::yavsg
                     "unable to load OBJ file: " + tinyobj_error
                 );
             else if( !tinyobj_error.empty() )
-                std::cerr << "tinyobj warning: " << tinyobj_error << std::endl;
+            {
+                std::size_t start = 0ul;
+                while( true )
+                {
+                    auto const newline = tinyobj_error.find( '\n', start );
+                    auto const size = (
+                        newline == std::string::npos
+                        ? tinyobj_error.size()
+                        : newline
+                    ) - start;
+                    if( size == 0 ) break;
+                    log_.warning(
+                        "tinyobj: {}"sv,
+                        std::string_view( tinyobj_error.c_str() + start, size )
+                    );
+                    start += size + 1;
+                    if( start >= tinyobj_error.size() ) break;
+                }
+            }
             
             // Load textures
             for( auto& material : obj_materials )

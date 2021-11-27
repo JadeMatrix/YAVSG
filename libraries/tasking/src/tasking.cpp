@@ -1,13 +1,16 @@
 #include <yavsg/tasking/tasking.hpp>
 
+#include <yavsg/logging.hpp>
 // yavsg::stop_task_system_task
 #include <yavsg/tasking/utility_tasks.hpp>
 #include <yavsg/gl/error.hpp>   // yavsg::gl::summary_error
 
+#include <fmt/ostream.h>    // std::thread::id support
+
 #include <atomic>
 #include <condition_variable>
-#include <iostream>
 #include <mutex>
+#include <sstream>
 #include <thread>
 #include <vector>
 #include <list>
@@ -15,6 +18,10 @@
 
 namespace
 {
+    using namespace std::string_view_literals;
+    
+    auto const log_ = JadeMatrix::yavsg::log_handle();
+    
     // Holds only the workers belonging to the tasking subsystem; there may be
     // other threads running as workers via become_task_worker(), such as the
     // main thread.
@@ -148,36 +155,34 @@ namespace JadeMatrix::yavsg
                 }
                 catch( const yavsg::gl::summary_error& e )
                 {
-                    std::cerr
-                        << "worker thread "
-                        << std::this_thread::get_id()
-                        << " exiting due to OpenGL error: "
-                        << e.what()
-                        << "; codes:"
-                        << std::endl
-                    ;
-                    yavsg::gl::print_summary_error_codes( std::cerr, e );
+                    std::stringstream codes;
+                    yavsg::gl::print_summary_error_codes( codes, e );
+                    log_.error(
+                        "Worker thread {} exiting due to OpenGL error: {}; "
+                            "codes:{}"sv,
+                        std::this_thread::get_id(),
+                        e.what(),
+                        codes.str()
+                    );
                     encountered_error = true;
                 }
                 catch( const std::exception& e )
                 {
-                    std::cerr
-                        << "worker thread "
-                        << std::this_thread::get_id()
-                        << " exiting due to uncaught std::exception: "
-                        << e.what()
-                        << std::endl
-                    ;
+                    log_.error(
+                        "Worker thread {} exiting due to uncaught "
+                            "std::exception: {}"sv,
+                        std::this_thread::get_id(),
+                        e.what()
+                    );
                     encountered_error = true;
                 }
                 catch( ... )
                 {
-                    std::cerr
-                        << "worker thread "
-                        << std::this_thread::get_id()
-                        << " exiting due to uncaught non-std::exception"
-                        << std::endl
-                    ;
+                    log_.error(
+                        "Worker thread {} exiting due to uncaught "
+                            "non-std::exception"sv,
+                        std::this_thread::get_id()
+                    );
                     encountered_error = true;
                 }
             }

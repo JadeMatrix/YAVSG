@@ -4,6 +4,7 @@ TARGET_LINK_LIBRARIES( engine
     events
     gl_wrap
     gl
+    logging
     rendering
     sdl
     tasking

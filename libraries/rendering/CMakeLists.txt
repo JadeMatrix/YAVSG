@@ -21,6 +21,8 @@ TARGET_LINK_LIBRARIES( rendering
         math
         SDL2::image # FIXME:For texture_reference.hpp
         tasking
+    PRIVATE
+        logging
 )
 
 SET_ALL_COMPILE_WARNINGS( rendering )
