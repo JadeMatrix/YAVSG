@@ -51,6 +51,13 @@ ADD_DEPENDENCY( fmt
     COMPONENTS   fmt
 )
 
+ADD_DEPENDENCY( doctest
+    REQUIRED
+    VERSION      2.3.3
+    SUBDIRECTORY "dependencies/onqtam/doctest/"
+    COMPONENTS   doctest
+)
+
 # First-party
 
 SET( JM_EXT_USE_STD_FORMAT FALSE )

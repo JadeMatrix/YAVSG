@@ -5,6 +5,7 @@
 #include <yavsg/tasking/tasking.hpp>
 
 // DEVEL:
+#include <yavsg/asserts.hpp>
 #include <yavsg/windowsys/frame.hpp>
 #include <yavsg/events/event_listener.hpp>
 #include <yavsg/logging.hpp>
@@ -37,6 +38,11 @@ namespace
 
 int main( int argc, char* argv[] )
 {
+    // CONSIDER: Move this to a support library
+    doctest::Context global_doctest_context;
+    global_doctest_context.setAsDefaultForAssertsOutOfTestCases();
+    global_doctest_context.setAssertHandler( yavsg::doctest_assert_handler );
+    
     if( argc < 3 )
     {
         log_.error(
