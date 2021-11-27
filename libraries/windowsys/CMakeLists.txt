@@ -15,4 +15,3 @@ TARGET_LINK_LIBRARIES( windowsys
     PRIVATE
         logging
 )
-SET_ALL_COMPILE_WARNINGS( windowsys )

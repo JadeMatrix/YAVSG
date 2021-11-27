@@ -24,5 +24,3 @@ TARGET_LINK_LIBRARIES( rendering
     PRIVATE
         logging
 )
-
-SET_ALL_COMPILE_WARNINGS( rendering )

@@ -65,7 +65,22 @@ ADD_DEPENDENCY( JadeMatrix-ext
 
 # Set up project targets #######################################################
 
+ADD_SUBDIRECTORY( "libraries/" )
+ADD_SUBDIRECTORY( "programs/"  )
+
+INCLUDE( JadeMatrix-CMake-Modules/Util/TargetUtilities )
 INCLUDE( JadeMatrix-CMake-Modules/Util/CompileWarnings )
 
-ADD_SUBDIRECTORY( "libraries/" )
-ADD_SUBDIRECTORY( "programs/" )
+LIST_TARGETS( PROJECT_TARGETS
+    DIRECTORIES
+        "libraries/"
+        "programs/"
+    CATEGORIES  BUILDSYSTEM
+)
+
+FOREACH( TARGET IN LISTS PROJECT_TARGETS )
+    GET_TARGET_PROPERTY( TARGET_TYPE "${TARGET}" TYPE )
+    IF( NOT TARGET_TYPE STREQUAL "INTERFACE_LIBRARY" )
+        SET_ALL_COMPILE_WARNINGS( "${TARGET}" )
+    ENDIF()
+ENDFOREACH()

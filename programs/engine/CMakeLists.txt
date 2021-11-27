@@ -11,4 +11,3 @@ TARGET_LINK_LIBRARIES( engine
     units
     windowsys
 )
-SET_ALL_COMPILE_WARNINGS( engine )
