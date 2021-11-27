@@ -4,6 +4,7 @@
 #include <yavsg/math/quaternion.hpp>
 #include <yavsg/math/vector.hpp>
 
+#include <fmt/format.h> // format
 #include <tiny_obj_loader.h>
 
 #include <assert.h>
@@ -49,9 +50,12 @@ namespace JadeMatrix::yavsg
                 obj_filename.c_str(),
                 obj_mtl_directory.c_str()
             ) )
-                throw std::runtime_error(
-                    "unable to load OBJ file: " + tinyobj_error
-                );
+            {
+                throw std::runtime_error(fmt::format(
+                    "unable to load OBJ file: {}"sv,
+                    tinyobj_error
+                ));
+            }
             else if( !tinyobj_error.empty() )
             {
                 std::size_t start = 0ul;
@@ -143,10 +147,12 @@ namespace JadeMatrix::yavsg
                     
                     // TODO: Suport other vertex counts
                     if( vertex_count != 3 )
-                        throw std::runtime_error(
-                            "vertex count = "
-                            + std::to_string( vertex_count )
-                        );
+                    {
+                        throw std::runtime_error(fmt::format(
+                            "vertex count = {}"sv,
+                            vertex_count
+                        ));
+                    }
                     
                     assert( obj_shape.mesh.material_ids[ face ] >= 0 );
                     assert( static_cast< decltype( indices )::size_type >(
