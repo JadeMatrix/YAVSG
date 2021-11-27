@@ -1,3 +1,9 @@
 [submodule "dependencies/JadeMatrix/JadeMatrix-CMake-Modules"]
 	path = dependencies/JadeMatrix/JadeMatrix-CMake-Modules
 	url = ../JadeMatrix-CMake-Modules.git
+[submodule "dependencies/JadeMatrix/ext"]
+	path = dependencies/JadeMatrix/ext
+	url = ../ext.git
+[submodule "dependencies/fmtlib/fmt"]
+	path = dependencies/fmtlib/fmt
+	url = ../../fmtlib/fmt.git

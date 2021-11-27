@@ -44,11 +44,23 @@ FIND_PACKAGE( tinyobjloader 1.0.4 EXACT REQUIRED COMPONENTS tinyobjloader )
 
 # Third-party via `ADD_DEPENDENCY()`
 
-# TODO:
+ADD_DEPENDENCY( fmt
+    REQUIRED
+    VERSION      7
+    SUBDIRECTORY "dependencies/fmtlib/fmt/"
+    COMPONENTS   fmt
+)
 
 # First-party
 
-# TODO:
+SET( JM_EXT_USE_STD_FORMAT FALSE )
+ADD_DEPENDENCY( JadeMatrix-ext
+    REQUIRED
+    VERSION      0.2.1
+    SUBDIRECTORY "dependencies/JadeMatrix/ext/"
+    NAMESPACE    JadeMatrix::
+    COMPONENTS   ext
+)
 
 
 # Set up project targets #######################################################
