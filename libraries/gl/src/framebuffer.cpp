@@ -3,7 +3,8 @@
 // For yavsg::gl::write_only_framebuffer::dump_BMP()
 #include <yavsg/sdl/sdl.hpp>
 
-#include <fmt/format.h> // format
+#include <fmt/format.h>         // format
+#include <doctest/doctest.h>    // REQUIRE
 
 #include <assert.h>
 #include <fstream>
@@ -42,7 +43,7 @@ namespace JadeMatrix::yavsg::gl
                     "couldn't read GL_MAX_COLOR_ATTACHMENTS for "
                     "yavsg::gl::color_attachment_name()"s
                 );
-                // TODO: REQUIRE( max_color_attachments > 0 )
+                REQUIRE( max_color_attachments > 0 );
             }
         );
         

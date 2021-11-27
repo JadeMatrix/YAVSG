@@ -31,5 +31,6 @@ TARGET_LINK_LIBRARIES( gl
         math
         sdl
     PRIVATE
+        doctest::doctest
         fmt::fmt
 )
