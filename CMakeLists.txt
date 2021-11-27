@@ -92,6 +92,5 @@ FOREACH( TARGET IN LISTS ALL_TARGETS )
     PREPROCESS_TARGET_SOURCES( "${TARGET}"
         SCRIPT "CMakeModules/PreprocessSourceFile.cmake"
         NO_SKIP_INCLUDES
-        GLOB_INCLUDES
     )
 ENDFOREACH()
