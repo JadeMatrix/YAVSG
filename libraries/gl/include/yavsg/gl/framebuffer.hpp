@@ -19,6 +19,12 @@ namespace JadeMatrix::yavsg
 }
 
 
+namespace JadeMatrix::yavsg::gl
+{
+    GLenum color_attachment_name( std::size_t );
+}
+
+
 namespace JadeMatrix::yavsg::gl // Depth/stencil texture attributes ////////////
 {
     template< typename DepthType > struct depth_stecil_dummy
@@ -208,7 +214,7 @@ namespace JadeMatrix::yavsg::gl // Framebuffer color target init ///////////////
             
             glFramebufferTexture2D(
                 GL_FRAMEBUFFER,
-                GL_COLOR_ATTACHMENT0 + nth,
+                color_attachment_name( nth ),
                 GL_TEXTURE_2D,
                 t.gl_texture_id(),
                 0   // Mipmap level (unused for now)
@@ -260,7 +266,7 @@ namespace JadeMatrix::yavsg::gl // Framebuffer color target init ///////////////
             
             glFramebufferTexture2D(
                 GL_FRAMEBUFFER,
-                GL_COLOR_ATTACHMENT0 + nth,
+                color_attachment_name( nth ),
                 GL_TEXTURE_2D,
                 t.gl_texture_id(),
                 0   // Mipmap level (unused for now)

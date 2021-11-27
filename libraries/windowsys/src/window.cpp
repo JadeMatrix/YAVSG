@@ -78,7 +78,8 @@ namespace // Window dimension utilities ////////////////////////////////////////
         return clamped;
     }
     
-    std::string window_state_repr(
+    // TODO: Rewrite or remove
+    [[maybe_unused]] std::string window_state_repr(
         const JadeMatrix::yavsg::window_state& state
     )
     {
@@ -612,7 +613,6 @@ namespace JadeMatrix::yavsg // Window implementation ///////////////////////////
     
     window::window( const window_state& init_state ) :
         sdl_window{           nullptr },
-        _default_framebuffer{ nullptr },
         self_reference{ new window_reference{ .window = this } },
         current_state{
             std::numeric_limits< float >::signaling_NaN(),
@@ -625,6 +625,7 @@ namespace JadeMatrix::yavsg // Window implementation ///////////////////////////
             false,
             false
         },
+        _default_framebuffer{ nullptr },
         state_change_listener{
             [ self_reference = this -> self_reference ](
                 const SDL_WindowEvent& e

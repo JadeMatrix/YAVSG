@@ -3,12 +3,64 @@
 // For yavsg::gl::write_only_framebuffer::dump_BMP()
 #include <yavsg/sdl/sdl.hpp>
 
+#include <fmt/format.h> // format
+
 #include <assert.h>
 #include <fstream>
-#include <iomanip>  // std::setw(), std::setfill()
-#include <limits>   // std::numeric_limits
+#include <iomanip>      // std::setw(), std::setfill()
+#include <limits>       // std::numeric_limits
+#include <mutex>        // std::call_once, std::once_flag
 #include <sstream>
+#include <stdexcept>    // std::runtime_error
+#include <string_view>
 #include <vector>
+
+
+namespace
+{
+    using namespace std::string_literals;
+    using namespace std::string_view_literals;
+    
+    std::once_flag gl_max_got_flags;
+}
+
+
+namespace JadeMatrix::yavsg::gl
+{
+    GLenum color_attachment_name( std::size_t nth )
+    {
+        static GLint max_color_attachments;
+        
+        std::call_once(
+            gl_max_got_flags,
+            [](){
+                glGetIntegerv(
+                    GL_MAX_COLOR_ATTACHMENTS,
+                    &max_color_attachments
+                );
+                YAVSG_GL_THROW_FOR_ERRORS(
+                    "couldn't read GL_MAX_COLOR_ATTACHMENTS for "
+                    "yavsg::gl::color_attachment_name()"s
+                );
+                // TODO: REQUIRE( max_color_attachments > 0 )
+            }
+        );
+        
+        static_assert(
+              std::numeric_limits< GLint       >::max()
+            < std::numeric_limits< std::size_t >::max()
+        );
+        if( nth >= static_cast< std::size_t >( max_color_attachments ) )
+        {
+            throw std::runtime_error(fmt::format(
+                "cannot have more than {} color attachments"sv,
+                max_color_attachments
+            ));
+        }
+        
+        return static_cast< GLenum >( GL_COLOR_ATTACHMENT0 + nth );
+    }
+}
 
 
 namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////

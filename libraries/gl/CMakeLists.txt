@@ -30,4 +30,6 @@ TARGET_LINK_LIBRARIES( gl
         gl_wrap
         math
         sdl
+    PRIVATE
+        fmt::fmt
 )

@@ -46,7 +46,7 @@ FIND_PACKAGE( tinyobjloader 1.0.4 EXACT REQUIRED COMPONENTS tinyobjloader )
 
 ADD_DEPENDENCY( fmt
     REQUIRED
-    VERSION      7
+    VERSION      7.1.3
     SUBDIRECTORY "dependencies/fmtlib/fmt/"
     COMPONENTS   fmt
 )

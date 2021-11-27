@@ -52,7 +52,7 @@ int main( int argc, char* argv[] )
         yavsg::SDL_manager sdl;
         
         yavsg::event_listener< SDL_QuitEvent > quit_listener{
-            []( const SDL_QuitEvent& e ){
+            []( const SDL_QuitEvent& ){
                 log_.info( "Quitting..."sv );
                 yavsg::submit_task(
                     std::make_unique< yavsg::stop_task_system_task >()
@@ -85,7 +85,6 @@ int main( int argc, char* argv[] )
             true
         } );
         
-        auto    base_fov = yavsg::radians< GLfloat >{ 45 }; // 58.31f°
         auto desired_fov = yavsg::radians< GLfloat >{
             yavsg::degrees< GLfloat >{ 90 }
         };

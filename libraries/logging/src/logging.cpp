@@ -15,7 +15,7 @@ JadeMatrix::yavsg::log_handle::log_handle() : ext::log::handle( {
     /* should_emit_for = */ []( ext::log::level ){ return true; },
     /* emit = */ [](
         ext::log::level                       lvl,
-        std::chrono::system_clock::time_point now,
+        std::chrono::system_clock::time_point /* now */,
         ext::source_location                  loc,
         std::string&&                         msg
     )
