@@ -1,5 +1,7 @@
 #include <yavsg/logging.hpp>
 
+#include <fmt/ostream.h>    // print
+
 #include <iostream> // clog
 
 
@@ -27,7 +29,8 @@ JadeMatrix::yavsg::log_handle::log_handle() : ext::log::handle( {
         case level::error  : std::clog << "\033[31m\033[1merror: "sv  ; break;
         }
         
-        std::clog << fmt::format(
+        fmt::print(
+            std::clog,
             "\033[0m{}\033[90m\033[3m ({}:{}:{})\033[0m\n"sv,
             msg,
             loc.file_name,
