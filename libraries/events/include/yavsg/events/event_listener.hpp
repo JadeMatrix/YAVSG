@@ -23,9 +23,6 @@ namespace JadeMatrix::yavsg
     
     template< class EventType > class event_listener
     {
-    protected:
-        listener_id id_;
-        
     public:
         event_listener(
             std::function< void( EventType const& ) >,
@@ -42,5 +39,8 @@ namespace JadeMatrix::yavsg
             std::swap( id_, o.id_ );
             return *this;
         }
+        
+    private:
+        listener_id id_;
     };
 }
