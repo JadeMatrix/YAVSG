@@ -3,8 +3,8 @@
 
 #include <yavsg/tasking/task.hpp>
 
-#include <functional>   // std::function
-#include <utility>      // std::size_t
+#include <functional>   // function
+#include <utility>      // size_t, swap
 
 
 /*
@@ -24,22 +24,22 @@ namespace JadeMatrix::yavsg
     template< class EventType > class event_listener
     {
     protected:
-        listener_id _id;
+        listener_id id_;
         
     public:
         event_listener(
-            std::function< void( const EventType& ) >,
+            std::function< void( EventType const& ) >,
             task_flags_type flags = task_flag::NONE
         );
         
-        event_listener( event_listener&& ) = default;
-        event_listener( const event_listener& ) = delete;
+        event_listener( event_listener     && ) = default;
+        event_listener( event_listener const& ) = delete;
         
         ~event_listener();
         
         event_listener& operator=( event_listener&& o )
         {
-            std::swap( _id, o._id );
+            std::swap( id_, o.id_ );
             return *this;
         }
     };

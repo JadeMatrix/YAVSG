@@ -20,4 +20,6 @@ TARGET_LINK_LIBRARIES( events
     PUBLIC
         sdl
         tasking
+    PRIVATE
+        doctest::doctest
 )

@@ -5,8 +5,10 @@
 #include <yavsg/tasking/tasking.hpp>
 #include <yavsg/tasking/utility_tasks.hpp>
 
+#include <doctest/doctest.h>    // REQUIRE
+
 #include <map>
-#include <mutex>    // std::mutex, std::once_flag, std::call_once()
+#include <mutex>    // mutex, once_flag, call_once
 
 
 namespace
@@ -17,38 +19,38 @@ namespace
     JadeMatrix::yavsg::listener_id next_listener_id = 1;
     
     #define DEFINE_LISTENER_MAP_FOR( EVENT, MAPNAME ) \
-    std::map< \
-        JadeMatrix::yavsg::listener_id, \
-        std::pair< \
-            std::function< void( const EVENT& ) >, \
-            JadeMatrix::yavsg::task_flags_type \
-        > \
-    > MAPNAME;
+        std::map< \
+            JadeMatrix::yavsg::listener_id, \
+            std::pair< \
+                std::function< void( SDL_##EVENT const& ) >, \
+                JadeMatrix::yavsg::task_flags_type \
+            > \
+        > MAPNAME##_listeners;
     
-    DEFINE_LISTENER_MAP_FOR( SDL_CommonEvent          ,            common_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_WindowEvent          ,            window_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_KeyboardEvent        ,          keyboard_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_TextEditingEvent     ,         text_edit_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_TextInputEvent       ,        text_input_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_MouseMotionEvent     ,      mouse_motion_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_MouseButtonEvent     ,      mouse_button_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_MouseWheelEvent      ,            scroll_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_JoyAxisEvent         ,          joy_axis_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_JoyBallEvent         ,          joy_ball_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_JoyHatEvent          ,           joy_hat_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_JoyButtonEvent       ,        joy_button_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_JoyDeviceEvent       ,        joy_device_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_ControllerAxisEvent  ,   controller_axis_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_ControllerButtonEvent, controller_button_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_ControllerDeviceEvent, controller_device_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_AudioDeviceEvent     ,      audio_device_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_QuitEvent            ,              quit_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_UserEvent            ,        user_event_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_SysWMEvent           ,            sys_wm_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_TouchFingerEvent     ,             touch_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_MultiGestureEvent    ,           gesture_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_DollarGestureEvent   ,    dollar_gesture_listeners )
-    DEFINE_LISTENER_MAP_FOR( SDL_DropEvent            ,              drop_listeners )
+    DEFINE_LISTENER_MAP_FOR( CommonEvent          , common            )
+    DEFINE_LISTENER_MAP_FOR( WindowEvent          , window            )
+    DEFINE_LISTENER_MAP_FOR( KeyboardEvent        , keyboard          )
+    DEFINE_LISTENER_MAP_FOR( TextEditingEvent     , text_edit         )
+    DEFINE_LISTENER_MAP_FOR( TextInputEvent       , text_input        )
+    DEFINE_LISTENER_MAP_FOR( MouseMotionEvent     , mouse_motion      )
+    DEFINE_LISTENER_MAP_FOR( MouseButtonEvent     , mouse_button      )
+    DEFINE_LISTENER_MAP_FOR( MouseWheelEvent      , scroll            )
+    DEFINE_LISTENER_MAP_FOR( JoyAxisEvent         , joy_axis          )
+    DEFINE_LISTENER_MAP_FOR( JoyBallEvent         , joy_ball          )
+    DEFINE_LISTENER_MAP_FOR( JoyHatEvent          , joy_hat           )
+    DEFINE_LISTENER_MAP_FOR( JoyButtonEvent       , joy_button        )
+    DEFINE_LISTENER_MAP_FOR( JoyDeviceEvent       , joy_device        )
+    DEFINE_LISTENER_MAP_FOR( ControllerAxisEvent  , controller_axis   )
+    DEFINE_LISTENER_MAP_FOR( ControllerButtonEvent, controller_button )
+    DEFINE_LISTENER_MAP_FOR( ControllerDeviceEvent, controller_device )
+    DEFINE_LISTENER_MAP_FOR( AudioDeviceEvent     , audio_device      )
+    DEFINE_LISTENER_MAP_FOR( QuitEvent            , quit              )
+    DEFINE_LISTENER_MAP_FOR( UserEvent            , user_event        )
+    DEFINE_LISTENER_MAP_FOR( SysWMEvent           , sys_wm            )
+    DEFINE_LISTENER_MAP_FOR( TouchFingerEvent     , touch             )
+    DEFINE_LISTENER_MAP_FOR( MultiGestureEvent    , gesture           )
+    DEFINE_LISTENER_MAP_FOR( DollarGestureEvent   , dollar_gesture    )
+    DEFINE_LISTENER_MAP_FOR( DropEvent            , drop              )
     
     #undef DEFINE_LISTENER_MAP_FOR
 }
@@ -56,177 +58,116 @@ namespace
 
 namespace // Event consumer task ///////////////////////////////////////////////
 {
-    #define DEFINE_SUBMIT_EVENT_CALLBACK_TASK( EVENT_MEMBER ) \
-    { \
-        auto callback = callback_pair.second.first; \
-        auto event    = window_event.EVENT_MEMBER; \
-        JadeMatrix::yavsg::submit_task( \
-            std::make_unique< JadeMatrix::yavsg::callback_task >( \
-                [ callback, event ](){ \
-                    callback( event ); \
-                    return false; \
-                }, \
-                callback_pair.second.second \
-            ) \
-        ); \
-    }
-    
     class poll_events_task : public JadeMatrix::yavsg::task
     {
     public:
-        virtual JadeMatrix::yavsg::task_flags_type flags() const
+        JadeMatrix::yavsg::task_flags_type flags() const override
         {
             // SDL needs to poll events on the main thread
             return JadeMatrix::yavsg::task_flag::MAIN_THREAD;
         }
         
-        virtual bool operator()()
+        bool operator()() override
         {
             SDL_Event window_event;
             while( SDL_PollEvent( &window_event ) )
             {
+                #define FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( \
+                    MAPNAME, \
+                    MEMBER \
+                ) \
+                    { \
+                        for( auto& callback_pair : MAPNAME##_listeners ) \
+                        { \
+                            JadeMatrix::yavsg::submit_task( \
+                                std::make_unique< \
+                                    JadeMatrix::yavsg::callback_task \
+                                >( \
+                                    [ \
+                                        callback = callback_pair.second.first, \
+                                        event    = window_event.MEMBER \
+                                    ](){ \
+                                        callback( event ); \
+                                        return false; \
+                                    }, \
+                                    callback_pair.second.second \
+                                ) \
+                            ); \
+                        } \
+                        break; \
+                    }
+                
                 switch( window_event.type )
                 {
-                case SDL_WINDOWEVENT:
-                    for( auto& callback_pair : window_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( window )
-                    break;
-                case SDL_KEYDOWN:
-                case SDL_KEYUP:
-                    for( auto& callback_pair : keyboard_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( key )
-                    break;
-                case SDL_TEXTEDITING:
-                    for( auto& callback_pair : text_edit_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( edit )
-                    break;
-                case SDL_TEXTINPUT:
-                    for( auto& callback_pair : text_input_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( text )
-                    break;
-                case SDL_MOUSEMOTION:
-                    for( auto& callback_pair : mouse_motion_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( motion )
-                    break;
-                case SDL_MOUSEBUTTONDOWN:
-                case SDL_MOUSEBUTTONUP:
-                    for( auto& callback_pair : mouse_button_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( button )
-                    break;
-                case SDL_MOUSEWHEEL:
-                    for( auto& callback_pair : scroll_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( wheel )
-                    break;
-                case SDL_JOYAXISMOTION:
-                    for( auto& callback_pair : joy_axis_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( jaxis )
-                    break;
-                case SDL_JOYBALLMOTION:
-                    for( auto& callback_pair : joy_ball_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( jball )
-                    break;
-                case SDL_JOYHATMOTION:
-                    for( auto& callback_pair : joy_hat_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( jhat )
-                    break;
-                case SDL_JOYBUTTONDOWN:
-                case SDL_JOYBUTTONUP:
-                    for( auto& callback_pair : joy_button_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( jbutton )
-                    break;
-                case SDL_JOYDEVICEADDED:
-                case SDL_JOYDEVICEREMOVED:
-                    for( auto& callback_pair : joy_device_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( jdevice )
-                    break;
-                case SDL_CONTROLLERAXISMOTION:
-                    for( auto& callback_pair : controller_axis_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( caxis )
-                    break;
-                case SDL_CONTROLLERBUTTONDOWN:
-                case SDL_CONTROLLERBUTTONUP:
-                    for( auto& callback_pair : controller_button_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( cbutton )
-                    break;
-                case SDL_CONTROLLERDEVICEADDED:
-                case SDL_CONTROLLERDEVICEREMOVED:
-                case SDL_CONTROLLERDEVICEREMAPPED:
-                    for( auto& callback_pair : controller_device_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( cdevice )
-                    break;
-                case SDL_AUDIODEVICEADDED:
-                case SDL_AUDIODEVICEREMOVED:
-                    for( auto& callback_pair : audio_device_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( adevice )
-                    break;
-                case SDL_QUIT:
-                    for( auto& callback_pair : quit_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( quit )
-                    break;
-                case SDL_USEREVENT:
-                    for( auto& callback_pair : user_event_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( user )
-                    break;
-                case SDL_SYSWMEVENT:
-                    for( auto& callback_pair : sys_wm_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( syswm )
-                    break;
-                case SDL_FINGERDOWN:
-                case SDL_FINGERUP:
-                case SDL_FINGERMOTION:
-                    for( auto& callback_pair : touch_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( tfinger )
-                    break;
-                case SDL_MULTIGESTURE:
-                    for( auto& callback_pair : gesture_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( mgesture )
-                    break;
-                case SDL_DOLLARGESTURE:
-                case SDL_DOLLARRECORD:
-                    for( auto& callback_pair : dollar_gesture_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( dgesture )
-                    break;
-                case SDL_DROPFILE:
-                case SDL_DROPTEXT:
-                case SDL_DROPBEGIN:
-                case SDL_DROPCOMPLETE:
-                    for( auto& callback_pair : drop_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( drop )
-                    break;
-                // case SDL_APP_TERMINATING:
-                // case SDL_APP_LOWMEMORY:
-                // case SDL_APP_WILLENTERBACKGROUND:
-                // case SDL_APP_DIDENTERBACKGROUND:
-                // case SDL_APP_WILLENTERFOREGROUND:
-                // case SDL_APP_DIDENTERFOREGROUND:
-                //     // Mobile-only, ignore for now
-                // case SDL_KEYMAPCHANGED:
-                // case SDL_CLIPBOARDUPDATE:
-                // case SDL_RENDER_TARGETS_RESET:
-                // case SDL_RENDER_DEVICE_RESET:
-                //     // Common
-                default:
-                    for( auto& callback_pair : common_listeners )
-                        DEFINE_SUBMIT_EVENT_CALLBACK_TASK( common )
-                    break;
+                case SDL_WINDOWEVENT                : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( window           , window   )
+                case SDL_KEYDOWN                    :
+                case SDL_KEYUP                      : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( keyboard         , key      )
+                case SDL_TEXTEDITING                : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( text_edit        , edit     )
+                case SDL_TEXTINPUT                  : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( text_input       , text     )
+                case SDL_MOUSEMOTION                : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( mouse_motion     , motion   )
+                case SDL_MOUSEBUTTONDOWN            :
+                case SDL_MOUSEBUTTONUP              : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( mouse_button     , button   )
+                case SDL_MOUSEWHEEL                 : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( scroll           , wheel    )
+                case SDL_JOYAXISMOTION              : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( joy_axis         , jaxis    )
+                case SDL_JOYBALLMOTION              : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( joy_ball         , jball    )
+                case SDL_JOYHATMOTION               : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( joy_hat          , jhat     )
+                case SDL_JOYBUTTONDOWN              :
+                case SDL_JOYBUTTONUP                : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( joy_button       , jbutton  )
+                case SDL_JOYDEVICEADDED             :
+                case SDL_JOYDEVICEREMOVED           : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( joy_device       , jdevice  )
+                case SDL_CONTROLLERAXISMOTION       : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( controller_axis  , caxis    )
+                case SDL_CONTROLLERBUTTONDOWN       :
+                case SDL_CONTROLLERBUTTONUP         : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( controller_button, cbutton  )
+                case SDL_CONTROLLERDEVICEADDED      :
+                case SDL_CONTROLLERDEVICEREMOVED    :
+                case SDL_CONTROLLERDEVICEREMAPPED   : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( controller_device, cdevice  )
+                case SDL_AUDIODEVICEADDED           :
+                case SDL_AUDIODEVICEREMOVED         : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( audio_device     , adevice  )
+                case SDL_QUIT                       : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( quit             , quit     )
+                case SDL_USEREVENT                  : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( user_event       , user     )
+                case SDL_SYSWMEVENT                 : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( sys_wm           , syswm    )
+                case SDL_FINGERDOWN                 :
+                case SDL_FINGERUP                   :
+                case SDL_FINGERMOTION               : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( touch            , tfinger  )
+                case SDL_MULTIGESTURE               : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( gesture          , mgesture )
+                case SDL_DOLLARGESTURE              :
+                case SDL_DOLLARRECORD               : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( dollar_gesture   , dgesture )
+                case SDL_DROPFILE                   :
+                case SDL_DROPTEXT                   :
+                case SDL_DROPBEGIN                  :
+                case SDL_DROPCOMPLETE               : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( drop             , drop     )
+                    // Mobile-only, treat as "common" for now
+                case SDL_APP_TERMINATING            :
+                case SDL_APP_LOWMEMORY              :
+                case SDL_APP_WILLENTERBACKGROUND    :
+                case SDL_APP_DIDENTERBACKGROUND     :
+                case SDL_APP_WILLENTERFOREGROUND    :
+                case SDL_APP_DIDENTERFOREGROUND     :
+                    // Treat as "common"
+                case SDL_KEYMAPCHANGED              :
+                case SDL_CLIPBOARDUPDATE            :
+                case SDL_RENDER_TARGETS_RESET       :
+                case SDL_RENDER_DEVICE_RESET        :
+                default                             : FOREACH_LISTENER_SUBMIT_EVENT_CALLBACK_TASK( common           , common   )
                 }
+                
+                #undef DEFINE_SUBMIT_EVENT_CALLBACK_TASK
             }
             
             return true;
         }
     };
-    
-    #undef DEFINE_SUBMIT_EVENT_CALLBACK_TASK
 }
 
 
-namespace JadeMatrix::yavsg // Listener constructor implementations ////////////
-{
-    #define DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( EVENT, MAPNAME ) \
-    template<> \
-    event_listener< EVENT >::event_listener( \
-        std::function< void( const EVENT& ) > callback, \
-        task_flags_type flags \
+// Listener constructor implementations ////////////////////////////////////////
+
+#define DEFINE_LISTENER_CONSTRUCTOR_FOR( EVENT, MAPNAME ) \
+    template<> JadeMatrix::yavsg::event_listener< \
+        SDL_##EVENT \
+    >::event_listener( \
+        std::function< void( SDL_##EVENT const& ) > callback, \
+        task_flags_type                             flags \
     ) \
     { \
         std::call_once( \
@@ -235,74 +176,81 @@ namespace JadeMatrix::yavsg // Listener constructor implementations ////////////
                 submit_task( std::make_unique< poll_events_task >() ); \
             } \
         ); \
-        std::unique_lock< std::mutex > _lock( listeners_mutex ); \
-        _id = next_listener_id++; \
-        MAPNAME[ _id ] = { callback, flags }; \
+        std::unique_lock lock( listeners_mutex ); \
+        id_ = next_listener_id++; \
+        auto const [ iter, inserted ] = MAPNAME##_listeners.emplace( \
+            id_, \
+            std::pair{ \
+                std::move( callback ), \
+                flags \
+            } \
+        ); \
+        ( void )iter; \
+        REQUIRE( inserted ); \
     }
-    
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_CommonEvent          ,            common_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_WindowEvent          ,            window_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_KeyboardEvent        ,          keyboard_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_TextEditingEvent     ,         text_edit_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_TextInputEvent       ,        text_input_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_MouseMotionEvent     ,      mouse_motion_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_MouseButtonEvent     ,      mouse_button_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_MouseWheelEvent      ,            scroll_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_JoyAxisEvent         ,          joy_axis_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_JoyBallEvent         ,          joy_ball_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_JoyHatEvent          ,           joy_hat_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_JoyButtonEvent       ,        joy_button_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_JoyDeviceEvent       ,        joy_device_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_ControllerAxisEvent  ,   controller_axis_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_ControllerButtonEvent, controller_button_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_ControllerDeviceEvent, controller_device_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_AudioDeviceEvent     ,      audio_device_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_QuitEvent            ,              quit_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_UserEvent            ,        user_event_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_SysWMEvent           ,            sys_wm_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_TouchFingerEvent     ,             touch_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_MultiGestureEvent    ,           gesture_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_DollarGestureEvent   ,    dollar_gesture_listeners )
-    DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR( SDL_DropEvent            ,              drop_listeners )
-    
-    #undef DEFINE_LISTENER_CONSTRUCTOR_OVERLOAD_FOR
-}
+
+DEFINE_LISTENER_CONSTRUCTOR_FOR( CommonEvent          , common            )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( WindowEvent          , window            )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( KeyboardEvent        , keyboard          )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( TextEditingEvent     , text_edit         )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( TextInputEvent       , text_input        )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( MouseMotionEvent     , mouse_motion      )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( MouseButtonEvent     , mouse_button      )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( MouseWheelEvent      , scroll            )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( JoyAxisEvent         , joy_axis          )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( JoyBallEvent         , joy_ball          )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( JoyHatEvent          , joy_hat           )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( JoyButtonEvent       , joy_button        )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( JoyDeviceEvent       , joy_device        )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( ControllerAxisEvent  , controller_axis   )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( ControllerButtonEvent, controller_button )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( ControllerDeviceEvent, controller_device )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( AudioDeviceEvent     , audio_device      )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( QuitEvent            , quit              )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( UserEvent            , user_event        )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( SysWMEvent           , sys_wm            )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( TouchFingerEvent     , touch             )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( MultiGestureEvent    , gesture           )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( DollarGestureEvent   , dollar_gesture    )
+DEFINE_LISTENER_CONSTRUCTOR_FOR( DropEvent            , drop              )
+
+#undef DEFINE_LISTENER_CONSTRUCTOR_FOR
 
 
-namespace JadeMatrix::yavsg // Listener destructor implementations /////////////
-{
-    #define DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( EVENT, MAPNAME ) \
-    template<> \
-    event_listener< EVENT >::~event_listener() \
+// Listener destructor implementations /////////////////////////////////////////
+
+#define DEFINE_LISTENER_DESTRUCTOR_FOR( EVENT, MAPNAME ) \
+    template<> JadeMatrix::yavsg::event_listener< \
+        SDL_##EVENT \
+    >::~event_listener() \
     { \
-        std::unique_lock< std::mutex > lock( listeners_mutex ); \
-        MAPNAME.erase( _id ); \
+        std::unique_lock lock( listeners_mutex ); \
+        MAPNAME##_listeners.erase( id_ ); \
     }
-    
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_CommonEvent          ,            common_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_WindowEvent          ,            window_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_KeyboardEvent        ,          keyboard_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_TextEditingEvent     ,         text_edit_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_TextInputEvent       ,        text_input_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_MouseMotionEvent     ,      mouse_motion_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_MouseButtonEvent     ,      mouse_button_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_MouseWheelEvent      ,            scroll_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_JoyAxisEvent         ,          joy_axis_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_JoyBallEvent         ,          joy_ball_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_JoyHatEvent          ,           joy_hat_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_JoyButtonEvent       ,        joy_button_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_JoyDeviceEvent       ,        joy_device_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_ControllerAxisEvent  ,   controller_axis_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_ControllerButtonEvent, controller_button_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_ControllerDeviceEvent, controller_device_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_AudioDeviceEvent     ,      audio_device_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_QuitEvent            ,              quit_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_UserEvent            ,        user_event_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_SysWMEvent           ,            sys_wm_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_TouchFingerEvent     ,             touch_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_MultiGestureEvent    ,           gesture_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_DollarGestureEvent   ,    dollar_gesture_listeners )
-    DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR( SDL_DropEvent            ,              drop_listeners )
-    
-    #undef DEFINE_LISTENER_DESTRUCTOR_OVERLOAD_FOR
-}
+
+DEFINE_LISTENER_DESTRUCTOR_FOR( CommonEvent          , common            )
+DEFINE_LISTENER_DESTRUCTOR_FOR( WindowEvent          , window            )
+DEFINE_LISTENER_DESTRUCTOR_FOR( KeyboardEvent        , keyboard          )
+DEFINE_LISTENER_DESTRUCTOR_FOR( TextEditingEvent     , text_edit         )
+DEFINE_LISTENER_DESTRUCTOR_FOR( TextInputEvent       , text_input        )
+DEFINE_LISTENER_DESTRUCTOR_FOR( MouseMotionEvent     , mouse_motion      )
+DEFINE_LISTENER_DESTRUCTOR_FOR( MouseButtonEvent     , mouse_button      )
+DEFINE_LISTENER_DESTRUCTOR_FOR( MouseWheelEvent      , scroll            )
+DEFINE_LISTENER_DESTRUCTOR_FOR( JoyAxisEvent         , joy_axis          )
+DEFINE_LISTENER_DESTRUCTOR_FOR( JoyBallEvent         , joy_ball          )
+DEFINE_LISTENER_DESTRUCTOR_FOR( JoyHatEvent          , joy_hat           )
+DEFINE_LISTENER_DESTRUCTOR_FOR( JoyButtonEvent       , joy_button        )
+DEFINE_LISTENER_DESTRUCTOR_FOR( JoyDeviceEvent       , joy_device        )
+DEFINE_LISTENER_DESTRUCTOR_FOR( ControllerAxisEvent  , controller_axis   )
+DEFINE_LISTENER_DESTRUCTOR_FOR( ControllerButtonEvent, controller_button )
+DEFINE_LISTENER_DESTRUCTOR_FOR( ControllerDeviceEvent, controller_device )
+DEFINE_LISTENER_DESTRUCTOR_FOR( AudioDeviceEvent     , audio_device      )
+DEFINE_LISTENER_DESTRUCTOR_FOR( QuitEvent            , quit              )
+DEFINE_LISTENER_DESTRUCTOR_FOR( UserEvent            , user_event        )
+DEFINE_LISTENER_DESTRUCTOR_FOR( SysWMEvent           , sys_wm            )
+DEFINE_LISTENER_DESTRUCTOR_FOR( TouchFingerEvent     , touch             )
+DEFINE_LISTENER_DESTRUCTOR_FOR( MultiGestureEvent    , gesture           )
+DEFINE_LISTENER_DESTRUCTOR_FOR( DollarGestureEvent   , dollar_gesture    )
+DEFINE_LISTENER_DESTRUCTOR_FOR( DropEvent            , drop              )
+
+#undef DEFINE_LISTENER_DESTRUCTOR_FOR
