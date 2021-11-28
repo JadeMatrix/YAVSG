@@ -15,7 +15,6 @@ namespace
 {
     std::once_flag poll_events_task_submitted_flag;
     
-    std::mutex listeners_mutex;
     JadeMatrix::yavsg::listener_id next_listener_id = 1;
     
     #define DEFINE_LISTENER_MAP_FOR( EVENT, MAPNAME ) \
@@ -25,7 +24,8 @@ namespace
                 std::function< void( SDL_##EVENT const& ) >, \
                 JadeMatrix::yavsg::task_flags_type \
             > \
-        > MAPNAME##_listeners;
+        > MAPNAME##_listeners; \
+        std::mutex MAPNAME##_listeners_mutex;
     
     DEFINE_LISTENER_MAP_FOR( CommonEvent          , common            )
     DEFINE_LISTENER_MAP_FOR( WindowEvent          , window            )
@@ -77,7 +77,7 @@ namespace // Event consumer task ///////////////////////////////////////////////
                     MEMBER \
                 ) \
                     { \
-                        std::unique_lock lock( listeners_mutex ); \
+                        std::unique_lock lock( MAPNAME##_listeners_mutex ); \
                         for( auto& callback_pair : MAPNAME##_listeners ) \
                         { \
                             JadeMatrix::yavsg::submit_task( \
@@ -177,7 +177,7 @@ namespace // Event consumer task ///////////////////////////////////////////////
                 submit_task( std::make_unique< poll_events_task >() ); \
             } \
         ); \
-        std::unique_lock lock( listeners_mutex ); \
+        std::unique_lock lock( MAPNAME##_listeners_mutex ); \
         id_ = next_listener_id++; \
         auto const [ iter, inserted ] = MAPNAME##_listeners.emplace( \
             id_, \
@@ -225,7 +225,7 @@ DEFINE_LISTENER_CONSTRUCTOR_FOR( DropEvent            , drop              )
         SDL_##EVENT \
     >::~event_listener() \
     { \
-        std::unique_lock lock( listeners_mutex ); \
+        std::unique_lock lock( MAPNAME##_listeners_mutex ); \
         MAPNAME##_listeners.erase( id_ ); \
     }
 
