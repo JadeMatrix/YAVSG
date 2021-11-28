@@ -77,6 +77,7 @@ namespace // Event consumer task ///////////////////////////////////////////////
                     MEMBER \
                 ) \
                     { \
+                        std::unique_lock lock( listeners_mutex ); \
                         for( auto& callback_pair : MAPNAME##_listeners ) \
                         { \
                             JadeMatrix::yavsg::submit_task( \
