@@ -58,11 +58,10 @@ namespace JadeMatrix::yavsg
             function_names.end()
         } )
         {
-            auto filename = (
+            const auto filename = (
                 shaders_dir()
-                + "/postprocess/"
-                + function_name
-                + ".frag"
+                / "postprocess"
+                / ( function_name + ".frag" )
             );
             
             std::filebuf function_source_file;
@@ -74,7 +73,7 @@ namespace JadeMatrix::yavsg
             if( !function_source_file.is_open() )
                 throw std::runtime_error(
                     "could not open shader function source file \""
-                    + filename
+                    + filename.native()
                     + "\""
                 );
             
@@ -113,7 +112,7 @@ namespace JadeMatrix::yavsg
             // FIXME: this creates references to temporaries
             gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                shaders_dir() + "/postprocess.vert"
+                shaders_dir() / "postprocess.vert"
             ).id,
             generate_fragment_shader( function_names ).id
         } }

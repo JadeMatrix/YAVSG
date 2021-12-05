@@ -1,10 +1,10 @@
 #pragma once
 
 
-#include <string>
+#include <filesystem>
 
 
 namespace JadeMatrix::yavsg
 {
-    std::string shaders_dir();
+    std::filesystem::path shaders_dir();
 }

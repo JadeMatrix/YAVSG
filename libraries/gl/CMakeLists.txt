@@ -30,7 +30,7 @@ TARGET_LINK_LIBRARIES( gl
         gl_wrap
         math
         sdl
-    PRIVATE
         doctest::doctest
+    PRIVATE
         fmt::fmt
 )

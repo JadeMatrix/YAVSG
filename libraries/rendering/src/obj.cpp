@@ -94,9 +94,9 @@ namespace JadeMatrix::yavsg
                 scene::material_texture_type specular_map;
                 
                 for( auto& info : {
-                    texture_info{    color_map, material.diffuse_texname , gl::texture_flag::NONE         },
-                    texture_info{   normal_map, material.bump_texname    , gl::texture_flag::LINEAR_INPUT },
-                    texture_info{ specular_map, material.specular_texname, gl::texture_flag::LINEAR_INPUT }
+                    texture_info{    color_map, material.diffuse_texname , gl::texture_flag::none         },
+                    texture_info{   normal_map, material.bump_texname    , gl::texture_flag::linear_input },
+                    texture_info{ specular_map, material.specular_texname, gl::texture_flag::linear_input }
                 } )
                 {
                     if( info.filename.size() )
@@ -109,9 +109,9 @@ namespace JadeMatrix::yavsg
                         info.texture = scene::material_texture_type::from_file(
                             texture_filename,
                             {
-                                settings::magnify_mode::LINEAR,
-                                settings::minify_mode::LINEAR,
-                                settings::mipmap_type::LINEAR,
+                                settings::magnify_mode::linear,
+                                settings::minify_mode::linear,
+                                settings::mipmap_type::linear,
                             },
                             info.flags
                         );

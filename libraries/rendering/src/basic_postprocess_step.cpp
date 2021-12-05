@@ -9,12 +9,12 @@
 namespace JadeMatrix::yavsg
 {
     basic_postprocess_step::basic_postprocess_step(
-        const std::string& fragment_shader_filename
+        std::filesystem::path const& fragment_shader_filename
     ) :
         postprocess_program( {
             yavsg::gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                shaders_dir() + "/postprocess.vert"
+                shaders_dir() / "postprocess.vert"
             ).id,
             yavsg::gl::shader::from_file(
                 GL_FRAGMENT_SHADER,

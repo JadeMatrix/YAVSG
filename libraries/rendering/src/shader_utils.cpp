@@ -4,7 +4,7 @@
 #include <stdexcept>    // runtime_error
 
 
-std::string JadeMatrix::yavsg::shaders_dir()
+std::filesystem::path JadeMatrix::yavsg::shaders_dir()
 {
     if( auto const* dir = std::getenv( "YAVSG_SHADERS_DIR" ) )
     {

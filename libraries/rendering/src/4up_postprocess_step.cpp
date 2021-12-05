@@ -36,7 +36,7 @@ namespace JadeMatrix::yavsg
         } )
             if( !substep.step )
                 substep.step = std::make_unique< basic_postprocess_step >(
-                    shaders_dir() + "/postprocess.frag"
+                    shaders_dir() / "postprocess.frag"
                 );
     }
     

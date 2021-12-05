@@ -18,11 +18,11 @@ namespace JadeMatrix::yavsg
         scene_program( {
             gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                shaders_dir() + "/obj_scene.vert"
+                shaders_dir() / "obj_scene.vert"
             ).id,
             gl::shader::from_file(
                 GL_FRAGMENT_SHADER,
-                shaders_dir() + "/obj_scene.frag"
+                shaders_dir() / "obj_scene.frag"
             ).id
         } )
     {

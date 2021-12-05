@@ -12,11 +12,11 @@ namespace JadeMatrix::yavsg
         postprocess_program( {
             yavsg::gl::shader::from_file(
                 GL_VERTEX_SHADER,
-                shaders_dir() + "/postprocess.vert"
+                shaders_dir() / "postprocess.vert"
             ).id,
             yavsg::gl::shader::from_file(
                 GL_FRAGMENT_SHADER,
-                shaders_dir() + "/dof.frag"
+                shaders_dir() / "dof.frag"
             ).id
         } ),
         vertices( {

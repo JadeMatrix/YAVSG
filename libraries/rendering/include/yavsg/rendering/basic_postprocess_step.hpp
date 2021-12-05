@@ -9,7 +9,7 @@
 #include <yavsg/gl/texture.hpp>
 #include <yavsg/math/vector.hpp>
 
-#include <string>
+#include <filesystem>
 
 
 namespace JadeMatrix::yavsg
@@ -34,7 +34,7 @@ namespace JadeMatrix::yavsg
         gl::index_buffer indices;
         
         basic_postprocess_step(
-            const std::string& fragment_shader_filename
+            std::filesystem::path const& fragment_shader_filename
         );
         virtual void run(
             const source_type         & source,

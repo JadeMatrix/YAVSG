@@ -45,7 +45,7 @@ namespace JadeMatrix::yavsg
         static texture_reference from_file(
             const std::string                & filename,
             const gl::texture_filter_settings& settings,
-            gl::texture_flags_type             flags = gl::texture_flag::NONE
+            gl::texture_flags_type             flags = gl::texture_flag::none
         );
         
         // Checks if this refers to a texture ready for rendering
