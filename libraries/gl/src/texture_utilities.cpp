@@ -269,7 +269,7 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
         ) )
         {
             std::size_t channels;
-            std::unique_ptr< char[] > preprocessed_data;
+            std::unique_ptr< std::byte[] > preprocessed_data;
             
             switch( upload_data.gl_incoming_format )
             {
@@ -346,7 +346,7 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
                 ) );
             }
             
-            preprocessed_data = std::unique_ptr< char[] >( new char[
+            preprocessed_data = std::unique_ptr< std::byte[] >( new std::byte[
                 sample_count * channels * type_size
             ] );
             internal_has_alpha = type_premultiply(
@@ -499,9 +499,9 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
         // elsewhere and be freed with `delete[]`, but SDL allocates with
         // `malloc()` since it's written in C
         auto sample_count = channels * width * height;
-        auto sdl_surface_data = new char[ sample_count ];
+        auto sdl_surface_data = new std::byte[ sample_count ];
         std::copy_n(
-            static_cast< char* >( sdl_surface->pixels ),
+            static_cast< std::byte* >( sdl_surface->pixels ),
             sample_count,
             sdl_surface_data
         );
@@ -515,7 +515,7 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
                 height,
                 incoming_format,
                 incoming_type,
-                std::unique_ptr< char[] >{ sdl_surface_data }
+                std::unique_ptr< std::byte[] >{ sdl_surface_data }
             },
             flags
         );

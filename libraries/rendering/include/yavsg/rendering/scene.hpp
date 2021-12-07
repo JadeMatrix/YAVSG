@@ -6,8 +6,8 @@
 #include "render_object_manager.hpp"
 #include "texture_reference.hpp"
 
-#include <utility>  // std::size_t
-#include <tuple>    // std::tuple_size
+#include <utility>  // size_t
+#include <tuple>    // tuple_size_v
 
 
 namespace JadeMatrix::yavsg
@@ -29,12 +29,12 @@ namespace JadeMatrix::yavsg
         class material_description : public material_description_base
         {
         public:
-                  material_texture_type&    color_map()       { return std::get< 0 >( values ); }
-                  material_texture_type&   normal_map()       { return std::get< 1 >( values ); }
-                  material_texture_type& specular_map()       { return std::get< 2 >( values ); }
-            const material_texture_type&    color_map() const { return std::get< 0 >( values ); }
-            const material_texture_type&   normal_map() const { return std::get< 1 >( values ); }
-            const material_texture_type& specular_map() const { return std::get< 2 >( values ); }
+            material_texture_type      &    color_map()       { return std::get< 0 >( values ); }
+            material_texture_type      &   normal_map()       { return std::get< 1 >( values ); }
+            material_texture_type      & specular_map()       { return std::get< 2 >( values ); }
+            material_texture_type const&    color_map() const { return std::get< 0 >( values ); }
+            material_texture_type const&   normal_map() const { return std::get< 1 >( values ); }
+            material_texture_type const& specular_map() const { return std::get< 2 >( values ); }
             
             using material_description_base::material;
             
@@ -44,7 +44,7 @@ namespace JadeMatrix::yavsg
                 material_texture_type& n,
                 material_texture_type& s
             ) : material_description_base( c, n, s ) {}
-            material_description( const material_description& o ) = delete;
+            material_description( material_description const& o ) = delete;
             material_description( material_description&& o ) :
                 material_description_base(
                     std::move( std::get< 0 >( o.values ) ),
@@ -54,9 +54,9 @@ namespace JadeMatrix::yavsg
             {}
         };
         
-        static const std::size_t material_texture_count = std::tuple_size<
+        static constexpr auto material_texture_count = std::tuple_size_v<
             material_description::tuple_type
-        >::value;
+        >;
         
         // Vertex structures ///////////////////////////////////////////////////
         
@@ -79,7 +79,6 @@ namespace JadeMatrix::yavsg
         render_object_manager_type object_manager;
         camera                     main_camera;
         
-    public:
         scene();
     };
 }

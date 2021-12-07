@@ -36,9 +36,9 @@ namespace JadeMatrix::yavsg
         basic_postprocess_step(
             std::filesystem::path const& fragment_shader_filename
         );
-        virtual void run(
-            const source_type         & source,
+        void run(
+            source_type          const& source,
             gl::write_only_framebuffer& target
-        );
+        ) override;
     };
 }

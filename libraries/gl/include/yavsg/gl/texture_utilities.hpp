@@ -4,7 +4,7 @@
 #include <yavsg/gl_wrap.hpp>
 #include <yavsg/sdl/sdl.hpp>
 
-#include <cstddef>  // size_t
+#include <cstddef>  // size_t, byte
 #include <string>
 #include <memory>   // unique_ptr
 
@@ -124,12 +124,12 @@ namespace JadeMatrix::yavsg::gl // Upload utilities ////////////////////////////
 {
     struct texture_upload_data
     {
-        GLint                     gl_internal_format;
-        std::size_t               width;
-        std::size_t               height;
-        GLenum                    gl_incoming_format;
-        GLenum                    gl_incoming_type;
-        std::unique_ptr< char[] > data;
+        GLint                          gl_internal_format;
+        std::size_t                    width;
+        std::size_t                    height;
+        GLenum                         gl_incoming_format;
+        GLenum                         gl_incoming_type;
+        std::unique_ptr< std::byte[] > data;
     };
     
     texture_upload_data process_texture_data(

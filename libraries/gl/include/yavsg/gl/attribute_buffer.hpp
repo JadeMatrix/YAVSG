@@ -37,6 +37,7 @@ namespace JadeMatrix::yavsg::gl
         // );
         
         std::size_t size() const;
+        bool empty() const;
         // TODO: Determine if there's a more opaque way to access this
         GLuint gl_buffer_id() const;
         
@@ -58,6 +59,7 @@ namespace JadeMatrix::yavsg::gl
         void upload_data( std::vector< GLuint > const& indices );
         
         std::size_t size() const;
+        bool empty() const;
         // TODO: Determine if there's a more opaque way to access this
         GLuint gl_buffer_id() const;
         
@@ -148,6 +150,12 @@ std::size_t JadeMatrix::yavsg::gl::attribute_buffer<
 }
 
 template< typename... Attributes >
+bool JadeMatrix::yavsg::gl::attribute_buffer< Attributes... >::empty() const
+{
+    return vertex_count_ == 0ul;
+}
+
+template< typename... Attributes >
 GLuint JadeMatrix::yavsg::gl::attribute_buffer<
     Attributes...
 >::gl_buffer_id() const
@@ -225,6 +233,11 @@ inline void JadeMatrix::yavsg::gl::index_buffer::upload_data(
 inline std::size_t JadeMatrix::yavsg::gl::index_buffer::size() const
 {
     return index_count_;
+}
+
+inline bool JadeMatrix::yavsg::gl::index_buffer::empty() const
+{
+    return index_count_ == 0ul;
 }
 
 inline GLuint JadeMatrix::yavsg::gl::index_buffer::gl_buffer_id() const

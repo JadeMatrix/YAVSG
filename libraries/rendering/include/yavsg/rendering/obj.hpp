@@ -7,15 +7,36 @@
 #include <yavsg/tasking/task.hpp>
 #include <yavsg/tasking/tasking.hpp>
 
+#include <filesystem>
+#include <utility>  // move
+
 
 namespace JadeMatrix::yavsg
 {
     class load_obj_task : public yavsg::task
     {
+    public:
+        load_obj_task(
+            // TODO: Possibly `std::shared_ptr` so the manager doesn't get
+            // destroyed before this executes
+            scene::render_object_manager_type& om,
+            std::filesystem::path              fn,
+            std::filesystem::path              md
+        ) :
+            object_manager   { om              },
+            obj_filename     { std::move( fn ) },
+            obj_mtl_directory{ std::move( md ) },
+            upload_mode      { false           }
+        {}
+        
+        task_flags_type flags() const;
+        
+        bool operator()();
+        
     protected:
         scene::render_object_manager_type& object_manager;
-        std::string obj_filename;
-        std::string obj_mtl_directory;
+        std::filesystem::path              obj_filename;
+        std::filesystem::path              obj_mtl_directory;
         
         std::vector< scene::material_description > materials;
         std::vector< scene::vertex_type          > vertices;
@@ -28,23 +49,5 @@ namespace JadeMatrix::yavsg
         GLfloat obj_min_z;
         
         bool upload_mode;
-        
-    public:
-        load_obj_task(
-            // TODO: Possibly `std::shared_ptr` so the manager doesn't get
-            // destroyed before this executes
-            scene::render_object_manager_type& om,
-            const std::string                & fn,
-            const std::string                & md
-        ) :
-            object_manager{    om },
-            obj_filename{      fn },
-            obj_mtl_directory{ md },
-            upload_mode{    false }
-        {}
-        
-        task_flags_type flags() const;
-        
-        bool operator()();
     };
 }

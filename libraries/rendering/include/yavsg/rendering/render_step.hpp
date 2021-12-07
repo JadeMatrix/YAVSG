@@ -5,7 +5,7 @@
 
 #include <yavsg/gl/framebuffer.hpp>
 
-#include <utility>  // std::size_t
+#include <cstddef>  // size_t
 
 
 namespace JadeMatrix::yavsg
@@ -13,20 +13,17 @@ namespace JadeMatrix::yavsg
     class render_step
     {
     public:
-        virtual ~render_step() {}
-        virtual void run(
-            const scene&,
-            gl::write_only_framebuffer&
-        ) = 0;
+        virtual ~render_step() = default;
+        virtual void run( scene const&, gl::write_only_framebuffer& ) = 0;
     };
     
     template< class... ColorTargetTypes > class postprocess_step
     {
     public:
-        virtual ~postprocess_step() {}
+        virtual ~postprocess_step() = default;
         virtual void run(
-            const gl::framebuffer< ColorTargetTypes... >& source,
-                  gl::write_only_framebuffer            & target
+            gl::framebuffer< ColorTargetTypes... > const& source,
+            gl::write_only_framebuffer                  & target
         ) = 0;
     };
 }

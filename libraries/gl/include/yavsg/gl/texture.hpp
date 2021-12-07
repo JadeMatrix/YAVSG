@@ -5,6 +5,7 @@
 #include "texture_utilities.hpp"
 
 #include <array>
+#include <cstddef>      // byte
 #include <string>
 #include <type_traits>  // enable_if
 
@@ -28,7 +29,7 @@ namespace JadeMatrix::yavsg::gl
         texture(
             std::size_t                    width,
             std::size_t                    height,
-            std::unique_ptr< char[] >      data,
+            std::unique_ptr< std::byte[] > data,
             texture_filter_settings const& settings,
             texture_flags_type             flags
         );
@@ -146,7 +147,7 @@ template< typename DataType, std::size_t Channels >
 JadeMatrix::yavsg::gl::texture< DataType, Channels >::texture(
     std::size_t                    width,
     std::size_t                    height,
-    std::unique_ptr< char[] >      data,
+    std::unique_ptr< std::byte[] > data,
     texture_filter_settings const& settings,
     texture_flags_type             flags
 ) : texture()

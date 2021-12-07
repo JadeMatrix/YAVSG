@@ -34,10 +34,10 @@ namespace JadeMatrix::yavsg
         
         const camera& scene_camera;
         
-        dof_postprocess_step( const camera& );
-        virtual void run(
-            const source_type         & source,
+        dof_postprocess_step( camera const& );
+        void run(
+            source_type          const& source,
             gl::write_only_framebuffer& target
-        );
+        ) override;
     };
 }

@@ -48,4 +48,6 @@ TARGET_LINK_LIBRARIES( rendering
         tinyobjloader
     PRIVATE
         logging
+        doctest::doctest
+        fmt::fmt
 )
