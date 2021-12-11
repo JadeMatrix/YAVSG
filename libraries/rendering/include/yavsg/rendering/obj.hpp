@@ -29,9 +29,9 @@ namespace JadeMatrix::yavsg
             upload_mode      { false           }
         {}
         
-        task_flags_type flags() const;
+        task_flags_type flags() const override;
         
-        bool operator()();
+        bool operator()() override;
         
     protected:
         scene::render_object_manager_type& object_manager;

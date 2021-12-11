@@ -161,12 +161,12 @@ namespace JadeMatrix::yavsg // Window update task //////////////////////////////
             update_flags{     f     }
         {}
         
-        virtual task_flags_type flags() const
+        task_flags_type flags() const override
         {
-            return task_flag::MAIN_THREAD;
+            return task_flag::main_thread;
         }
         
-        virtual bool operator()()
+        bool operator()() override
         {
             // Artificial scope because the frame task (possibly submitted at
             // the end of the function) also needs to lock the reference mutex
@@ -480,12 +480,12 @@ namespace // Window cleaup task ////////////////////////////////////////////////
             gl_context{ g }
         {}
         
-        virtual JadeMatrix::yavsg::task_flags_type flags() const
+        JadeMatrix::yavsg::task_flags_type flags() const override
         {
-            return JadeMatrix::yavsg::task_flag::MAIN_THREAD;
+            return JadeMatrix::yavsg::task_flag::main_thread;
         }
         
-        virtual bool operator()()
+        bool operator()() override
         {
             SDL_GL_DeleteContext( gl_context );
             SDL_DestroyWindow( sdl_window );
@@ -649,7 +649,7 @@ namespace JadeMatrix::yavsg // Window implementation ///////////////////////////
                         self_reference -> window -> update_internal_state();
                 }
             },
-            task_flag::MAIN_THREAD
+            task_flag::main_thread
         }
     {
         submit_task( std::make_unique< update_window_task >(

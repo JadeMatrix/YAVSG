@@ -26,7 +26,7 @@ namespace JadeMatrix::yavsg
     public:
         event_listener(
             std::function< void( EventType const& ) >,
-            task_flags_type flags = task_flag::NONE
+            task_flags_type flags = task_flag::none
         );
         
         event_listener( event_listener     && ) = default;

@@ -110,7 +110,7 @@ namespace JadeMatrix::yavsg // Tasks ///////////////////////////////////////////
             }
         }
         
-        virtual bool operator()();
+        bool operator()() override;
     };
     
     template<
@@ -151,12 +151,12 @@ namespace JadeMatrix::yavsg // Tasks ///////////////////////////////////////////
             }
         }
         
-        virtual task_flags_type flags() const
+        task_flags_type flags() const override
         {
-            return task_flag::GPU_THREAD;
+            return task_flag::gpu_thread;
         }
         
-        virtual bool operator()();
+        bool operator()() override;
     };
     
     template<
@@ -181,12 +181,12 @@ namespace JadeMatrix::yavsg // Tasks ///////////////////////////////////////////
         ) : texture_{ texture }
         {}
         
-        virtual task_flags_type flags() const
+        task_flags_type flags() const override
         {
-            return task_flag::GPU_THREAD;
+            return task_flag::gpu_thread;
         }
         
-        virtual bool operator()();
+        bool operator()() override;
     };
 }
 

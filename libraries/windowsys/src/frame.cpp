@@ -83,7 +83,7 @@ namespace JadeMatrix::yavsg
     
     task_flags_type frame_task::flags() const
     {
-        return task_flag::GPU_THREAD;
+        return task_flag::gpu_thread;
     }
     
     bool frame_task::operator()()

@@ -46,7 +46,7 @@ namespace JadeMatrix::yavsg
         frame_task( std::shared_ptr< window_reference > );
         ~frame_task();
         
-        task_flags_type flags() const;
-        bool operator()();
+        task_flags_type flags() const override;
+        bool operator()() override;
     };
 }

@@ -175,14 +175,14 @@ int main( int argc, char* argv[] )
                     log_.info( "Quit event pushed"sv );
                 }
             },
-            yavsg::task_flag::MAIN_THREAD
+            yavsg::task_flag::main_thread
         };
         
         // TODO: Figure out why quit events don't work in single-threaded mode
         // yavsg::initialize_task_system( static_cast< std::size_t >( 0 ) );
         yavsg::initialize_task_system( true );
         log_.info( "task system initialized, becoming worker..."sv );
-        yavsg::become_task_worker( yavsg::task_flag::MAIN_THREAD );
+        yavsg::become_task_worker( yavsg::task_flag::main_thread );
         yavsg::stop_task_system( true );
         log_.info( "task system stopped"sv );
         

@@ -64,7 +64,7 @@ namespace // Event consumer task ///////////////////////////////////////////////
         JadeMatrix::yavsg::task_flags_type flags() const override
         {
             // SDL needs to poll events on the main thread
-            return JadeMatrix::yavsg::task_flag::MAIN_THREAD;
+            return JadeMatrix::yavsg::task_flag::main_thread;
         }
         
         bool operator()() override

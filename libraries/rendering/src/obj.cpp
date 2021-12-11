@@ -27,7 +27,7 @@ namespace
 JadeMatrix::yavsg::task_flags_type
 JadeMatrix::yavsg::load_obj_task::flags() const
 {
-    return ( upload_mode ? task_flag::GPU_THREAD : task_flag::NONE );
+    return ( upload_mode ? task_flag::gpu_thread : task_flag::none );
 }
 
 bool JadeMatrix::yavsg::load_obj_task::operator()()
