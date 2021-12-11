@@ -21,4 +21,6 @@ TARGET_LINK_LIBRARIES( sdl
     PUBLIC
         SDL2::sdl
         gl_wrap
+    PRIVATE
+        fmt::fmt
 )
