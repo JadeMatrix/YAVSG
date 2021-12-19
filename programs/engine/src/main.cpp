@@ -84,7 +84,7 @@ int main( int argc, char* argv[] )
             window_height,
             -1,
             -1,
-            yavsg::window_arrange_state::NORMAL,
+            yavsg::window_arrange_state::normal,
             "YAVSG",
             1.0f,
             true,

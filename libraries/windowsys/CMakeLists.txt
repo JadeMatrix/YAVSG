@@ -28,4 +28,5 @@ TARGET_LINK_LIBRARIES( windowsys
         tasking
     PRIVATE
         logging
+        doctest::doctest
 )
