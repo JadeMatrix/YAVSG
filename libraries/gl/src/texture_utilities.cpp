@@ -1,16 +1,24 @@
 #include <yavsg/gl/texture_utilities.hpp>
 
 #include <yavsg/gl/error.hpp>
-#include <yavsg/math/scalar_operations.hpp> // yavsg::power()
+#include <yavsg/math/scalar_operations.hpp> // power
+
+#include <fmt/format.h>
+#include <doctest/doctest.h>    // REQUIRE
 
 #include <algorithm>
-#include <assert.h>
-#include <exception>
 #include <limits>
-#include <mutex>        // std::mutex, std::once_flag, std::call_once()
-#include <type_traits>  // std::conditional, std::is_floating_point,
-                        // std::enable_if
-#include <utility>      // std::swap()
+#include <mutex>        // mutex, once_flag, call_once
+#include <stdexcept>    // runtime_error
+#include <type_traits>  // conditional, is_floating_point, enable_if_t
+#include <utility>      // swap
+
+
+namespace
+{
+    using namespace std::string_literals;
+    using namespace std::string_view_literals;
+}
 
 
 namespace // Anisotropic filtering support /////////////////////////////////////
@@ -53,39 +61,40 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
         
         // See http://docs.gl/gl3/glTexImage2D
         if( f_sample <= static_cast< f >( 0.04045 ) )
+        {
             return f_sample / static_cast< f >( 12.92 );
+        }
         else
-            return yavsg::power(
+        {
+            return JadeMatrix::yavsg::power(
                 (
                     f_sample + static_cast< f >( 0.055 )
                 ) / static_cast< f >( 1.055 ),
                 static_cast< f >( 2.4 )
             );
+        }
     }
     
     template< typename T > auto premultiply(
-        const  void* data,
-               void* preprocessed_data,
-        std::size_t  sample_count,
-        std::size_t  channels,
-        yavsg::gl::texture_flags_type flags
-    ) -> typename std::enable_if<
-        std::is_integral< T >::value,
-        bool
-    >::type
+        void const* data,
+        void      * preprocessed_data,
+        std::size_t sample_count,
+        std::size_t channels,
+        JadeMatrix::yavsg::gl::texture_flags_type flags
+    ) -> std::enable_if_t< std::is_integral< T >::value, bool >
     {
-        bool has_varying_alpha = false;
-        bool multiply_alpha = !(
+        auto has_varying_alpha = false;
+        auto const multiply_alpha = !(
             flags
-            & yavsg::gl::texture_flag::DISABLE_PREMULTIPLIED_ALPHA
+            & JadeMatrix::yavsg::gl::texture_flag::disable_premultiplied_alpha
         );
-        bool linearize = !(
+        auto const linearize = !(
             flags
-            & yavsg::gl::texture_flag::LINEAR_INPUT
+            & JadeMatrix::yavsg::gl::texture_flag::linear_input
         );
         
-        auto  in_data = static_cast< const T* >(              data );
-        auto out_data = static_cast<       T* >( preprocessed_data );
+        auto  in_data = static_cast< T const* >(              data );
+        auto out_data = static_cast< T      * >( preprocessed_data );
         
         auto max = static_cast< double >( std::numeric_limits< T >::max() );
         
@@ -102,11 +111,13 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
                 );
             }
             
-            std::size_t j;
-            for( j = 0; j < channels; ++j )
+            for( std::size_t j = 0; j < channels; ++j )
+            {
                 if( j == 3 )
+                {
                     // No conversions applied to alpha channel
                     out_data[ channels * i + j ] = in_data[ channels * i + j ];
+                }
                 else
                 {
                     auto in_sample = static_cast< double >(
@@ -115,45 +126,47 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
                     
                     // Alpha premultiplication
                     if( multiply_alpha )
+                    {
                         // TODO: Don't perform multiplication if alpha is 100%
                         in_sample *= alpha;
+                    }
                     
                     // Color space linearization (gamma de-correction)
                     if( linearize )
+                    {
                         in_sample = linearize_sample( in_sample );
+                    }
                     
                     out_data[ channels * i + j ] = static_cast< T >(
                         in_sample * max
                     );
                 }
+            }
         }
         
         return has_varying_alpha;
     }
     
     template< typename T > auto premultiply(
-        const  void* data,
-               void* preprocessed_data,
-        std::size_t  sample_count,
-        std::size_t  channels,
-        yavsg::gl::texture_flags_type flags
-    ) -> typename std::enable_if<
-        std::is_floating_point< T >::value,
-        bool
-    >::type
+        void const* data,
+        void      * preprocessed_data,
+        std::size_t sample_count,
+        std::size_t channels,
+        JadeMatrix::yavsg::gl::texture_flags_type flags
+    ) -> std::enable_if_t< std::is_floating_point< T >::value, bool >
     {
-        bool has_varying_alpha = false;
-        bool multiply_alpha = !(
+        auto has_varying_alpha = false;
+        auto const multiply_alpha = !(
             flags
-            & yavsg::gl::texture_flag::DISABLE_PREMULTIPLIED_ALPHA
+            & JadeMatrix::yavsg::gl::texture_flag::disable_premultiplied_alpha
         );
-        bool linearize = !(
+        auto const linearize = !(
             flags
-            & yavsg::gl::texture_flag::LINEAR_INPUT
+            & JadeMatrix::yavsg::gl::texture_flag::linear_input
         );
         
-        auto  in_data = static_cast< const T* >(              data );
-        auto out_data = static_cast<       T* >( preprocessed_data );
+        auto  in_data = static_cast< T const* >(              data );
+        auto out_data = static_cast< T      * >( preprocessed_data );
         
         for( std::size_t i = 0; i < sample_count; ++i )
         {
@@ -164,26 +177,33 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
                 alpha = in_data[ channels * i + 3 ];
             }
             
-            std::size_t j;
-            for( j = 0; j < channels; ++j )
+            for( std::size_t j = 0; j < channels; ++j )
+            {
                 if( j == 3 )
+                {
                     // No conversions applied to alpha channel
                     out_data[ channels * i + j ] = in_data[ channels * i + j ];
+                }
                 else
                 {
                     auto in_sample = in_data[ channels * i + j ];
                     
                     // Alpha premultiplication
                     if( multiply_alpha )
+                    {
                         // TODO: Don't perform multiplication if alpha is 100%
                         in_sample *= alpha;
+                    }
                     
                     // Color space linearization (gamma de-correction)
                     if( linearize )
+                    {
                         in_sample = linearize_sample( in_sample );
+                    }
                     
                     out_data[ channels * i + j ] = in_sample;
                 }
+            }
         }
         
         return has_varying_alpha;
@@ -191,24 +211,28 @@ namespace // Alpha & gamma preprocess functions ////////////////////////////////
 }
 
 
-namespace yavsg { namespace gl // Texture data processing implementation ///////
+namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
 {
     texture_upload_data process_texture_data(
         texture_upload_data upload_data,
         texture_flags_type  flags
     )
     {
-        if( flags & texture_flag::ALLOCATE_ONLY )
+        if( flags & texture_flag::allocate_only )
+        {
             upload_data.data = nullptr;
+        }
         else if( !upload_data.data )
+        {
             throw std::runtime_error(
                 "null data to yavsg::gl::process_texture_data() but allocate-"
-                "only flag not set"
+                "only flag not set"s
             );
+        }
         
         // We can skip a whole bunch of potential preprocessing if we're just
         // going to end up discarding the alpha anyways
-        bool internal_has_alpha;
+        auto internal_has_alpha = false;
         switch( upload_data.gl_internal_format )
         {
         case GL_RGBA:
@@ -223,21 +247,18 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
         // case GL_RGBA64F:
             internal_has_alpha = true;
             break;
-        default:
-            internal_has_alpha = false;
-            break;
         }
         
         auto sample_count = upload_data.width * upload_data.height;
         
-        auto needs_alpha_pass = (
+        auto const needs_alpha_pass = (
             internal_has_alpha
-            && !( flags & texture_flag::DISABLE_PREMULTIPLIED_ALPHA )
+            && !( flags & texture_flag::disable_premultiplied_alpha )
         );
-        auto needs_drop_pass = !(
-            flags & texture_flag::KEEP_UNUSED_CHANNELS
+        auto const needs_drop_pass = !(
+            flags & texture_flag::keep_unused_channels
         );
-        auto needs_gamma_pass = !( flags & texture_flag::LINEAR_INPUT );
+        auto const needs_gamma_pass = !( flags & texture_flag::linear_input );
         
         // Perform alpha premultiplication & gamma correction
         // TODO: Just use OpenGL sRGB type if internal format is RGB(A)8
@@ -248,36 +269,30 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
         ) )
         {
             std::size_t channels;
-            std::unique_ptr< char[] > preprocessed_data;
+            std::unique_ptr< std::byte[] > preprocessed_data;
             
             switch( upload_data.gl_incoming_format )
             {
-            case GL_RED:
-                channels = 1;
-                break;
-            case GL_RG:
-                channels = 2;
-                break;
-            case GL_RGB:
-                channels = 3;
-                break;
-            case GL_RGBA:
-                channels = 4;
-                break;
+            case GL_RED : channels = 1; break;
+            case GL_RG  : channels = 2; break;
+            case GL_RGB : channels = 3; break;
+            case GL_RGBA: channels = 4; break;
             default:
-                throw std::runtime_error(
-                    "uknown/unsupported OpenGL pixel format "
-                    + std::to_string( upload_data.gl_incoming_type )
-                    + " for yavsg::gl::process_texture_data()"
-                );
+                throw std::runtime_error( fmt::format(
+                    "uknown/unsupported OpenGL pixel format {} for "
+                        "yavsg::gl::process_texture_data()"sv,
+                    upload_data.gl_incoming_type
+                ) );
             }
             
             texture_flags_type modified_flags = flags;
             if( upload_data.gl_incoming_format != GL_RGBA )
-                modified_flags |= texture_flag::DISABLE_PREMULTIPLIED_ALPHA;
+            {
+                modified_flags |= texture_flag::disable_premultiplied_alpha;
+            }
             
             std::function< bool(
-                const void*,
+                void const*,
                 void*,
                 std::size_t,
                 std::size_t,
@@ -324,14 +339,14 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             //     type_premultiply = premultiply< GLdouble >;
             //     break;
             default:
-                throw std::runtime_error(
-                    "uknown/unsupported OpenGL type "
-                    + std::to_string( upload_data.gl_incoming_type )
-                    + " for yavsg::gl::process_texture_data()"
-                );
+                throw std::runtime_error( fmt::format(
+                    "uknown/unsupported OpenGL type {} for "
+                        "yavsg::gl::process_texture_data()"sv,
+                    upload_data.gl_incoming_type
+                ) );
             }
             
-            preprocessed_data = std::unique_ptr< char[] >( new char[
+            preprocessed_data = std::unique_ptr< std::byte[] >( new std::byte[
                 sample_count * channels * type_size
             ] );
             internal_has_alpha = type_premultiply(
@@ -345,46 +360,29 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             std::swap( upload_data.data, preprocessed_data );
         }
         
-        // Don't bother storing alpha channel in OpenGL memory if it's all
-        // 100%
+        // Don't bother storing alpha channel in OpenGL memory if it's all 100%
         // TODO: Make this abstract to G = 0%, B = 0%, A = 100%
         if( !internal_has_alpha )
+        {
             switch( upload_data.gl_internal_format )
             {
-            case GL_RGBA:
-                upload_data.gl_internal_format = GL_RGB;
-                break;
-            case GL_RGBA8I:
-                upload_data.gl_internal_format = GL_RGB8I;
-                break;
-            case GL_RGBA8UI:
-                upload_data.gl_internal_format = GL_RGB8UI;
-                break;
-            case GL_RGBA16I:
-                upload_data.gl_internal_format = GL_RGB16I;
-                break;
-            case GL_RGBA16UI:
-                upload_data.gl_internal_format = GL_RGB16UI;
-                break;
-            case GL_RGBA32I:
-                upload_data.gl_internal_format = GL_RGB32I;
-                break;
-            case GL_RGBA32UI:
-                upload_data.gl_internal_format = GL_RGB32UI;
-                break;
-            case GL_RGBA16F:
-                upload_data.gl_internal_format = GL_RGB16F;
-                break;
-            case GL_RGBA32F:
-                upload_data.gl_internal_format = GL_RGB32F;
-                break;
+            case GL_RGBA    : upload_data.gl_internal_format = GL_RGB    ; break;
+            case GL_RGBA8I  : upload_data.gl_internal_format = GL_RGB8I  ; break;
+            case GL_RGBA8UI : upload_data.gl_internal_format = GL_RGB8UI ; break;
+            case GL_RGBA16I : upload_data.gl_internal_format = GL_RGB16I ; break;
+            case GL_RGBA16UI: upload_data.gl_internal_format = GL_RGB16UI; break;
+            case GL_RGBA32I : upload_data.gl_internal_format = GL_RGB32I ; break;
+            case GL_RGBA32UI: upload_data.gl_internal_format = GL_RGB32UI; break;
+            case GL_RGBA16F : upload_data.gl_internal_format = GL_RGB16F ; break;
+            case GL_RGBA32F : upload_data.gl_internal_format = GL_RGB32F ; break;
             }
+        }
         
         return upload_data;
     }
     
     texture_upload_data process_texture_data(
-        SDL_Surface*       sdl_surface,
+        SDL_Surface      * sdl_surface,
         texture_flags_type flags,
         GLint              gl_internal_format
     )
@@ -392,9 +390,11 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
         // Surface is passed as a pointer for consistency with the SDL API, so
         // we'll want to check if it's NULL
         if( !sdl_surface )
+        {
             throw std::runtime_error(
-                "null SDL_Surface* for yavsg::gl::process_texture_data()"
+                "null SDL_Surface* for yavsg::gl::process_texture_data()"s
             );
+        }
         
         GLenum incoming_format;
         GLenum incoming_type = GL_UNSIGNED_BYTE;
@@ -402,22 +402,22 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
         
         std::size_t channels;
         
-        if( sdl_surface -> format -> format == SDL_PIXELFORMAT_RGBA8888 )
+        if( sdl_surface->format->format == SDL_PIXELFORMAT_RGBA8888 )
         {
             incoming_format = GL_RGBA; // Rgb + A
             channels = 4;
         }
-        else if( sdl_surface -> format -> format == SDL_PIXELFORMAT_BGRA8888 )
+        else if( sdl_surface->format->format == SDL_PIXELFORMAT_BGRA8888 )
         {
             incoming_format = GL_BGRA; // Bgr + A
             channels = 4;
         }
-        else if( sdl_surface -> format -> format == SDL_PIXELFORMAT_RGB888 )
+        else if( sdl_surface->format->format == SDL_PIXELFORMAT_RGB888 )
         {
             incoming_format = GL_RGB;  // Rgb
             channels = 3;
         }
-        else if( sdl_surface -> format -> format == SDL_PIXELFORMAT_BGR888 )
+        else if( sdl_surface->format->format == SDL_PIXELFORMAT_BGR888 )
         {
             incoming_format = GL_BGR;  // Bgr
             channels = 3;
@@ -426,8 +426,8 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
         {
             SDL_PixelFormat* new_format = nullptr;
             
-            bool format_has_alpha;
-            switch( sdl_surface -> format -> format )
+            bool format_has_alpha = false;
+            switch( sdl_surface->format->format )
             {
             case SDL_PIXELFORMAT_ARGB4444:
             case SDL_PIXELFORMAT_RGBA4444:
@@ -446,9 +446,6 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             case SDL_PIXELFORMAT_ARGB2101010:
                 format_has_alpha = true;
                 break;
-            default:
-                format_has_alpha = false;
-                break;
             }
             
             if( format_has_alpha )
@@ -465,11 +462,13 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             }
             
             if( !new_format )
-                throw std::runtime_error(
+            {
+                throw std::runtime_error( fmt::format(
                     "couldn't allocate SDL format for "
-                    "yavsg::gl::process_texture_data(): "
-                    + std::string( SDL_GetError() )
-                );
+                        "yavsg::gl::process_texture_data(): {}"sv,
+                    SDL_GetError()
+                ) );
+            }
             
             converted_surface = SDL_ConvertSurface(
                 sdl_surface,
@@ -481,26 +480,28 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             SDL_FreeFormat( new_format );
             
             if( !converted_surface )
-                throw std::runtime_error(
+            {
+                throw std::runtime_error( fmt::format(
                     "couldn't convert SDL surface for "
-                    "yavsg::gl::process_texture_data(): "
-                    + std::string( SDL_GetError() )
-                );
+                        "yavsg::gl::process_texture_data(): {}"sv,
+                    SDL_GetError()
+                ) );
+            }
             
             std::swap( sdl_surface, converted_surface );
             SDL_FreeSurface( converted_surface );
         }
         
-        std::size_t width  = static_cast< std::size_t >( sdl_surface -> w );
-        std::size_t height = static_cast< std::size_t >( sdl_surface -> h );
+        std::size_t width  = static_cast< std::size_t >( sdl_surface->w );
+        std::size_t height = static_cast< std::size_t >( sdl_surface->h );
         
         // Copy data; need to do this because the data may/will be freed
         // elsewhere and be freed with `delete[]`, but SDL allocates with
         // `malloc()` since it's written in C
         auto sample_count = channels * width * height;
-        auto sdl_surface_data = new char[ sample_count ];
+        auto sdl_surface_data = new std::byte[ sample_count ];
         std::copy_n(
-            static_cast< char* >( sdl_surface -> pixels ),
+            static_cast< std::byte* >( sdl_surface->pixels ),
             sample_count,
             sdl_surface_data
         );
@@ -514,7 +515,7 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
                 height,
                 incoming_format,
                 incoming_type,
-                std::unique_ptr< char[] >{ sdl_surface_data }
+                std::unique_ptr< std::byte[] >{ sdl_surface_data }
             },
             flags
         );
@@ -523,18 +524,17 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
     void upload_texture_data(
         GLuint                         gl_id,
         texture_upload_data            upload_data,
-        const texture_filter_settings& settings
+        texture_filter_settings const& settings
     )
     {
         glBindTexture( GL_TEXTURE_2D, gl_id );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't bind texture "
-            + std::to_string( gl_id )
-            + " for yavsg::gl::upload_texture_data()"
-        );
+        YAVSG_GL_THROW_FOR_ERRORS( fmt::format(
+            "couldn't bind texture {} for yavsg::gl::upload_texture_data()"sv,
+            gl_id
+        ) );
         
-        assert( upload_data.width  <= std::numeric_limits< GLsizei >::max() );
-        assert( upload_data.height <= std::numeric_limits< GLsizei >::max() );
+        REQUIRE( upload_data.width  <= std::numeric_limits< GLsizei >::max() );
+        REQUIRE( upload_data.height <= std::numeric_limits< GLsizei >::max() );
         auto data_width  = static_cast< GLsizei >( upload_data.width  );
         auto data_height = static_cast< GLsizei >( upload_data.height );
         
@@ -549,73 +549,67 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             upload_data.gl_incoming_type,   // Pixel type
             upload_data.data.get()          // Pixel data
         );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't allocate "
-            + std::to_string( upload_data.width )
-            + "x"
-            + std::to_string( upload_data.height )
-            + " texture "
-            + std::to_string( gl_id )
-            + ( upload_data.data ? "" : " from null data" )
-            + " for yavsg::gl::process_texture_data()"
-        );
+        YAVSG_GL_THROW_FOR_ERRORS( fmt::format(
+            "couldn't allocate {}×{} texture {}{} for "
+                "yavsg::gl::upload_texture_data()"sv,
+            upload_data.width,
+            upload_data.height,
+            gl_id,
+            ( upload_data.data ? ""sv : " from null data"sv )
+        ) );
         
         set_bound_texture_filtering( settings );
     }
     
-    void set_bound_texture_filtering( const texture_filter_settings& settings )
+    void set_bound_texture_filtering( texture_filter_settings const& settings )
     {
         using magnify_mode = texture_filter_settings::magnify_mode;
         using  minify_mode = texture_filter_settings::minify_mode;
         using  mipmap_type = texture_filter_settings::mipmap_type;
         
-        GLint mag_filter;
-        GLint min_filter;
+        GLint mag_filter = 0;
+        GLint min_filter = 0;
         
         switch( settings.magnify )
         {
-        case magnify_mode::NEAREST:
-            mag_filter = GL_NEAREST;
-            break;
-        case magnify_mode::LINEAR:
-            mag_filter = GL_LINEAR;
-            break;
+        case magnify_mode::nearest: mag_filter = GL_NEAREST; break;
+        case magnify_mode::linear : mag_filter = GL_LINEAR ; break;
         }
         
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter );
         YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't set mag filter for yavsg::gl::set_texture_filtering()"
+            "couldn't set mag filter for yavsg::gl::set_texture_filtering()"s
         );
         
         switch( settings.minify )
         {
-        case minify_mode::NEAREST:
+        case minify_mode::nearest:
             {
                 switch( settings.mipmaps )
                 {
-                case mipmap_type::NEAREST:
+                case mipmap_type::nearest:
                     min_filter = GL_NEAREST_MIPMAP_NEAREST;
                     break;
-                case mipmap_type::LINEAR:
+                case mipmap_type::linear:
                     min_filter = GL_NEAREST_MIPMAP_LINEAR;
                     break;
-                case mipmap_type::NONE:
+                case mipmap_type::none:
                     min_filter = GL_NEAREST;
                     break;
                 }
             }
             break;
-        case minify_mode::LINEAR:
+        case minify_mode::linear:
             {
                 switch( settings.mipmaps )
                 {
-                case mipmap_type::NEAREST:
+                case mipmap_type::nearest:
                     min_filter = GL_LINEAR_MIPMAP_NEAREST;
                     break;
-                case mipmap_type::LINEAR:
+                case mipmap_type::linear:
                     min_filter = GL_LINEAR_MIPMAP_LINEAR;
                     break;
-                case mipmap_type::NONE:
+                case mipmap_type::none:
                     min_filter = GL_LINEAR;
                     break;
                 }
@@ -626,15 +620,15 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't set min filter for texture for "
-            "yavsg::gl::set_texture_filtering()"
+            "yavsg::gl::set_texture_filtering()"s
         );
         
-        if( settings.mipmaps != mipmap_type::NONE )
+        if( settings.mipmaps != mipmap_type::none )
         {
             glGenerateMipmap( GL_TEXTURE_2D );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't generate mipmaps for texture for "
-                "yavsg::gl::set_texture_filtering()"
+                "yavsg::gl::set_texture_filtering()"s
             );
             
             if( anisotropic_filtering_supported() )
@@ -652,4 +646,4 @@ namespace yavsg { namespace gl // Texture data processing implementation ///////
             }
         }
     }
-} }
+}

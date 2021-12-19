@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_MATH_MATRIX_HPP
-#define YAVSG_MATH_MATRIX_HPP
 
 
 #include <array>
@@ -9,7 +7,7 @@
 #include <sstream>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     template< typename T, unsigned int Rows, unsigned int Cols > class matrix
     {
@@ -184,7 +182,7 @@ namespace yavsg
 }
 
 
-namespace yavsg // Binary scalar operators /////////////////////////////////////
+namespace JadeMatrix::yavsg // Binary scalar operators /////////////////////////
 {
     #define DEFINE_OPERATORS_FOR_BINARY_SCALAR_OPERAND( OPERAND ) \
     template< \
@@ -243,7 +241,7 @@ namespace yavsg // Binary scalar operators /////////////////////////////////////
 }
 
 
-namespace yavsg // Assignment scalar operators /////////////////////////////////
+namespace JadeMatrix::yavsg // Assignment scalar operators /////////////////////
 {
     #define DEFINE_OPERATORS_FOR_ASSIGNMENT_SCALAR_OPERAND( OPERAND ) \
     template< \
@@ -274,7 +272,7 @@ namespace yavsg // Assignment scalar operators /////////////////////////////////
 }
 
 
-namespace yavsg // Binary matrix operators /////////////////////////////////////
+namespace JadeMatrix::yavsg // Binary matrix operators /////////////////////////
 {
     #define DEFINE_OPERATORS_FOR_BINARY_MATRIX_OPERAND( OPERAND ) \
     template< \
@@ -307,7 +305,7 @@ namespace yavsg // Binary matrix operators /////////////////////////////////////
 }
 
 
-namespace yavsg // Assignment matrix operators /////////////////////////////////
+namespace JadeMatrix::yavsg // Assignment matrix operators /////////////////////
 {
     #define DEFINE_OPERATORS_FOR_ASSIGNMENT_MATRIX_OPERAND( OPERAND ) \
     template< \
@@ -335,7 +333,7 @@ namespace yavsg // Assignment matrix operators /////////////////////////////////
 }
 
 
-namespace yavsg // Equality operators //////////////////////////////////////////
+namespace JadeMatrix::yavsg // Equality operators //////////////////////////////
 {
     template<
         typename L,
@@ -379,7 +377,7 @@ namespace yavsg // Equality operators //////////////////////////////////////////
 }
 
 
-namespace yavsg // Stream formatting operators & pretty-string /////////////////
+namespace JadeMatrix::yavsg // Stream formatting operators & pretty-string /////
 {
     template< typename T, unsigned int Rows, unsigned int Cols >
     std::ostream& operator<<(
@@ -511,6 +509,3 @@ namespace yavsg // Stream formatting operators & pretty-string /////////////////
         return matrix_string;
     }
 }
-
-
-#endif

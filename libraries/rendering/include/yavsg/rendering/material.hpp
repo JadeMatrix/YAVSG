@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_MATERIAL_HPP
-#define YAVSG_RENDERING_MATERIAL_HPP
 
 
 #include "shader_variable_names.hpp"
@@ -9,9 +7,9 @@
 #include <yavsg/gl/shader_program.hpp>
 #include <yavsg/gl/texture.hpp>
 
+#include <cstddef>  // size_t
 #include <string>
 #include <tuple>
-#include <utility>  // std::size_t
 
 
 // When setting up materials for a render pass, it's (purposefully) not possible
@@ -22,28 +20,29 @@
 // as they aren't meaningful in themselves anyways.
 
 
-namespace yavsg // Binding attributes //////////////////////////////////////////
+namespace JadeMatrix::yavsg // Binding attributes //////////////////////////////
 {
-    template< typename T, class AttributeBuffer, class Framebuffer >
-    struct bind_attributes
+    template<
+        typename T,
+        typename AttributeBuffer,
+        typename Framebuffer
+    > struct bind_attributes
     {
-        static const std::size_t increment_active_texture = 0;
+        static constexpr std::size_t increment_active_texture = 0;
         
-        template< std::size_t ActiveTexture >
-        static void bind_one(
+        template< std::size_t ActiveTexture > static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
-            const std::string& name,
-            const T& value
+            std::string const& name,
+            T           const& value
         )
         {
             program.template set_uniform< T >( name, value );
         }
         
-        template< std::size_t ActiveTexture >
-        static void bind_one(
+        template< std::size_t ActiveTexture > static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
             shader_string_id name_id,
-            const T& value
+            T         const& value
         )
         {
             bind_one< ActiveTexture >(
@@ -55,42 +54,41 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
     };
     
     template<
-        class AttributeBuffer,
-        class Framebuffer,
+        typename AttributeBuffer,
+        typename Framebuffer,
         typename DataType,
         std::size_t Channels
-    >
-    struct bind_attributes<
+    > struct bind_attributes<
         texture_reference< DataType, Channels >,
         AttributeBuffer,
         Framebuffer
     >
     {
-        static const std::size_t increment_active_texture = 1;
+        static constexpr std::size_t increment_active_texture = 1;
         
         using tex_ref_type = texture_reference< DataType, Channels >;
         
-        template< std::size_t ActiveTexture >
-        static void bind_one(
+        template< std::size_t ActiveTexture > static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
-            const std::string& name,
-            const tex_ref_type& reference_to_bind
+            std::string  const& name,
+            tex_ref_type const& reference_to_bind
         )
         {
             if( reference_to_bind )
             {
-                reference_to_bind -> template bind_as< ActiveTexture >();
+                reference_to_bind->template bind_as< ActiveTexture >();
                 program. template set_uniform< GLint >( name, ActiveTexture );
             }
             else
+            {
                 gl::unbind_texture< ActiveTexture >();
+            }
         }
         
-        template< std::size_t ActiveTexture >
-        static void bind_one(
+        template< std::size_t ActiveTexture > static void bind_one(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
-            shader_string_id name_id,
-            const tex_ref_type& reference_to_bind
+            shader_string_id    name_id,
+            tex_ref_type const& reference_to_bind
         )
         {
             bind_one< ActiveTexture >(
@@ -103,22 +101,20 @@ namespace yavsg // Binding attributes //////////////////////////////////////////
 }
 
 
-namespace yavsg // Specializable bind delegation ///////////////////////////////
+namespace JadeMatrix::yavsg // Specializable bind delegation ///////////////////
 {
     template<
         std::size_t FirstActiveTexture,
         std::size_t TupleIndex,
-        class TupleType,
-        class AttributeBuffer,
-        class Framebuffer
-    >
-    struct bind_material_values
+        typename    TupleType,
+        typename    AttributeBuffer,
+        typename    Framebuffer
+    > struct bind_material_values
     {
-        template< class IndexableNames >
-        static void bind(
+        template< typename IndexableNames > static void bind(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
-            const IndexableNames& names,
-            const TupleType& values
+            IndexableNames const& names,
+            TupleType      const& values
         )
         {
             using value_type = typename std::tuple_element<
@@ -152,11 +148,10 @@ namespace yavsg // Specializable bind delegation ///////////////////////////////
     
     template<
         std::size_t FirstActiveTexture,
-        class TupleType,
-        class AttributeBuffer,
-        class Framebuffer
-    >
-    struct bind_material_values<
+        typename    TupleType,
+        typename    AttributeBuffer,
+        typename    Framebuffer
+    > struct bind_material_values<
         FirstActiveTexture,
         0,
         TupleType,
@@ -164,27 +159,21 @@ namespace yavsg // Specializable bind delegation ///////////////////////////////
         Framebuffer
     >
     {
-        template< class IndexableNames >
-        static void bind(
+        template< typename IndexableNames > static void bind(
             gl::shader_program< AttributeBuffer, Framebuffer >&,
-            const IndexableNames&,
-            const TupleType&
+            IndexableNames const&,
+            TupleType      const&
         ) {}
     };
 }
 
 
-namespace yavsg // Material descriptor /////////////////////////////////////////
+namespace JadeMatrix::yavsg // Material descriptor /////////////////////////////
 {
     template< typename... Attributes > class material
     {
     public:
         using tuple_type = std::tuple< Attributes... >;
-        
-    protected:
-        tuple_type values;
-        
-    public:
         
         // TODO: enable move construction of values
         material( Attributes... args ) : values{ args... } {}
@@ -198,10 +187,9 @@ namespace yavsg // Material descriptor /////////////////////////////////////////
             class AttributeBuffer,
             class Framebuffer,
             class IndexableNames
-        >
-        void bind(
+        > void bind(
             gl::shader_program< AttributeBuffer, Framebuffer >& program,
-            const IndexableNames& names
+            IndexableNames const& names
         ) const
         {
             bind_material_values<
@@ -212,8 +200,8 @@ namespace yavsg // Material descriptor /////////////////////////////////////////
                 Framebuffer
             >::bind( program, names, values );
         }
+        
+    protected:
+        tuple_type values;
     };
 }
-
-
-#endif

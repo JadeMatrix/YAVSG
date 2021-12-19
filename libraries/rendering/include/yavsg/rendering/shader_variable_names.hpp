@@ -1,12 +1,10 @@
 #pragma once
-#ifndef YAVSG_RENDERING_SHADER_VARIABLE_NAMES_HPP
-#define YAVSG_RENDERING_SHADER_VARIABLE_NAMES_HPP
 
 
 #include <string>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     // Standard declarations in shaders
 #if 0
@@ -66,43 +64,40 @@ namespace yavsg
     
     enum class shader_string_id
     {
-        VERTEX_IN_POSITION,
-        VERTEX_IN_NORMAL,
-        VERTEX_IN_TANGENT,
-        VERTEX_IN_COLOR,
-        VERTEX_IN_TEXTURE,
+        vertex_in_position,
+        vertex_in_normal,
+        vertex_in_tangent,
+        vertex_in_color,
+        vertex_in_texture,
         
-        TRANSFORM_MODEL,
-        TRANSFORM_VIEW,
-        TRANSFORM_PROJECTION,
+        transform_model,
+        transform_view,
+        transform_projection,
         
-        VERTEX_OUT_POSITION,
-        VERTEX_OUT_COLOR,
-        VERTEX_OUT_TEXTURE,
-        VERTEX_OUT_TBN_MATRIX,
-        FRAGMENT_IN_POSITION,
-        FRAGMENT_IN_COLOR,
-        FRAGMENT_IN_TEXTURE,
-        FRAGMENT_IN_TBN_MATRIX,
+        vertex_out_position,
+        vertex_out_color,
+        vertex_out_texture,
+        vertex_out_tbn_matrix,
+        fragment_in_position,
+        fragment_in_color,
+        fragment_in_texture,
+        fragment_in_tbn_matrix,
         
-        MAP_COLOR,
-        MAP_NORMAL,
-        MAP_SPECULAR,
+        map_color,
+        map_normal,
+        map_specular,
         
-        CAMERA_POINT_NEAR,
-        CAMERA_POINT_FOCAL,
-        CAMERA_POINT_FAR,
+        camera_point_near,
+        camera_point_focal,
+        camera_point_far,
         
-        FRAMEBUFFER_SOURCE_COLOR,
-        FRAMEBUFFER_SOURCE_DEPTH,
-        FRAMEBUFFER_TARGET_WIDTH,
-        FRAMEBUFFER_TARGET_HEIGHT,
+        framebuffer_source_color,
+        framebuffer_source_depth,
+        framebuffer_target_width,
+        framebuffer_target_height,
         
-        FRAGMENT_OUT_COLOR
+        fragment_out_color
     };
     
     const std::string& shader_string( shader_string_id );
 }
-
-
-#endif

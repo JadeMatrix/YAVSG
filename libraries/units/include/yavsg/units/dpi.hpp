@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_UNITS_DPI_HPP
-#define YAVSG_UNITS_DPI_HPP
 
 
 #include "unit.hpp"
@@ -9,17 +7,17 @@
 #include <string>
 
 
-namespace yavsg { namespace dpi // Declarations ////////////////////////////////
+namespace JadeMatrix::yavsg::dpi // Declarations ///////////////////////////////
 {
     template< typename T > struct pixel_traits;
     template< typename T > struct point_traits;
     
     template< typename T > using pixels = unit< T, pixel_traits< T > >;
     template< typename T > using points = unit< T, point_traits< T > >;
-} }
+}
 
 
-namespace yavsg { namespace dpi
+namespace JadeMatrix::yavsg::dpi
 {
     template< typename T > struct pixel_traits
     {
@@ -66,14 +64,11 @@ namespace yavsg { namespace dpi
             return static_cast< O >( from );
         }
     };
-} }
+}
 
 
-namespace yavsg { namespace dpi // Prefixed versions of DPI units //////////////
+namespace JadeMatrix::yavsg::dpi // Prefixed versions of DPI units /////////////
 {
     ALL_PREFIXES_FOR_UNIT( pixel, pixels )
     ALL_PREFIXES_FOR_UNIT( point, points )
-} }
-
-
-#endif
+}

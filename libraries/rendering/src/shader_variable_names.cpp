@@ -3,112 +3,85 @@
 
 namespace
 {
-    std::string vertex_in_position_str        = "vertex_in_position";
-    std::string vertex_in_normal_str          = "vertex_in_normal";
-    std::string vertex_in_tangent_str         = "vertex_in_tangent";
-    std::string vertex_in_color_str           = "vertex_in_color";
-    std::string vertex_in_texture_str         = "vertex_in_texture";
+    using namespace std::string_literals;
     
-    std::string transform_model_str           = "transform.model";
-    std::string transform_view_str            = "transform.view";
-    std::string transform_projection_str      = "transform.projection";
+    auto const vertex_in_position        = "vertex_in_position"s;
+    auto const vertex_in_normal          = "vertex_in_normal"s;
+    auto const vertex_in_tangent         = "vertex_in_tangent"s;
+    auto const vertex_in_color           = "vertex_in_color"s;
+    auto const vertex_in_texture         = "vertex_in_texture"s;
     
-    std::string position_str                  = "position";
-    std::string color_str                     = "color";
-    std::string texture_str                   = "texture";
-    std::string TBN_matrix_str                = "TBN_matrix";
-    std::string vertex_out_position_str       =  "vertex_out." + position_str;
-    std::string vertex_out_color_str          =  "vertex_out." + color_str;
-    std::string vertex_out_texture_str        =  "vertex_out." + texture_str;
-    std::string vertex_out_TBN_matrix_str     =  "vertex_out." + TBN_matrix_str;
-    std::string fragment_in_position_str      = "fragment_in." + position_str;
-    std::string fragment_in_color_str         = "fragment_in." + color_str;
-    std::string fragment_in_texture_str       = "fragment_in." + texture_str;
-    std::string fragment_in_TBN_matrix_str    = "fragment_in." + TBN_matrix_str;
+    auto const transform_model           = "transform.model"s;
+    auto const transform_view            = "transform.view"s;
+    auto const transform_projection      = "transform.projection"s;
     
-    std::string map_color_str                 = "map_color";
-    std::string map_normal_str                = "map_normal";
-    std::string map_specular_str              = "map_specular";
+    auto const position                  = "position"s;
+    auto const color                     = "color"s;
+    auto const texture                   = "texture"s;
+    auto const TBN_matrix                = "TBN_matrix"s;
+    auto const vertex_out_position       =  "vertex_out."s + position;
+    auto const vertex_out_color          =  "vertex_out."s + color;
+    auto const vertex_out_texture        =  "vertex_out."s + texture;
+    auto const vertex_out_TBN_matrix     =  "vertex_out."s + TBN_matrix;
+    auto const fragment_in_position      = "fragment_in."s + position;
+    auto const fragment_in_color         = "fragment_in."s + color;
+    auto const fragment_in_texture       = "fragment_in."s + texture;
+    auto const fragment_in_TBN_matrix    = "fragment_in."s + TBN_matrix;
     
-    std::string camera_point_near_str         = "camera_point.near";
-    std::string camera_point_focal_str        = "camera_point.focal";
-    std::string camera_point_far_str          = "camera_point.far";
+    auto const map_color                 = "map_color"s;
+    auto const map_normal                = "map_normal"s;
+    auto const map_specular              = "map_specular"s;
     
-    std::string framebuffer_source_color_str  = "framebuffer_source_color";
-    std::string framebuffer_source_depth_str  = "framebuffer_source_depth";
-    std::string framebuffer_target_width_str  = "framebuffer_target.width";
-    std::string framebuffer_target_height_str = "framebuffer_target.height";
+    auto const camera_point_near         = "camera_point.near"s;
+    auto const camera_point_focal        = "camera_point.focal"s;
+    auto const camera_point_far          = "camera_point.far"s;
     
-    std::string fragment_out_color_str        = "fragment_out_color";
+    auto const framebuffer_source_color  = "framebuffer_source_color"s;
+    auto const framebuffer_source_depth  = "framebuffer_source_depth"s;
+    auto const framebuffer_target_width  = "framebuffer_target.width"s;
+    auto const framebuffer_target_height = "framebuffer_target.height"s;
+    
+    auto const fragment_out_color        = "fragment_out_color"s;
 }
 
 
-namespace yavsg
+const std::string& JadeMatrix::yavsg::shader_string( shader_string_id id )
 {
-    const std::string& shader_string( shader_string_id id )
+    switch( id )
     {
-        switch( id )
-        {
-        case shader_string_id::VERTEX_IN_POSITION:
-            return vertex_in_position_str;
-        case shader_string_id::VERTEX_IN_NORMAL:
-            return vertex_in_normal_str;
-        case shader_string_id::VERTEX_IN_TANGENT:
-            return vertex_in_tangent_str;
-        case shader_string_id::VERTEX_IN_COLOR:
-            return vertex_in_color_str;
-        case shader_string_id::VERTEX_IN_TEXTURE:
-            return vertex_in_texture_str;
-        
-        case shader_string_id::TRANSFORM_MODEL:
-            return transform_model_str;
-        case shader_string_id::TRANSFORM_VIEW:
-            return transform_view_str;
-        case shader_string_id::TRANSFORM_PROJECTION:
-            return transform_projection_str;
-        
-        case shader_string_id::VERTEX_OUT_POSITION:
-            return vertex_out_position_str;
-        case shader_string_id::VERTEX_OUT_COLOR:
-            return vertex_out_color_str;
-        case shader_string_id::VERTEX_OUT_TEXTURE:
-            return vertex_out_texture_str;
-        case shader_string_id::VERTEX_OUT_TBN_MATRIX:
-            return vertex_out_TBN_matrix_str;
-        case shader_string_id::FRAGMENT_IN_POSITION:
-            return fragment_in_position_str;
-        case shader_string_id::FRAGMENT_IN_COLOR:
-            return fragment_in_color_str;
-        case shader_string_id::FRAGMENT_IN_TEXTURE:
-            return fragment_in_texture_str;
-        case shader_string_id::FRAGMENT_IN_TBN_MATRIX:
-            return fragment_in_TBN_matrix_str;
-        
-        case shader_string_id::MAP_COLOR:
-            return map_color_str;
-        case shader_string_id::MAP_NORMAL:
-            return map_normal_str;
-        case shader_string_id::MAP_SPECULAR:
-            return map_specular_str;
-        
-        case shader_string_id::CAMERA_POINT_NEAR:
-            return camera_point_near_str;
-        case shader_string_id::CAMERA_POINT_FOCAL:
-            return camera_point_focal_str;
-        case shader_string_id::CAMERA_POINT_FAR:
-            return camera_point_far_str;
-        
-        case shader_string_id::FRAMEBUFFER_SOURCE_COLOR:
-            return framebuffer_source_color_str;
-        case shader_string_id::FRAMEBUFFER_SOURCE_DEPTH:
-            return framebuffer_source_depth_str;
-        case shader_string_id::FRAMEBUFFER_TARGET_WIDTH:
-            return framebuffer_target_width_str;
-        case shader_string_id::FRAMEBUFFER_TARGET_HEIGHT:
-            return framebuffer_target_height_str;
-        
-        case shader_string_id::FRAGMENT_OUT_COLOR:
-            return fragment_out_color_str;
-        }
+        using ssid = shader_string_id;
+    case ssid::vertex_in_position       : return vertex_in_position;
+    case ssid::vertex_in_normal         : return vertex_in_normal;
+    case ssid::vertex_in_tangent        : return vertex_in_tangent;
+    case ssid::vertex_in_color          : return vertex_in_color;
+    case ssid::vertex_in_texture        : return vertex_in_texture;
+    
+    case ssid::transform_model          : return transform_model;
+    case ssid::transform_view           : return transform_view;
+    case ssid::transform_projection     : return transform_projection;
+    
+    case ssid::vertex_out_position      : return vertex_out_position;
+    case ssid::vertex_out_color         : return vertex_out_color;
+    case ssid::vertex_out_texture       : return vertex_out_texture;
+    case ssid::vertex_out_tbn_matrix    : return vertex_out_TBN_matrix;
+    case ssid::fragment_in_position     : return fragment_in_position;
+    case ssid::fragment_in_color        : return fragment_in_color;
+    case ssid::fragment_in_texture      : return fragment_in_texture;
+    case ssid::fragment_in_tbn_matrix   : return fragment_in_TBN_matrix;
+    
+    case ssid::map_color                : return map_color;
+    case ssid::map_normal               : return map_normal;
+    case ssid::map_specular             : return map_specular;
+    
+    case ssid::camera_point_near        : return camera_point_near;
+    case ssid::camera_point_focal       : return camera_point_focal;
+    case ssid::camera_point_far         : return camera_point_far;
+    
+    case ssid::framebuffer_source_color : return framebuffer_source_color;
+    case ssid::framebuffer_source_depth : return framebuffer_source_depth;
+    case ssid::framebuffer_target_width : return framebuffer_target_width;
+    case ssid::framebuffer_target_height: return framebuffer_target_height;
+    
+    case ssid::fragment_out_color       : return fragment_out_color;
     }
 }

@@ -1,12 +1,10 @@
 #pragma once
-#ifndef YAVSG_EVENTS_EVENT_LISTENER_HPP
-#define YAVSG_EVENTS_EVENT_LISTENER_HPP
 
 
 #include <yavsg/tasking/task.hpp>
 
-#include <functional>   // std::function
-#include <utility>      // std::size_t
+#include <functional>   // function
+#include <utility>      // size_t, swap
 
 
 /*
@@ -19,33 +17,30 @@ event callback wishes to change the event handling system.
 */
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     using listener_id = std::size_t;
     
     template< class EventType > class event_listener
     {
-    protected:
-        listener_id _id;
-        
     public:
         event_listener(
-            std::function< void( const EventType& ) >,
-            task_flags_type flags = task_flag::NONE
+            std::function< void( EventType const& ) >,
+            task_flags_type flags = task_flag::none
         );
         
-        event_listener( event_listener&& ) = default;
-        event_listener( const event_listener& ) = delete;
+        event_listener( event_listener     && ) = default;
+        event_listener( event_listener const& ) = delete;
         
         ~event_listener();
         
         event_listener& operator=( event_listener&& o )
         {
-            std::swap( _id, o._id );
+            std::swap( id_, o.id_ );
             return *this;
         }
+        
+    private:
+        listener_id id_;
     };
 }
-
-
-#endif

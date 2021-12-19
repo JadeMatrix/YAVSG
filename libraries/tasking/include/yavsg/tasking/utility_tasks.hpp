@@ -1,14 +1,12 @@
 #pragma once
-#ifndef YAVSG_TASKING_UTILITY_TASKS_HPP
-#define YAVSG_TASKING_UTILITY_TASKS_HPP
 
 
 #include "task.hpp"
 
-#include <functional>   // std::function
+#include <functional>   // function
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     // This just triggers worker shutdown internally -- stop_task_system() must
     // still be called as normal
@@ -16,8 +14,8 @@ namespace yavsg
     {
     public:
         // Implemented in "src/tasking/tasking.cpp"
-        virtual bool operator()();
-        virtual task_flags_type flags() const;
+        bool operator()() override;
+        task_flags_type flags() const override;
     };
     
     // General-purpose callback-based task for lambdas etc; typically an
@@ -28,26 +26,23 @@ namespace yavsg
         using callback_type = std::function< bool( void ) >;
         
     protected:
-        callback_type _callback;
-        task_flags_type _flags;
+        callback_type callback_;
+        task_flags_type flags_;
         
     public:
         callback_task( callback_type c, task_flags_type f ) :
-            _callback( c ),
-            _flags( f )
+            callback_( c ),
+            flags_( f )
         {}
         
-        virtual task_flags_type flags() const
+        task_flags_type flags() const override
         {
-            return _flags;
+            return flags_;
         }
         
-        virtual bool operator()()
+        bool operator()() override
         {
-            return _callback();
+            return callback_();
         }
     };
 }
-
-
-#endif

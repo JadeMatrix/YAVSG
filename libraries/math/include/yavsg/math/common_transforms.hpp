@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_MATH_COMMON_TRANSFORMS_HPP
-#define YAVSG_MATH_COMMON_TRANSFORMS_HPP
 
 
 #include "matrix.hpp"
@@ -11,7 +9,7 @@
 #include <yavsg/units/angular.hpp>
 
 
-namespace yavsg // Views ///////////////////////////////////////////////////////
+namespace JadeMatrix::yavsg // Views ///////////////////////////////////////////
 {
     // Look-at with camera at 0,0,0 that expects the world to be transformed
     // separately
@@ -61,7 +59,7 @@ namespace yavsg // Views ///////////////////////////////////////////////////////
 }
 
 
-namespace yavsg // Projections /////////////////////////////////////////////////
+namespace JadeMatrix::yavsg // Projections /////////////////////////////////////
 {
     // Basic orthographic with 0,0 at the center
     template<
@@ -151,6 +149,3 @@ namespace yavsg // Projections /////////////////////////////////////////////////
         };
     }
 }
-
-
-#endif

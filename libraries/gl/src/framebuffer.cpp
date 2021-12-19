@@ -3,76 +3,121 @@
 // For yavsg::gl::write_only_framebuffer::dump_BMP()
 #include <yavsg/sdl/sdl.hpp>
 
+#include <fmt/format.h>         // format
+#include <doctest/doctest.h>    // REQUIRE
+
 #include <assert.h>
 #include <fstream>
-#include <iomanip>  // std::setw(), std::setfill()
-#include <limits>   // std::numeric_limits
+#include <iomanip>      // std::setw(), std::setfill()
+#include <limits>       // std::numeric_limits
+#include <mutex>        // std::call_once, std::once_flag
 #include <sstream>
+#include <stdexcept>    // std::runtime_error
 #include <vector>
 
 
-namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
+namespace
+{
+    using namespace std::string_literals;
+    using namespace std::string_view_literals;
+    
+    std::once_flag gl_max_got_flags;
+}
+
+
+namespace JadeMatrix::yavsg::gl
+{
+    GLenum color_attachment_name( std::size_t nth )
+    {
+        static GLint max_color_attachments;
+        
+        std::call_once(
+            gl_max_got_flags,
+            [](){
+                glGetIntegerv(
+                    GL_MAX_COLOR_ATTACHMENTS,
+                    &max_color_attachments
+                );
+                YAVSG_GL_THROW_FOR_ERRORS(
+                    "couldn't read GL_MAX_COLOR_ATTACHMENTS for "
+                    "yavsg::gl::color_attachment_name()"s
+                );
+                REQUIRE( max_color_attachments > 0 );
+            }
+        );
+        
+        static_assert(
+              std::numeric_limits< GLint       >::max()
+            < std::numeric_limits< std::size_t >::max()
+        );
+        if( nth >= static_cast< std::size_t >( max_color_attachments ) )
+        {
+            throw std::runtime_error(fmt::format(
+                "cannot have more than {} color attachments"sv,
+                max_color_attachments
+            ));
+        }
+        
+        return static_cast< GLenum >( GL_COLOR_ATTACHMENT0 + nth );
+    }
+}
+
+
+namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
 {
     write_only_framebuffer& write_only_framebuffer::operator =(
         write_only_framebuffer&& o
     )
     {
-        std::swap( _width         , o._width          );
-        std::swap( _height        , o._height         );
-        std::swap( _alpha_blending, o._alpha_blending );
-        std::swap( gl_id          , o.gl_id           );
+        std::swap( width_         , o.width_          );
+        std::swap( height_        , o.height_         );
+        std::swap( alpha_blending_, o.alpha_blending_ );
+        std::swap( gl_id_         , o.gl_id_          );
         
         return *this;
     }
     
     write_only_framebuffer::write_only_framebuffer(
-        GLuint gl_id,
+        GLuint      gl_id,
         std::size_t num_color_targets,
         std::size_t width,
         std::size_t height
     ) :
-        _width ( width  ),
-        _height( height ),
-        gl_id  ( gl_id  ),
-        num_color_targets( num_color_targets )
+        num_color_targets( num_color_targets ),
+        width_ ( width  ),
+        height_( height ),
+        gl_id_ ( gl_id  )
     {
-        /*
-        _width
-        _height
-        _alpha_blending
-        gl_id
-        num_color_targets
-        */
         alpha_blending( alpha_blend_mode::DISABLED );
     }
     
     std::size_t write_only_framebuffer::width() const
     {
-        return _width;
+        return width_;
     }
     
     std::size_t write_only_framebuffer::height() const
     {
-        return _height;
+        return height_;
     }
     
     void write_only_framebuffer::bind()
     {
-        glBindFramebuffer( GL_FRAMEBUFFER, gl_id );
+        glBindFramebuffer( GL_FRAMEBUFFER, gl_id_ );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't bind framebuffer "
-            + std::to_string( gl_id )
-            + std::string( gl_id == 0 ? " (default)" : "" )
+            + std::to_string( gl_id_ )
+            + std::string( gl_id_ == 0 ? " (default)" : "" )
             + " for yavsg::gl::base_framebuffer::bind()"
         );
         
-        if( _alpha_blending == alpha_blend_mode::DISABLED )
+        if( alpha_blending_ == alpha_blend_mode::DISABLED )
         {
             glDisablei( GL_BLEND, 0 );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't disable blending for framebuffer "
-                + std::to_string( gl_id )
-                + std::string( gl_id == 0 ? " (default)" : "" )
+                + std::to_string( gl_id_ )
+                + std::string( gl_id_ == 0 ? " (default)" : "" )
                 + " for yavsg::gl::base_framebuffer::alpha_blending()"
             );
         }
@@ -81,26 +126,26 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
             glEnablei( GL_BLEND, 0 );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't enable blending for framebuffer "
-                + std::to_string( gl_id )
-                + std::string( gl_id == 0 ? " (default)" : "" )
+                + std::to_string( gl_id_ )
+                + std::string( gl_id_ == 0 ? " (default)" : "" )
                 + " for yavsg::gl::base_framebuffer::alpha_blending()"
             );
         }
         
-        if( _alpha_blending != alpha_blend_mode::DISABLED )
+        if( alpha_blending_ != alpha_blend_mode::DISABLED )
         {
             // TODO: glBlendEquationSeparatei( 0, GL_FUNC_ADD, GL_FUNC_ADD );
             glBlendEquationSeparate( GL_FUNC_ADD, GL_FUNC_ADD );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't set separate blending equations for framebuffer "
-                + std::to_string( gl_id )
-                + std::string( gl_id == 0 ? " (default)" : "" )
+                + std::to_string( gl_id_ )
+                + std::string( gl_id_ == 0 ? " (default)" : "" )
                 + " for yavsg::gl::base_framebuffer::alpha_blending()"
             );
             
             // Use a switch to get warnings about possible unhandled cases in
             // the future
-            switch( _alpha_blending )
+            switch( alpha_blending_ )
             {
             case alpha_blend_mode::DISABLED:
                 // Shouldn't really be possible, but makes the compiler shut
@@ -162,8 +207,8 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
             }
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't set separate blending functions for framebuffer "
-                + std::to_string( gl_id )
-                + std::string( gl_id == 0 ? " (default)" : "" )
+                + std::to_string( gl_id_ )
+                + std::string( gl_id_ == 0 ? " (default)" : "" )
                 + " for yavsg::gl::base_framebuffer::alpha_blending()"
             );
         }
@@ -173,13 +218,13 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
         alpha_blend_mode mode
     )
     {
-        _alpha_blending = mode;
-        return _alpha_blending;
+        alpha_blending_ = mode;
+        return alpha_blending_;
     }
     
     alpha_blend_mode write_only_framebuffer::alpha_blending() const
     {
-        return _alpha_blending;
+        return alpha_blending_;
     }
     
     // TODO: make this a debug function
@@ -187,13 +232,13 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
         const std::string& descriptive_name
     )
     {
-        assert( _width  <= std::numeric_limits< GLsizei >::max() );
-        assert( _height <= std::numeric_limits< GLsizei >::max() );
-        auto w = static_cast< GLsizei >( _width  );
-        auto h = static_cast< GLsizei >( _height );
+        assert( width_  <= std::numeric_limits< GLsizei >::max() );
+        assert( height_ <= std::numeric_limits< GLsizei >::max() );
+        auto w = static_cast< GLsizei >( width_  );
+        auto h = static_cast< GLsizei >( height_ );
         
         // TODO: make class member & only realloc when buffer size increases
-        std::vector< char > pixels( _width * _height * 4 );
+        std::vector< char > pixels( width_ * height_ * 4 );
         
         glReadPixels(
             0,
@@ -253,4 +298,4 @@ namespace yavsg { namespace gl // Write-only framebuffer implementation ////////
                 + std::string( SDL_GetError() )
             );
     }
-} }
+}

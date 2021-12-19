@@ -1,29 +1,25 @@
 #pragma once
-#ifndef YAVSG_GL_SHADER_HPP
-#define YAVSG_GL_SHADER_HPP
 
 
 #include <yavsg/gl_wrap.hpp>
 
+#include <filesystem>
 #include <string>
 
 
-namespace yavsg { namespace gl
+namespace JadeMatrix::yavsg::gl
 {
     class shader
     {
     public:
         GLuint id;
         
-        shader( GLenum shader_type, const std::string& source );
+        shader( GLenum shader_type, std::string const& source );
         ~shader();
         
         static shader from_file(
-            GLenum shader_type,
-            const std::string& filename
+            GLenum                       shader_type,
+            std::filesystem::path const& filename
         );
     };
-} }
-
-
-#endif
+}

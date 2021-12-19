@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_TEXTURE_REFERENCE_HPP
-#define YAVSG_RENDERING_TEXTURE_REFERENCE_HPP
 
 
 #include <yavsg/gl/texture.hpp>
@@ -10,14 +8,16 @@
 // TODO: Don't have this in the header
 #include <SDL2/SDL_image.h>
 
-#include <exception>    // std::invalid_argument
+#include <cstddef>      // size_t
+#include <exception>    // invalid_argument, runtime_error
+#include <filesystem>
+#include <memory>       // shared_ptr, make_shared, unique_ptr, make_unique
 #include <mutex>
 #include <string>
-// std::shared_ptr, std::make_shared(), std::unique_ptr, std::make_unique()
-#include <memory>
+#include <utility>      // move
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     template< typename DataType, std::size_t Channels > class texture_reference
     {
@@ -27,7 +27,7 @@ namespace yavsg
         class shared_data
         {
         public:
-            std::mutex                      data_mutex;
+            std::mutex mutable data_mutex;
             // TODO: std::unique_ptr< texture_type > texture;
             texture_type* texture;
             
@@ -35,19 +35,15 @@ namespace yavsg
             ~shared_data();
         };
         
-    protected:
-        std::shared_ptr< shared_data > _shared_data;
-        
-    public:
         texture_reference();
-        texture_reference( const texture_reference& );
+        texture_reference( texture_reference const& );
         
         texture_reference& operator=( texture_reference&& ) = default;
         
         static texture_reference from_file(
-            const std::string                & filename,
-            const gl::texture_filter_settings& settings,
-            gl::texture_flags_type             flags = gl::texture_flag::NONE
+            std::filesystem::path              filename,
+            gl::texture_filter_settings const& settings,
+            gl::texture_flags_type             flags = gl::texture_flag::none
         );
         
         // Checks if this refers to a texture ready for rendering
@@ -58,23 +54,26 @@ namespace yavsg
         // valid, the referenced texture will remain so as long as the reference
         // object exists.
         texture_type* operator ->();
-        const texture_type* operator ->() const;
+        texture_type const* operator ->() const;
         texture_type& operator *()
         {
-            return *( this -> operator->() );
+            return *( this->operator->() );
         }
-        const texture_type& operator *() const
+        texture_type const& operator *() const
         {
-            return *( this -> operator->() );
+            return *( this->operator->() );
         }
+        
+    protected:
+        std::shared_ptr< shared_data > shared_data_;
     };
 }
 
 
-namespace yavsg // Tasks ///////////////////////////////////////////////////////
+namespace JadeMatrix::yavsg // Tasks ///////////////////////////////////////////
 {
     template<
-        typename DataType,
+        typename    DataType,
         std::size_t Channels
     > class load_texture_file_task : public task
     {
@@ -85,34 +84,37 @@ namespace yavsg // Tasks ///////////////////////////////////////////////////////
         >::shared_data;
         
     protected:
-        std::shared_ptr< shared_data > _shared_data;
-        std::string                    _filename;
-        gl::texture_filter_settings    _settings;
-        gl::texture_flags_type         _flags;
+        std::shared_ptr< shared_data > shared_data_;
+        std::filesystem::path          filename_;
+        gl::texture_filter_settings    settings_;
+        gl::texture_flags_type         flags_;
         
     public:
         load_texture_file_task(
             std::shared_ptr< shared_data >     sd,
-            const std::string                & filename,
+            std::filesystem::path              filename,
             const gl::texture_filter_settings& settings,
             gl::texture_flags_type             flags
         ) :
-            _shared_data{ sd       },
-            _filename   { filename },
-            _settings   { settings },
-            _flags      { flags    }
+            shared_data_{ sd                    },
+            filename_   { std::move( filename ) },
+            settings_   { settings              },
+            flags_      { flags                 }
         {
-            if( !_shared_data )
+            using namespace std::string_literals;
+            if( !shared_data_ )
+            {
                 throw std::invalid_argument(
-                    "shared_data to load_texture_file_task is null"
+                    "shared_data to load_texture_file_task is null"s
                 );
+            }
         }
         
-        virtual bool operator()();
+        bool operator()() override;
     };
     
     template<
-        typename DataType,
+        typename    DataType,
         std::size_t Channels
     > class upload_texture_data_task : public task
     {
@@ -123,10 +125,10 @@ namespace yavsg // Tasks ///////////////////////////////////////////////////////
         >::shared_data;
         
     protected:
-        std::shared_ptr< shared_data > _shared_data;
-        gl::texture_upload_data        _upload_data;
-        gl::texture_filter_settings    _settings;
-        gl::texture_flags_type         _flags;
+        std::shared_ptr< shared_data > shared_data_;
+        gl::texture_upload_data        upload_data_;
+        gl::texture_filter_settings    settings_;
+        gl::texture_flags_type         flags_;
         
     public:
         upload_texture_data_task(
@@ -135,27 +137,30 @@ namespace yavsg // Tasks ///////////////////////////////////////////////////////
             gl::texture_filter_settings    settings,
             gl::texture_flags_type         flags
         ) :
-            _shared_data{ sd                       },
-            _upload_data{ std::move( upload_data ) },
-            _settings   { settings                 },
-            _flags      { flags                    }
+            shared_data_{ sd                       },
+            upload_data_{ std::move( upload_data ) },
+            settings_   { settings                 },
+            flags_      { flags                    }
         {
-            if( !_shared_data )
+            using namespace std::string_literals;
+            if( !shared_data_ )
+            {
                 throw std::invalid_argument(
-                    "shared_data to upload_texture_data_task is null"
+                    "shared_data to upload_texture_data_task is null"s
                 );
+            }
         }
         
-        virtual task_flags_type flags() const
+        task_flags_type flags() const override
         {
-            return task_flag::GPU_THREAD;
+            return task_flag::gpu_thread;
         }
         
-        virtual bool operator()();
+        bool operator()() override;
     };
     
     template<
-        typename DataType,
+        typename   DataType,
         std::size_t Channels
     > class destroy_texture_data_task : public task
     {
@@ -166,218 +171,261 @@ namespace yavsg // Tasks ///////////////////////////////////////////////////////
         >::shared_data;
         
     protected:
-        // TODO: std::unique_ptr< gl::texture< DataType, Channels > > _texture;
-        gl::texture< DataType, Channels >* _texture;
+        // TODO: std::unique_ptr< gl::texture< DataType, Channels > > texture_;
+        gl::texture< DataType, Channels >* texture_;
         
     public:
         destroy_texture_data_task(
             // TODO: std::unique_ptr< gl::texture< DataType, Channels > > texture
             gl::texture< DataType, Channels >* texture
-        ) : _texture{ texture }
+        ) : texture_{ texture }
         {}
         
-        virtual task_flags_type flags() const
+        task_flags_type flags() const override
         {
-            return task_flag::GPU_THREAD;
+            return task_flag::gpu_thread;
         }
         
-        virtual bool operator()();
+        bool operator()() override;
     };
 }
 
 
-namespace yavsg // Texture reference shared data implementation ////////////////
+// Texture reference shared data implementation ////////////////////////////////
+
+template<
+    typename    DataType,
+    std::size_t Channels
+> JadeMatrix::yavsg::texture_reference<
+    DataType,
+    Channels
+>::shared_data::shared_data() :
+    texture( nullptr )
+{}
+
+template<
+    typename    DataType,
+    std::size_t Channels
+> JadeMatrix::yavsg::texture_reference<
+    DataType,
+    Channels
+>::shared_data::~shared_data()
 {
-    template< typename DataType, std::size_t Channels >
-    texture_reference< DataType, Channels >::shared_data::shared_data() :
-        texture( nullptr )
-    {}
-    
-    template< typename DataType, std::size_t Channels >
-    texture_reference< DataType, Channels >::shared_data::~shared_data()
+    // The shared data being destroyed means that nothing refers to the texture
+    // anymore, including any tasks operating on it
+    std::unique_lock lock( data_mutex );
+    if( texture )
     {
-        // The shared data being destroyed means that nothing refers to the
-        // texture anymore, including any tasks operating on it
-        std::lock_guard< std::mutex > lock( data_mutex );
-        if( texture )
-            submit_task( std::make_unique<
-                destroy_texture_data_task< DataType, Channels >
-            >( texture ) );
-    }
-}
-
-
-namespace yavsg // Texture reference implementation ////////////////////////////
-{
-    template< typename DataType, std::size_t Channels >
-    texture_reference< DataType, Channels >::texture_reference()
-    {}
-    
-    template< typename DataType, std::size_t Channels >
-    texture_reference< DataType, Channels >::texture_reference(
-        const texture_reference& o
-    ) : _shared_data( o._shared_data )
-    {}
-    
-    template< typename DataType, std::size_t Channels >
-    texture_reference< DataType, Channels >::operator bool() const
-    {
-        if( _shared_data )
-        {
-            std::lock_guard< std::mutex > lock( const_cast< std::mutex& >(
-                _shared_data -> data_mutex
-            ) );
-            return static_cast< bool >( _shared_data -> texture );
-        }
-        
-        return false;
-    }
-    
-    template< typename DataType, std::size_t Channels >
-    typename texture_reference<
-        DataType,
-        Channels
-    >::texture_type* texture_reference< DataType, Channels >::operator ->()
-    {
-        if( _shared_data )
-        {
-            std::lock_guard< std::mutex > lock( _shared_data -> data_mutex );
-            if( _shared_data -> texture )
-                return _shared_data -> texture;
-        }
-        
-        throw std::invalid_argument(
-            "yavsg::gl::texture_reference does not refer to a texture ready "
-            "for rendering"
-        );
-    }
-    
-    template< typename DataType, std::size_t Channels >
-    const typename texture_reference<
-        DataType,
-        Channels
-    >::texture_type* texture_reference<
-        DataType,
-        Channels
-    >::operator ->() const
-    {
-        if( _shared_data )
-        {
-            std::lock_guard< std::mutex > lock( const_cast< std::mutex& >(
-                _shared_data -> data_mutex
-            ) );
-            if( _shared_data -> texture )
-                return _shared_data -> texture;
-        }
-        
-        throw std::invalid_argument(
-            "yavsg::gl::texture_reference does not refer to a texture ready "
-            "for rendering"
-        );
-    }
-}
-
-
-namespace yavsg // Texture reference static methods implementation /////////////
-{
-    template< typename DataType, std::size_t Channels >
-    texture_reference<
-        DataType,
-        Channels
-    > texture_reference< DataType, Channels >::from_file(
-        const std::string                & filename,
-        const gl::texture_filter_settings& settings,
-        gl::texture_flags_type             flags
-    )
-    {
-        using ref_type = texture_reference< DataType, Channels >;
-        
-        ref_type ref;
-        
-        ref._shared_data = std::make_shared< ref_type::shared_data >();
-        
         submit_task( std::make_unique<
-            load_texture_file_task< DataType, Channels >
-        >(
-            ref._shared_data,
-            filename,
-            settings,
-            flags
-        ) );
-        
-        return ref;
+            destroy_texture_data_task< DataType, Channels >
+        >( texture ) );
     }
 }
 
 
-namespace yavsg // Task implementations ////////////////////////////////////////
+// Texture reference implementation ////////////////////////////////////////////
+
+template<
+    typename    DataType,
+    std::size_t Channels
+> JadeMatrix::yavsg::texture_reference<
+    DataType,
+    Channels
+>::texture_reference()
+{}
+
+template<
+    typename    DataType,
+    std::size_t Channels
+> JadeMatrix::yavsg::texture_reference<
+    DataType,
+    Channels
+>::texture_reference( texture_reference const& o ) :
+    shared_data_( o.shared_data_ )
+{}
+
+template<
+    typename    DataType,
+    std::size_t Channels
+> JadeMatrix::yavsg::texture_reference<
+    DataType,
+    Channels
+>::operator bool() const
 {
-    template<
-        typename DataType,
-        std::size_t Channels
-    > bool load_texture_file_task< DataType, Channels >::operator()()
+    if( shared_data_ )
     {
-        SDL_Surface* sdl_surface = IMG_Load(
-            _filename.c_str()
-        );
-        if( !sdl_surface )
-            // TODO: graceful failure (just don't load)
-            throw std::runtime_error(
-                "failed to load texture \""
-                + _filename
-                + "\": "
-                + IMG_GetError()
-            );
-        
-        using format_traits = gl::texture_format_traits< DataType, Channels >;
-        
-        submit_task( std::make_unique<
-            upload_texture_data_task< DataType, Channels >
-        >(
-            _shared_data,
-            gl::process_texture_data(
-                sdl_surface,
-                _flags,
-                format_traits::gl_internal_format
-            ),
-            _settings,
-            _flags
-        ) );
-        
-        return false;
+        std::unique_lock lock( shared_data_->data_mutex );
+        return static_cast< bool >( shared_data_->texture );
     }
     
-    template<
-        typename DataType,
-        std::size_t Channels
-    > bool upload_texture_data_task< DataType, Channels >::operator()()
+    return false;
+}
+
+template<
+    typename    DataType,
+    std::size_t Channels
+> typename JadeMatrix::yavsg::texture_reference<
+    DataType,
+    Channels
+>::texture_type* JadeMatrix::yavsg::texture_reference<
+    DataType,
+    Channels
+>::operator ->()
+{
+    using namespace std::string_literals;
+    
+    if( shared_data_ )
     {
-        std::lock_guard< std::mutex > lock( _shared_data -> data_mutex );
-        
-        // _shared_data -> texture = std::make_unique<
-        //     gl::texture< DataType, Channels >
-        // >();
-        _shared_data -> texture = new gl::texture< DataType, Channels >();
-        
-        upload_texture_data(
-            _shared_data -> texture -> gl_texture_id(),
-            std::move( _upload_data ),
-            _settings
-        );
-        
-        return false;
+        std::unique_lock lock( shared_data_->data_mutex );
+        if( shared_data_->texture )
+        {
+            return shared_data_->texture;
+        }
     }
     
-    template<
-        typename DataType,
-        std::size_t Channels
-    > bool destroy_texture_data_task< DataType, Channels >::operator()()
+    throw std::invalid_argument(
+        "yavsg::gl::texture_reference does not refer to a texture ready for "
+        "rendering"s
+    );
+}
+
+template<
+    typename    DataType,
+    std::size_t Channels
+> const typename JadeMatrix::yavsg::texture_reference<
+    DataType,
+    Channels
+>::texture_type* JadeMatrix::yavsg::texture_reference<
+    DataType,
+    Channels
+>::operator ->() const
+{
+    using namespace std::string_literals;
+    
+    if( shared_data_ )
     {
-        // TODO: _texture = nullptr;
-        delete _texture;
-        return false;
+        std::unique_lock lock( shared_data_->data_mutex );
+        if( shared_data_->texture )
+        {
+            return shared_data_->texture;
+        }
     }
+    
+    throw std::invalid_argument(
+        "yavsg::gl::texture_reference does not refer to a texture ready for "
+        "rendering"s
+    );
 }
 
 
-#endif
+// Texture reference static methods implementation /////////////////////////////
+
+template<
+    typename    DataType,
+    std::size_t Channels
+> JadeMatrix::yavsg::texture_reference<
+    DataType,
+    Channels
+> JadeMatrix::yavsg::texture_reference< DataType, Channels >::from_file(
+    std::filesystem::path              filename,
+    gl::texture_filter_settings const& settings,
+    gl::texture_flags_type             flags
+)
+{
+    using ref_type = texture_reference< DataType, Channels >;
+    
+    ref_type ref;
+    
+    ref.shared_data_ = std::make_shared< ref_type::shared_data >();
+    
+    submit_task( std::make_unique<
+        load_texture_file_task< DataType, Channels >
+    >(
+        ref.shared_data_,
+        std::move( filename ),
+        settings,
+        flags
+    ) );
+    
+    return ref;
+}
+
+
+// Task implementations ////////////////////////////////////////////////////////
+
+template<
+    typename    DataType,
+    std::size_t Channels
+> bool JadeMatrix::yavsg::load_texture_file_task<
+    DataType,
+    Channels
+>::operator()()
+{
+    using namespace std::string_literals;
+    
+    SDL_Surface* sdl_surface = IMG_Load( filename_.c_str() );
+    if( !sdl_surface )
+    {
+        // TODO: graceful failure (just don't load)
+        throw std::runtime_error(
+            "failed to load texture \""s
+            + filename_.native()
+            + "\": "s
+            + IMG_GetError()
+        );
+    }
+    
+    using format_traits = gl::texture_format_traits< DataType, Channels >;
+    
+    submit_task( std::make_unique<
+        upload_texture_data_task< DataType, Channels >
+    >(
+        shared_data_,
+        gl::process_texture_data(
+            sdl_surface,
+            flags_,
+            format_traits::gl_internal_format
+        ),
+        settings_,
+        flags_
+    ) );
+    
+    return false;
+}
+
+template<
+    typename    DataType,
+    std::size_t Channels
+> bool JadeMatrix::yavsg::upload_texture_data_task<
+    DataType,
+    Channels
+>::operator()()
+{
+    std::unique_lock lock( shared_data_->data_mutex );
+    
+    // shared_data_->texture = std::make_unique<
+    //     gl::texture< DataType, Channels >
+    // >();
+    shared_data_->texture = new gl::texture< DataType, Channels >();
+    
+    upload_texture_data(
+        shared_data_->texture->gl_texture_id(),
+        std::move( upload_data_ ),
+        settings_
+    );
+    
+    return false;
+}
+
+template<
+    typename    DataType,
+    std::size_t Channels
+> bool JadeMatrix::yavsg::destroy_texture_data_task<
+    DataType,
+    Channels
+>::operator()()
+{
+    // TODO: texture_ = nullptr;
+    delete texture_;
+    return false;
+}

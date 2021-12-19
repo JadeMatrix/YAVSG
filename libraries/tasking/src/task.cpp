@@ -1,12 +1,9 @@
 #include <yavsg/tasking/task.hpp>
 
 
-namespace yavsg
+JadeMatrix::yavsg::task::~task() {}
+
+JadeMatrix::yavsg::task_flags_type JadeMatrix::yavsg::task::flags() const
 {
-    task::~task() {}
-    
-    task_flags_type task::flags() const
-    {
-        return task_flag::NONE;
-    }
+    return task_flag::none;
 }

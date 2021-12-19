@@ -1,29 +1,28 @@
 #pragma once
-#ifndef YAVSG_GL_BUFFER_HPP
-#define YAVSG_GL_BUFFER_HPP
 
 
 #include <yavsg/gl_wrap.hpp>
 
-#include <exception>
-#include <ostream>
+#include <iosfwd>       // ostream (fwd)
+#include <stdexcept>    // runtime_error
 #include <string>
+#include <utility>      // move
 #include <vector>
 
 
-namespace yavsg { namespace gl
+namespace JadeMatrix::yavsg::gl
 {
     class summary_error : public std::runtime_error
     {
     public:
-        const std::vector< GLenum > error_codes;
+        std::vector< GLenum > const error_codes;
         
         summary_error(
-            const std::string& message,
-            const std::vector< GLenum >& codes_in
+            std::string    const& message,
+            std::vector< GLenum > codes_in
         ) :
             std::runtime_error( message ),
-            error_codes( codes_in )
+            error_codes( std::move( codes_in ) )
         {}
     };
     
@@ -38,18 +37,17 @@ namespace yavsg { namespace gl
             std::vector< GLenum > error_codes{ gl_error_code }; \
              \
             while( ( gl_error_code = glGetError() ) != GL_NO_ERROR ) \
+            { \
                 error_codes.push_back( gl_error_code ); \
+            } \
              \
             throw yavsg::gl::summary_error( \
                 ( MESSAGE_EXPRESSION ), \
-                error_codes \
+                std::move( error_codes ) \
             ); \
         } \
     }
     
     // Utility function for use in `catch()` blocks
-    void print_summary_error_codes( std::ostream&, const summary_error& );
-} }
-
-
-#endif
+    void print_summary_error_codes( std::ostream&, summary_error const& );
+}

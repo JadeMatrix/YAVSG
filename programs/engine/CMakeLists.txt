@@ -1,13 +1,23 @@
 ADD_EXECUTABLE( engine )
-TARGET_SOURCES( engine PRIVATE "src/main.cpp" )
-TARGET_LINK_LIBRARIES( engine
-    events
-    gl_wrap
-    gl
-    rendering
-    sdl
-    tasking
-    units
-    windowsys
+
+SET( HEADERS
 )
-TARGET_COMPILE_OPTIONS( engine PRIVATE ${YAVSG_COMPILE_OPTIONS} )
+SET( SOURCES
+    "src/main.cpp"
+)
+TARGET_SOURCES( engine PRIVATE ${HEADERS} ${SOURCES} )
+SOURCE_GROUP( "C++ Headers" FILES ${HEADERS} )
+SOURCE_GROUP( "C++ Sources" FILES ${SOURCES} )
+
+TARGET_LINK_LIBRARIES( engine
+    PRIVATE
+        events
+        gl_wrap
+        gl
+        logging
+        rendering
+        sdl
+        tasking
+        units
+        windowsys
+)

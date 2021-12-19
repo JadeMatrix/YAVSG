@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_DOF_POSTPROCESS_STEP_HPP
-#define YAVSG_RENDERING_DOF_POSTPROCESS_STEP_HPP
 
 
 #include "camera.hpp"
@@ -13,7 +11,7 @@
 #include <yavsg/math/vector.hpp>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class dof_postprocess_step : public postprocess_step<
         gl::texture< GLfloat, 3 >
@@ -36,13 +34,10 @@ namespace yavsg
         
         const camera& scene_camera;
         
-        dof_postprocess_step( const camera& );
-        virtual void run(
-            const source_type         & source,
+        dof_postprocess_step( camera const& );
+        void run(
+            source_type          const& source,
             gl::write_only_framebuffer& target
-        );
+        ) override;
     };
 }
-
-
-#endif

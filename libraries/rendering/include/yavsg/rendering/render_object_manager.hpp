@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_RENDER_OBJECT_MANAGER_HPP
-#define YAVSG_RENDERING_RENDER_OBJECT_MANAGER_HPP
 
 
 #include <yavsg/gl_wrap.hpp>
@@ -14,21 +12,23 @@
 #include <vector>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     // TODO: More abstract for different implementations? Or just make more
     // efficient?
-    template< class AttributeBuffer, class Material > class render_object_manager
+    template<
+        typename AttributeBuffer,
+        typename Material
+    > class render_object_manager
     {
     public:
-        
         struct render_group
         {
             Material material;
             gl::index_buffer indices;
             
             render_group() = default;
-            render_group( const render_group& o ) = delete;
+            render_group( render_group const& o ) = delete;
             
             render_group(
                 Material        && m,
@@ -56,14 +56,14 @@ namespace yavsg
             versor< GLfloat > rotation;
             
             // render_object() = default;
-            render_object( const render_object& o ) = delete;
+            render_object( render_object const& o ) = delete;
             
             render_object(
                 std::vector< render_group >&& rg,
                 AttributeBuffer            && v,
-                const vector< GLfloat, 3 >  & p,
-                const vector< GLfloat, 3 >  & s,
-                const versor< GLfloat >     & r
+                vector< GLfloat, 3 >   const& p,
+                vector< GLfloat, 3 >   const& s,
+                versor< GLfloat >      const& r
             ) :
                 render_groups( std::move( rg ) ),
                 vertices(      std::move( v  ) ),
@@ -92,17 +92,33 @@ namespace yavsg
         
         using object_list = std::vector< render_object >;
         
-    protected:
-        // Possibly different in the future
-        std::mutex   read_mutex;
-        std::mutex& write_mutex = read_mutex;
-        
-        std::vector< render_object > objects;
-        
-    public:
         class read_reference
         {
             friend class render_object_manager;
+            
+        public:
+            read_reference( read_reference const& ) = delete;
+            read_reference( read_reference&& o ) : parent( o.parent )
+            {
+                std::swap( should_unlock, o.should_unlock );
+            }
+            
+            ~read_reference()
+            {
+                if( should_unlock )
+                {
+                    parent.read_mutex.unlock();
+                }
+            }
+            
+            object_list const& operator *()
+            {
+                return parent.objects;
+            }
+            object_list const* operator ->()
+            {
+                return &parent.objects;
+            }
             
         protected:
             render_object_manager& parent;
@@ -114,34 +130,36 @@ namespace yavsg
             {
                 parent.read_mutex.lock();
             }
-            
-        public:
-            
-            read_reference( const read_reference& ) = delete;
-            read_reference( read_reference&& o ) : parent( o.parent )
-            {
-                std::swap( should_unlock, o.should_unlock );
-            }
-            
-            ~read_reference()
-            {
-                if( should_unlock )
-                    parent.read_mutex.unlock();
-            }
-            
-            const object_list& operator *()
-            {
-                return parent.objects;
-            }
-            const object_list* operator ->()
-            {
-                return &parent.objects;
-            }
         };
         
         class write_reference
         {
             friend class render_object_manager;
+            
+        public:
+            
+            write_reference( write_reference const& ) = delete;
+            write_reference( write_reference&& o ) : parent( o.parent )
+            {
+                std::swap( should_unlock, o.should_unlock );
+            }
+            
+            ~write_reference()
+            {
+                if( should_unlock )
+                {
+                    parent.write_mutex.unlock();
+                }
+            }
+            
+            object_list& operator *()
+            {
+                return parent.objects;
+            }
+            object_list* operator ->()
+            {
+                return &parent.objects;
+            }
             
         protected:
             render_object_manager& parent;
@@ -152,29 +170,6 @@ namespace yavsg
                 should_unlock( true )
             {
                 parent.write_mutex.lock();
-            }
-            
-        public:
-            
-            write_reference( const write_reference& ) = delete;
-            write_reference( write_reference&& o ) : parent( o.parent )
-            {
-                std::swap( should_unlock, o.should_unlock );
-            }
-            
-            ~write_reference()
-            {
-                if( should_unlock )
-                    parent.write_mutex.unlock();
-            }
-            
-            object_list& operator *()
-            {
-                return parent.objects;
-            }
-            object_list* operator ->()
-            {
-                return &parent.objects;
             }
         };
         
@@ -190,8 +185,12 @@ namespace yavsg
         {
             return write_reference( *this );
         }
+        
+    protected:
+        // Possibly different in the future
+        std::mutex mutable read_mutex;
+        std::mutex       & write_mutex = read_mutex;
+        
+        std::vector< render_object > objects;
     };
 }
-
-
-#endif

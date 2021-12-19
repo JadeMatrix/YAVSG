@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_MATH_SCALAR_OPERATIONS_HPP
-#define YAVSG_MATH_SCALAR_OPERATIONS_HPP
 
 
 // http://en.cppreference.com/w/cpp/header/cmath
@@ -9,7 +7,7 @@
 #include <type_traits>
 
 
-namespace yavsg // Power functions /////////////////////////////////////////////
+namespace JadeMatrix::yavsg // Power functions /////////////////////////////////
 {
     template< typename T > T sqrt( const T& value )
     {
@@ -177,6 +175,3 @@ namespace yavsg // Power functions /////////////////////////////////////////////
     //     return newtons_method< __int128 >( v );
     // }
 }
-
-
-#endif

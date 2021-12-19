@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_MATH_TRIGONOMETRY_HPP
-#define YAVSG_MATH_TRIGONOMETRY_HPP
 
 
 #include <yavsg/units/angular.hpp>
@@ -8,7 +6,7 @@
 #include <cmath>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     template< typename T > ratio< T > sin( const radians< T >& r )
     {
@@ -43,6 +41,3 @@ namespace yavsg
         return std::atan2( static_cast< T >( r1 ), static_cast< T >( r2 ) );
     }
 }
-
-
-#endif

@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_CAMERA_HPP
-#define YAVSG_RENDERING_CAMERA_HPP
 
 
 #include <yavsg/math/matrix.hpp>
@@ -10,38 +8,28 @@
 #include <yavsg/math/quaternion.hpp>
 #include <yavsg/units/angular.hpp>
 
-#include <mutex>
+#include <mutex>    // recursive_mutex, unique_lock
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class camera
     {
-    protected:
-        vector< float, 3 > _position;
-        vector< float, 3 > _relative_focus;
-        float _near_point;
-        float  _far_point;
-        degrees< float > _fov;
-        
-        // Simpler to use a recursive mutex as some functions call others here
-        std::recursive_mutex _mutex;
-        
     public:
         camera(
-            const vector< float, 3 >& position,
+            vector< float, 3 > const& position,
             float  near_point,
             float focal_point,
             float   far_point
         );
         camera(
-            const vector< float, 3 >& position,
-            const vector< float, 3 >& points
+            vector< float, 3 > const& position,
+            vector< float, 3 > const& points
         ) : camera( position, points[ 0 ], points[ 1 ], points[ 2 ] ) {}
         
         vector< float, 3 > position(                           ) const;
-        vector< float, 3 > position( const vector< float, 3 >& )      ;
-        vector< float, 3 >     move( const vector< float, 3 >& )      ;
+        vector< float, 3 > position( vector< float, 3 > const& )      ;
+        vector< float, 3 >     move( vector< float, 3 > const& )      ;
         vector< float, 3 >     move(               float       )      ;
         
         // TODO: linear units
@@ -74,24 +62,32 @@ namespace yavsg
         template< typename T >        vector< T, 3 >     points() const;
         template< typename T > square_matrix< T, 4 >       view() const;
         template< typename T, typename R > square_matrix< T, 4 > projection(
-            const R& aspect_ratio
+            R const& aspect_ratio
         ) const;
         
         void look_at(
-            const vector< float, 3 >& point,
+            vector< float, 3 > const& point,
             bool adjust_focal = true
         );
+        
+    protected:
+        vector< float, 3 > position_;
+        vector< float, 3 > relative_focus_;
+        float near_point_;
+        float  far_point_;
+        degrees< float > fov_;
+        
+        // Simpler to use a recursive mutex as some functions call others here
+        std::recursive_mutex mutable mutex_;
     };
 }
 
 
-namespace yavsg // Template member function implementations ////////////////////
+namespace JadeMatrix::yavsg // Template member function implementations ////////
 {
     template< typename T > vector< T, 3 > camera::points() const
     {
-        std::lock_guard< std::recursive_mutex > _lock(
-            const_cast< std::recursive_mutex& >( _mutex )
-        );
+        std::unique_lock lock( mutex_ );
         return {
              near_point(),
             focal_point(),
@@ -101,12 +97,10 @@ namespace yavsg // Template member function implementations ////////////////////
     
     template< typename T > square_matrix< T, 4 > camera::view() const
     {
-        std::lock_guard< std::recursive_mutex > _lock(
-            const_cast< std::recursive_mutex& >( _mutex )
-        );
+        std::unique_lock lock( mutex_ );
         return yavsg::look_at< T >(
-            _position,
-            _position + _relative_focus,
+            position_,
+            position_ + relative_focus_,
             yavsg::vector< T, 3 >(  0.0f,  0.0f,  1.0f )
         );
     }
@@ -116,17 +110,12 @@ namespace yavsg // Template member function implementations ////////////////////
         typename R
     > square_matrix< T, 4 > camera::projection( const R& aspect_ratio ) const
     {
-        std::lock_guard< std::recursive_mutex > _lock(
-            const_cast< std::recursive_mutex& >( _mutex )
-        );
+        std::unique_lock lock( mutex_ );
         return perspective< T >(
-            _fov,
+            fov_,
             aspect_ratio,
-            _near_point,
-            _far_point
+            near_point_,
+            far_point_
         );
     }
 }
-
-
-#endif

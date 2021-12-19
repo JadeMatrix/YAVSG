@@ -1,12 +1,10 @@
 #pragma once
-#ifndef YAVSG_SDL_UTILS_HPP
-#define YAVSG_SDL_UTILS_HPP
 
 
 #include "sdl.hpp"
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class SDL_manager
     {
@@ -15,6 +13,3 @@ namespace yavsg
         ~SDL_manager();
     };
 }
-
-
-#endif

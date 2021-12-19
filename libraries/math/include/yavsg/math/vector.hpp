@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_MATH_VECTOR_HPP
-#define YAVSG_MATH_VECTOR_HPP
 
 
 #include "matrix.hpp"
@@ -11,7 +9,7 @@
 #include <ostream>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     template< typename T, unsigned int D > class vector
     {
@@ -149,7 +147,7 @@ namespace yavsg
 }
 
 
-namespace yavsg // Binary scalar operators /////////////////////////////////////
+namespace JadeMatrix::yavsg // Binary scalar operators /////////////////////////
 {
     #define DEFINE_OPERATORS_FOR_BINARY_SCALAR_OPERAND( OPERAND ) \
     template< typename L, unsigned int LD, typename R > \
@@ -190,7 +188,7 @@ namespace yavsg // Binary scalar operators /////////////////////////////////////
 }
 
 
-namespace yavsg // Assignment scalar operators /////////////////////////////////
+namespace JadeMatrix::yavsg // Assignment scalar operators /////////////////////
 {
     #define DEFINE_OPERATORS_FOR_ASSIGNMENT_SCALAR_OPERAND( OPERAND ) \
     template< typename L, unsigned int LD, typename R > \
@@ -215,7 +213,7 @@ namespace yavsg // Assignment scalar operators /////////////////////////////////
 }
 
 
-namespace yavsg // Binary vector operators /////////////////////////////////////
+namespace JadeMatrix::yavsg // Binary vector operators /////////////////////////
 {
     #define DEFINE_OPERATORS_FOR_BINARY_VECTOR_OPERAND( OPERAND ) \
     template< typename L, typename R, unsigned int D > \
@@ -241,7 +239,7 @@ namespace yavsg // Binary vector operators /////////////////////////////////////
 }
 
 
-namespace yavsg // Assignment vector operators /////////////////////////////////
+namespace JadeMatrix::yavsg // Assignment vector operators /////////////////////
 {
     #define DEFINE_OPERATORS_FOR_ASSIGNMENT_VECTOR_OPERAND( OPERAND ) \
     template< typename L, typename R, unsigned int D > \
@@ -263,7 +261,7 @@ namespace yavsg // Assignment vector operators /////////////////////////////////
 }
 
 
-namespace yavsg // Equality operators //////////////////////////////////////////
+namespace JadeMatrix::yavsg // Equality operators //////////////////////////////
 {
     template< typename L, typename R, unsigned int D >
     constexpr
@@ -294,7 +292,7 @@ namespace yavsg // Equality operators //////////////////////////////////////////
 
 
 #if 0
-namespace yavsg // (Magnitude) comparison operators ////////////////////////////
+namespace JadeMatrix::yavsg // (Magnitude) comparison operators ////////////////
 {
     #define DEFINE_OPERATORS_FOR_COMPARISON_OPERAND( OPERAND ) \
     template< typename L, typename R, unsigned int D > \
@@ -317,7 +315,7 @@ namespace yavsg // (Magnitude) comparison operators ////////////////////////////
 #endif
 
 
-namespace yavsg // Matrix-vector multiplication ////////////////////////////////
+namespace JadeMatrix::yavsg // Matrix-vector multiplication ////////////////////
 {
     // If unmatching dimensions are required, use pure matrix multiplication
     template<
@@ -343,7 +341,7 @@ namespace yavsg // Matrix-vector multiplication ////////////////////////////////
 }
 
 
-namespace yavsg // Stream formatting operator //////////////////////////////////
+namespace JadeMatrix::yavsg // Stream formatting operator //////////////////////
 {
     template< typename T, unsigned int D >
     std::ostream& operator<<( std::ostream& out, const vector< T, D >& v )
@@ -359,6 +357,3 @@ namespace yavsg // Stream formatting operator //////////////////////////////////
         return out;
     }
 }
-
-
-#endif

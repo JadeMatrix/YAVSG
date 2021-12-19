@@ -1,6 +1,4 @@
 #pragma once
-#ifndef YAVSG_RENDERING_MULTI_POSTPROCESS_STEP_HPP
-#define YAVSG_RENDERING_MULTI_POSTPROCESS_STEP_HPP
 
 
 #include "render_step.hpp"
@@ -16,12 +14,22 @@
 #include <vector>
 
 
-namespace yavsg
+namespace JadeMatrix::yavsg
 {
     class multi_postprocess_step : public postprocess_step<
         gl::texture< GLfloat, 3 >
     >
     {
+    public:
+        multi_postprocess_step(
+            std::vector< std::string > const& function_names
+        );
+        
+        void run(
+            gl::framebuffer< gl::texture< GLfloat, 3 > > const& source,
+            gl::write_only_framebuffer                        & target
+        ) override;
+        
     protected:
         using attribute_buffer_type = gl::attribute_buffer<
             vector< GLfloat, 2 >,
@@ -37,20 +45,7 @@ namespace yavsg
         > multi_program;
         
         gl::shader generate_fragment_shader(
-            const std::vector< std::string > function_names
-        );
-        
-    public:
-        multi_postprocess_step(
-            const std::vector< std::string > function_names
-        );
-        
-        virtual void run(
-            const gl::framebuffer< gl::texture< GLfloat, 3 > >& source,
-                  gl::write_only_framebuffer                  & target
+            std::vector< std::string > const& function_names
         );
     };
 }
-
-
-#endif

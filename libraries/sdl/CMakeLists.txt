@@ -1,8 +1,26 @@
 ADD_LIBRARY( sdl )
-TARGET_SOURCES( sdl PRIVATE "src/utils.cpp" )
-TARGET_INCLUDE_DIRECTORIES( sdl PUBLIC "include/" )
 
-FIND_PACKAGE( SDL2 2.0.8 REQUIRED COMPONENTS sdl )
-TARGET_LINK_LIBRARIES( sdl PUBLIC SDL2::sdl gl_wrap )
+SET( HEADERS
+    "include/yavsg/sdl/sdl.hpp"
+    "include/yavsg/sdl/utils.hpp"
+)
+SET( SOURCES
+    "src/utils.cpp"
+)
+TARGET_SOURCES( sdl PRIVATE ${HEADERS} ${SOURCES} )
+SOURCE_GROUP( "C++ Headers" FILES ${HEADERS} )
+SOURCE_GROUP( "C++ Sources" FILES ${SOURCES} )
 
-TARGET_COMPILE_OPTIONS( sdl PRIVATE ${YAVSG_COMPILE_OPTIONS} )
+TARGET_INCLUDE_DIRECTORIES( sdl
+    PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>"
+        "$<INSTALL_INTERFACE:include/>"
+)
+
+TARGET_LINK_LIBRARIES( sdl
+    PUBLIC
+        SDL2::sdl
+        gl_wrap
+    PRIVATE
+        fmt::fmt
+)
