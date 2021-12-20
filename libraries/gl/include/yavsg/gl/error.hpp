@@ -31,12 +31,12 @@ namespace JadeMatrix::yavsg::gl
     // there's an error.
     #define YAVSG_GL_THROW_FOR_ERRORS( MESSAGE_EXPRESSION ) \
     { \
-        GLenum gl_error_code = glGetError(); \
+        GLenum gl_error_code = gl::GetError(); \
         if( gl_error_code != GL_NO_ERROR ) \
         { \
             std::vector< GLenum > error_codes{ gl_error_code }; \
              \
-            while( ( gl_error_code = glGetError() ) != GL_NO_ERROR ) \
+            while( ( gl_error_code = gl::GetError() ) != GL_NO_ERROR ) \
             { \
                 error_codes.push_back( gl_error_code ); \
             } \

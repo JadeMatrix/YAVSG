@@ -34,7 +34,7 @@ namespace JadeMatrix::yavsg::gl
         std::call_once(
             gl_max_got_flags,
             [](){
-                glGetIntegerv(
+                gl::GetIntegerv(
                     GL_MAX_COLOR_ATTACHMENTS,
                     &max_color_attachments
                 );
@@ -103,7 +103,7 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
     
     void write_only_framebuffer::bind()
     {
-        glBindFramebuffer( GL_FRAMEBUFFER, gl_id_ );
+        gl::BindFramebuffer( GL_FRAMEBUFFER, gl_id_ );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't bind framebuffer "
             + std::to_string( gl_id_ )
@@ -113,7 +113,7 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
         
         if( alpha_blending_ == alpha_blend_mode::DISABLED )
         {
-            glDisablei( GL_BLEND, 0 );
+            gl::Disablei( GL_BLEND, 0 );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't disable blending for framebuffer "
                 + std::to_string( gl_id_ )
@@ -123,7 +123,7 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
         }
         else
         {
-            glEnablei( GL_BLEND, 0 );
+            gl::Enablei( GL_BLEND, 0 );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't enable blending for framebuffer "
                 + std::to_string( gl_id_ )
@@ -134,8 +134,8 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
         
         if( alpha_blending_ != alpha_blend_mode::DISABLED )
         {
-            // TODO: glBlendEquationSeparatei( 0, GL_FUNC_ADD, GL_FUNC_ADD );
-            glBlendEquationSeparate( GL_FUNC_ADD, GL_FUNC_ADD );
+            // TODO: gl::BlendEquationSeparatei( 0, GL_FUNC_ADD, GL_FUNC_ADD );
+            gl::BlendEquationSeparate( GL_FUNC_ADD, GL_FUNC_ADD );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't set separate blending equations for framebuffer "
                 + std::to_string( gl_id_ )
@@ -155,8 +155,8 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                     "yavsg::gl::base_framebuffer::alpha_blending()"
                 );
             case alpha_blend_mode::PREMULTIPLIED:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
+                gl::BlendFuncSeparate(
+                // TODO: gl::BlendFuncSeparatei(
                 //     0,
                     GL_ONE,
                     GL_ONE_MINUS_SRC_ALPHA,
@@ -165,8 +165,8 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                 );
                 break;
             case alpha_blend_mode::PREMULTIPLIED_DROP_ALPHA:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
+                gl::BlendFuncSeparate(
+                // TODO: gl::BlendFuncSeparatei(
                 //     0,
                     GL_ONE,
                     GL_ONE_MINUS_SRC_ALPHA,
@@ -175,8 +175,8 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                 );
                 break;
             case alpha_blend_mode::BASIC:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
+                gl::BlendFuncSeparate(
+                // TODO: gl::BlendFuncSeparatei(
                 //     0,
                     GL_SRC_ALPHA,
                     GL_ONE_MINUS_SRC_ALPHA,
@@ -185,8 +185,8 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                 );
                 break;
             case alpha_blend_mode::PASSTHROUGH:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
+                gl::BlendFuncSeparate(
+                // TODO: gl::BlendFuncSeparatei(
                 //     0,
                     GL_SRC_ALPHA,
                     GL_ONE_MINUS_SRC_ALPHA,
@@ -195,8 +195,8 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                 );
                 break;
             case alpha_blend_mode::DROP_ALPHA:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
+                gl::BlendFuncSeparate(
+                // TODO: gl::BlendFuncSeparatei(
                 //     0,
                     GL_SRC_ALPHA,
                     GL_ONE_MINUS_SRC_ALPHA,
@@ -240,7 +240,7 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
         // TODO: make class member & only realloc when buffer size increases
         std::vector< char > pixels( width_ * height_ * 4 );
         
-        glReadPixels(
+        gl::ReadPixels(
             0,
             0,
             w,

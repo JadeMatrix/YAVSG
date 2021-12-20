@@ -527,7 +527,7 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
         texture_filter_settings const& settings
     )
     {
-        glBindTexture( GL_TEXTURE_2D, gl_id );
+        gl::BindTexture( GL_TEXTURE_2D, gl_id );
         YAVSG_GL_THROW_FOR_ERRORS( fmt::format(
             "couldn't bind texture {} for yavsg::gl::upload_texture_data()"sv,
             gl_id
@@ -538,7 +538,7 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
         auto data_width  = static_cast< GLsizei >( upload_data.width  );
         auto data_height = static_cast< GLsizei >( upload_data.height );
         
-        glTexImage2D(   // Loads starting at 0,0 as bottom left
+        gl::TexImage2D(   // Loads starting at 0,0 as bottom left
             GL_TEXTURE_2D,
             0,                              // LoD, 0 = base
             upload_data.gl_internal_format, // Internal format
@@ -576,7 +576,7 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
         case magnify_mode::linear : mag_filter = GL_LINEAR ; break;
         }
         
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter );
+        gl::TexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't set mag filter for yavsg::gl::set_texture_filtering()"s
         );
@@ -617,7 +617,7 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
             break;
         }
         
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter );
+        gl::TexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't set min filter for texture for "
             "yavsg::gl::set_texture_filtering()"s
@@ -625,7 +625,7 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
         
         if( settings.mipmaps != mipmap_type::none )
         {
-            glGenerateMipmap( GL_TEXTURE_2D );
+            gl::GenerateMipmap( GL_TEXTURE_2D );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't generate mipmaps for texture for "
                 "yavsg::gl::set_texture_filtering()"s
@@ -634,11 +634,11 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
             if( anisotropic_filtering_supported() )
             {
                 GLfloat max_anisotropic_level;
-                glGetFloatv(
+                gl::GetFloatv(
                     GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT,
                     &max_anisotropic_level
                 );
-                glTexParameterf(
+                gl::TexParameterf(
                     GL_TEXTURE_2D,
                     GL_TEXTURE_MAX_ANISOTROPY_EXT,
                     max_anisotropic_level

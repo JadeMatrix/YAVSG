@@ -90,8 +90,8 @@ void JadeMatrix::yavsg::multi_postprocess_step::run(
     gl::write_only_framebuffer                        & target
 )
 {
-    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-    glClear(
+    gl::ClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+    gl::Clear(
           GL_COLOR_BUFFER_BIT
         | GL_DEPTH_BUFFER_BIT
         | GL_STENCIL_BUFFER_BIT
@@ -100,7 +100,7 @@ void JadeMatrix::yavsg::multi_postprocess_step::run(
         "couldn't clear buffer for yavsg::multi_postprocess_step::run()"s
     );
     
-    glDisable( GL_DEPTH_TEST );
+    gl::Disable( GL_DEPTH_TEST );
     YAVSG_GL_THROW_FOR_ERRORS(
         "couldn't disable depth testing for "
         "yavsg::multi_postprocess_step::run()"s

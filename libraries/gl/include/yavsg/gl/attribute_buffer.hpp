@@ -79,7 +79,7 @@ JadeMatrix::yavsg::gl::attribute_buffer< Attributes... >::attribute_buffer(
 {
     using namespace std::string_literals;
     
-    glGenBuffers( 1, &gl_id_ );
+    gl::GenBuffers( 1, &gl_id_ );
     YAVSG_GL_THROW_FOR_ERRORS(
         "couldn't generate buffers for yavsg::gl::attribute_buffer"s
     );
@@ -100,7 +100,7 @@ JadeMatrix::yavsg::gl::attribute_buffer< Attributes... >::~attribute_buffer()
 {
     if( gl_id_ != 0 )
     {
-        glDeleteBuffers( 1, &gl_id_ );
+        gl::DeleteBuffers( 1, &gl_id_ );
     }
 }
 
@@ -111,7 +111,7 @@ void JadeMatrix::yavsg::gl::attribute_buffer< Attributes... >::upload_data(
 {
     using namespace std::string_literals;
     
-    glBindBuffer( GL_ARRAY_BUFFER, gl_id_ );
+    gl::BindBuffer( GL_ARRAY_BUFFER, gl_id_ );
     YAVSG_GL_THROW_FOR_ERRORS(
         "couldn't bind buffer "s
         + std::to_string( gl_id_ )
@@ -122,7 +122,7 @@ void JadeMatrix::yavsg::gl::attribute_buffer< Attributes... >::upload_data(
     REQUIRE( vertices_len <= std::numeric_limits< GLsizeiptr >::max() );
     auto const vertices_len_glsip = static_cast< GLsizeiptr >( vertices_len );
     
-    glBufferData(
+    gl::BufferData(
         GL_ARRAY_BUFFER,
         vertices_len_glsip,
         vertices.data(),
@@ -173,7 +173,7 @@ inline JadeMatrix::yavsg::gl::index_buffer::index_buffer(
 {
     using namespace std::string_literals;
     
-    glGenBuffers( 1, &gl_id_ );
+    gl::GenBuffers( 1, &gl_id_ );
     YAVSG_GL_THROW_FOR_ERRORS(
         "couldn't generate buffers for yavsg::gl::index_buffer"s
     );
@@ -190,7 +190,7 @@ inline JadeMatrix::yavsg::gl::index_buffer::~index_buffer()
 {
     if( gl_id_ != 0 )
     {
-        glDeleteBuffers( 1, &gl_id_ );
+        gl::DeleteBuffers( 1, &gl_id_ );
     }
 }
 
@@ -200,7 +200,7 @@ inline void JadeMatrix::yavsg::gl::index_buffer::upload_data(
 {
     using namespace std::string_literals;
     
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gl_id_ );
+    gl::BindBuffer( GL_ELEMENT_ARRAY_BUFFER, gl_id_ );
     YAVSG_GL_THROW_FOR_ERRORS(
         "couldn't bind buffer "s
         + std::to_string( gl_id_ )
@@ -211,7 +211,7 @@ inline void JadeMatrix::yavsg::gl::index_buffer::upload_data(
     REQUIRE( buffer_len <= std::numeric_limits< GLsizeiptr >::max() );
     auto const buffer_len_glsip = static_cast< GLsizeiptr >( buffer_len );
     
-    glBufferData(
+    gl::BufferData(
         GL_ELEMENT_ARRAY_BUFFER,
         buffer_len_glsip,
         indices.data(),

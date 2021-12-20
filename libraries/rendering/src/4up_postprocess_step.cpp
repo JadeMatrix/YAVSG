@@ -52,8 +52,8 @@ void JadeMatrix::yavsg::debug_4up_postprocess_step::run(
     gl::write_only_framebuffer& target
 )
 {
-    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-    glClear(
+    gl::ClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+    gl::Clear(
           GL_COLOR_BUFFER_BIT
         | GL_DEPTH_BUFFER_BIT
         | GL_STENCIL_BUFFER_BIT
@@ -62,7 +62,7 @@ void JadeMatrix::yavsg::debug_4up_postprocess_step::run(
         "couldn't clear buffer for yavsg::debug_4up_postprocess_step::run()"s
     );
     
-    glDisable( GL_DEPTH_TEST );
+    gl::Disable( GL_DEPTH_TEST );
     YAVSG_GL_THROW_FOR_ERRORS(
         "couldn't disable depth testing for "
         "yavsg::debug_4up_postprocess_step::run()"s
@@ -82,7 +82,7 @@ void JadeMatrix::yavsg::debug_4up_postprocess_step::run(
         REQUIRE( half_height <= std::numeric_limits< GLint >::max() );
         REQUIRE( half_width  <= std::numeric_limits< GLint >::max() );
         
-        glViewport(
+        gl::Viewport(
             static_cast< GLint >( x_offset_factor * half_width  ),
             static_cast< GLint >( y_offset_factor * half_height ),
             static_cast< GLint >(                   half_width  ),
@@ -93,13 +93,13 @@ void JadeMatrix::yavsg::debug_4up_postprocess_step::run(
             "yavsg::debug_4up_postprocess_step::run()"s
         );
         
-        glEnable( GL_SCISSOR_TEST );
+        gl::Enable( GL_SCISSOR_TEST );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't enable scissor testing for "
             "yavsg::debug_4up_postprocess_step::run()"s
         );
         
-        glScissor(
+        gl::Scissor(
             static_cast< GLint >( x_offset_factor * half_width  ),
             static_cast< GLint >( y_offset_factor * half_height ),
             static_cast< GLint >(                   half_width  ),
@@ -116,7 +116,7 @@ void JadeMatrix::yavsg::debug_4up_postprocess_step::run(
         }
     }
     
-    glDisable( GL_SCISSOR_TEST );
+    gl::Disable( GL_SCISSOR_TEST );
     YAVSG_GL_THROW_FOR_ERRORS(
         "couldn't disable scissor testing for "
         "yavsg::debug_4up_postprocess_step::run()"s

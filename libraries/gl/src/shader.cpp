@@ -22,7 +22,7 @@ JadeMatrix::yavsg::gl::shader::shader(
     std::string const& source
 )
 {
-    id = glCreateShader( shader_type );
+    id = gl::CreateShader( shader_type );
     YAVSG_GL_THROW_FOR_ERRORS(
         "couldn't create shader for yavsg::gl::shader"s
     );
@@ -30,16 +30,16 @@ JadeMatrix::yavsg::gl::shader::shader(
     try
     {
         auto source_c_string = source.c_str();
-        glShaderSource( id, 1, &source_c_string, nullptr );
+        gl::ShaderSource( id, 1, &source_c_string, nullptr );
         YAVSG_GL_THROW_FOR_ERRORS( fmt::format(
             "couldn't load source for shader {} for yavsg::gl::shader"sv,
             id
         ) );
         
-        glCompileShader( id );
+        gl::CompileShader( id );
         
         GLint status;
-        glGetShaderiv( id, GL_COMPILE_STATUS, &status );
+        gl::GetShaderiv( id, GL_COMPILE_STATUS, &status );
         if( status != GL_TRUE )
         {
             constexpr GLsizei log_buffer_length = 1024;
@@ -49,7 +49,7 @@ JadeMatrix::yavsg::gl::shader::shader(
             
             while( true )
             {
-                glGetShaderInfoLog(
+                gl::GetShaderInfoLog(
                     id,
                     log_buffer_length,
                     &got_buffer_length,
@@ -71,14 +71,14 @@ JadeMatrix::yavsg::gl::shader::shader(
     }
     catch( ... )
     {
-        glDeleteShader( id );
+        gl::DeleteShader( id );
         throw;
     }
 }
 
 JadeMatrix::yavsg::gl::shader::~shader()
 {
-    glDeleteShader( id );
+    gl::DeleteShader( id );
 }
 
 JadeMatrix::yavsg::gl::shader JadeMatrix::yavsg::gl::shader::from_file(

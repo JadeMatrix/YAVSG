@@ -60,7 +60,7 @@ namespace JadeMatrix::yavsg::gl
         {
             using namespace std::string_literals;
             
-            glActiveTexture( GL_TEXTURE0 + ActiveTexture );
+            gl::ActiveTexture( GL_TEXTURE0 + ActiveTexture );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't activate GL_TEXTURE"s
                 + std::to_string( ActiveTexture )
@@ -69,7 +69,7 @@ namespace JadeMatrix::yavsg::gl
                 + " for yavsg::gl::texture::bind_as<>()"s
             );
             
-            glBindTexture( GL_TEXTURE_2D, gl_id_ );
+            gl::BindTexture( GL_TEXTURE_2D, gl_id_ );
             YAVSG_GL_THROW_FOR_ERRORS(
                 "couldn't bind texture "s
                 + std::to_string( gl_id_ )
@@ -94,14 +94,14 @@ namespace JadeMatrix::yavsg::gl
     {
         using namespace std::string_literals;
         
-        glActiveTexture( GL_TEXTURE0 + ActiveTexture );
+        gl::ActiveTexture( GL_TEXTURE0 + ActiveTexture );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't activate GL_TEXTURE"s
             + std::to_string( ActiveTexture )
             + " to bind default texture for yavsg::gl::unbind_texture()"s
         );
         
-        glBindTexture( GL_TEXTURE_2D, 0 );
+        gl::BindTexture( GL_TEXTURE_2D, 0 );
         YAVSG_GL_THROW_FOR_ERRORS(
             "couldn't bind default texture as GL_TEXTURE"s
             + std::to_string( ActiveTexture )
@@ -118,7 +118,7 @@ JadeMatrix::yavsg::gl::texture< DataType, Channels >::texture()
 {
     using namespace std::string_literals;
     
-    glGenTextures( 1, &gl_id_ );
+    gl::GenTextures( 1, &gl_id_ );
     YAVSG_GL_THROW_FOR_ERRORS(
         "couldn't generate texture for yavsg::gl::texture"s
     );
@@ -129,7 +129,7 @@ JadeMatrix::yavsg::gl::texture< DataType, Channels >::~texture()
 {
     if( gl_id_ != default_texture_gl_id )
     {
-        glDeleteTextures( 1, &gl_id_ );
+        gl::DeleteTextures( 1, &gl_id_ );
     }
 }
 
@@ -190,7 +190,7 @@ void JadeMatrix::yavsg::gl::texture< DataType, Channels >::filtering(
 {
     using namespace std::string_literals;
     
-    glBindTexture( GL_TEXTURE_2D, gl_id_ );
+    gl::BindTexture( GL_TEXTURE_2D, gl_id_ );
     YAVSG_GL_THROW_FOR_ERRORS(
         "couldn't bind texture "s
         + std::to_string( gl_id_ )
