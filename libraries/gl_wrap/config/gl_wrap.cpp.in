@@ -14,7 +14,20 @@ namespace
     using namespace std::string_view_literals;
     
     auto const log_ = JadeMatrix::yavsg::log_handle();
+    
+    auto log_every_opengl_call = false;
+    auto check_opengl_errors   = true;
 }
 
+
+void JadeMatrix::yavsg::gl::log_every_opengl_call( bool enabled )
+{
+    ::log_every_opengl_call = enabled;
+}
+
+void JadeMatrix::yavsg::gl::check_opengl_errors( bool enabled )
+{
+    ::check_opengl_errors = enabled;
+}
 
 @GL_WRAP_WRAPPER_DEFINITIONS@

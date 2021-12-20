@@ -21,5 +21,8 @@
 
 namespace JadeMatrix::yavsg::gl
 {
+    void log_every_opengl_call( bool );
+    void check_opengl_errors( bool );
+    
 @GL_WRAP_WRAPPER_DECLARATIONS@
 }
