@@ -3,16 +3,15 @@
 
 #include <yavsg/gl_wrap.hpp>
 
-#include <iosfwd>       // ostream (fwd)
-#include <stdexcept>    // runtime_error
+#include <iosfwd>   // ostream (fwd)
 #include <string>
-#include <utility>      // move
+#include <utility>  // move
 #include <vector>
 
 
 namespace JadeMatrix::yavsg::gl
 {
-    class summary_error : public std::runtime_error
+    class summary_error : public error
     {
     public:
         std::vector< GLenum > const error_codes;
@@ -21,7 +20,7 @@ namespace JadeMatrix::yavsg::gl
             std::string    const& message,
             std::vector< GLenum > codes_in
         ) :
-            std::runtime_error( message ),
+            error( message ),
             error_codes( std::move( codes_in ) )
         {}
     };

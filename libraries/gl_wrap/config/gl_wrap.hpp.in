@@ -18,11 +18,18 @@
 
 #include <ext/source_location.hpp>
 
+#include <stdexcept>    // runtime_error
+
 
 namespace JadeMatrix::yavsg::gl
 {
     void log_every_opengl_call( bool );
     void check_opengl_errors( bool );
+    
+    class error : public std::runtime_error
+    {
+        using std::runtime_error::runtime_error;
+    };
     
 @GL_WRAP_WRAPPER_DECLARATIONS@
 }
