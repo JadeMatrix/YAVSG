@@ -1,7 +1,7 @@
 #include <yavsg/gl/error.hpp>
 
-#include <yavsg/sdl/sdl.hpp>    // GL_STACK_OVERFLOW, GL_STACK_UNDERFLOW,
-                                //  GL_TABLE_TOO_LARGE
+// #include <yavsg/sdl/sdl.hpp>    // GL_STACK_OVERFLOW, GL_STACK_UNDERFLOW,
+//                                 //  GL_TABLE_TOO_LARGE
 
 #include <ostream>
 #include <string_view>
@@ -34,12 +34,12 @@ void JadeMatrix::yavsg::gl::print_summary_error_codes(
             case GL_INVALID_OPERATION:
                 out << "GL_INVALID_OPERATION"sv;
                 break;
-            case GL_STACK_OVERFLOW:
-                out << "GL_STACK_OVERFLOW"sv;
-                break;
-            case GL_STACK_UNDERFLOW:
-                out << "GL_STACK_UNDERFLOW"sv;
-                break;
+            // case GL_STACK_OVERFLOW:
+            //     out << "GL_STACK_OVERFLOW"sv;
+            //     break;
+            // case GL_STACK_UNDERFLOW:
+            //     out << "GL_STACK_UNDERFLOW"sv;
+            //     break;
             case GL_OUT_OF_MEMORY:
                 out << "GL_OUT_OF_MEMORY"sv;
                 break;
@@ -49,9 +49,9 @@ void JadeMatrix::yavsg::gl::print_summary_error_codes(
             case 0x0507: // GL_CONTEXT_LOST available in 4.5+
                 out << "GL_CONTEXT_LOST"sv;
                 break;
-            case GL_TABLE_TOO_LARGE:
-                out << "GL_TABLE_TOO_LARGE"sv;
-                break;
+            // case GL_TABLE_TOO_LARGE:
+            //     out << "GL_TABLE_TOO_LARGE"sv;
+            //     break;
             default:
                 out << std::to_string( code );
                 break;

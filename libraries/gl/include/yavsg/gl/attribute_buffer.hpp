@@ -3,7 +3,7 @@
 
 #include <yavsg/gl_wrap.hpp>
 
-#include "error.hpp"
+#include <yavsg/gl/error.hpp>
 
 #include <doctest/doctest.h>    // REQUIRE
 

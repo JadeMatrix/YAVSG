@@ -2,7 +2,6 @@ ADD_LIBRARY( gl )
 
 SET( HEADERS
     "include/yavsg/gl/attribute_buffer.hpp"
-    "include/yavsg/gl/error.hpp"
     "include/yavsg/gl/framebuffer.hpp"
     "include/yavsg/gl/shader.hpp"
     "include/yavsg/gl/shader_program.hpp"
@@ -10,7 +9,6 @@ SET( HEADERS
     "include/yavsg/gl/texture_utilities.hpp"
 )
 SET( SOURCES
-    "src/error.cpp"
     "src/framebuffer.cpp"
     "src/shader.cpp"
     "src/texture_utilities.cpp"
@@ -29,8 +27,9 @@ TARGET_LINK_LIBRARIES( gl
     PUBLIC
         gl_wrap
         math
-        sdl
         doctest::doctest
+        # TODO: Remove this public dependency
+        sdl
     PRIVATE
         fmt::fmt
 )

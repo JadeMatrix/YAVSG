@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "error.hpp"
+#include <yavsg/gl/error.hpp>
 #include "texture_utilities.hpp"
 
 #include <array>

@@ -1,9 +1,11 @@
 ADD_LIBRARY( gl_wrap )
 
 SET( HEADERS
+    "include/yavsg/gl/error.hpp"
     "${CMAKE_CURRENT_BINARY_DIR}/include/yavsg/gl_wrap.hpp"
 )
 SET( SOURCES
+    "src/error.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/src/gl_wrap.cpp"
 )
 TARGET_SOURCES( gl_wrap PRIVATE ${HEADERS} ${SOURCES} )
@@ -12,6 +14,7 @@ SOURCE_GROUP( "C++ Sources" FILES ${SOURCES} )
 
 TARGET_INCLUDE_DIRECTORIES( gl_wrap
     PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>"
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include/>"
         "$<INSTALL_INTERFACE:include/>"
 )

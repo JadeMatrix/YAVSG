@@ -3,7 +3,7 @@
 
 #include <yavsg/gl_wrap.hpp>
 
-#include "error.hpp"
+#include <yavsg/gl/error.hpp>
 #include "attribute_buffer.hpp"
 // #include "../rendering/shader_variable_names.hpp"
 
