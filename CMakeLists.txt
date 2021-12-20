@@ -100,4 +100,15 @@ FOREACH( TARGET IN LISTS ALL_TARGETS )
         SCRIPT "CMakeModules/PreprocessSourceFile.cmake"
         NO_SKIP_INCLUDES
     )
+    IF( CMAKE_GENERATOR MATCHES "[Nn]inja" )
+        GET_TARGET_PROPERTY( TARGET_TYPE "${TARGET}" TYPE )
+        IF( NOT TARGET_TYPE STREQUAL INTERFACE_LIBRARY )
+            TARGET_COMPILE_OPTIONS( "${TARGET}"
+                PRIVATE
+                    "$<IF:$<CXX_COMPILER_ID:GNU>,-fdiagnostics-color=always,>"
+                    "$<IF:$<CXX_COMPILER_ID:Clang>,-fcolor-diagnostics,>"
+                    "$<IF:$<CXX_COMPILER_ID:AppleClang>,-fcolor-diagnostics,>"
+            )
+        ENDIF()
+    ENDIF()
 ENDFOREACH()
