@@ -20,8 +20,6 @@ TARGET_INCLUDE_DIRECTORIES( tasking
 )
 
 TARGET_LINK_LIBRARIES( tasking
-    PUBLIC
-        gl
     PRIVATE
         logging
 )

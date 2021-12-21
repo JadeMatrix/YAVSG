@@ -2,14 +2,12 @@
 
 #include <yavsg/logging.hpp>
 #include <yavsg/tasking/utility_tasks.hpp>  // stop_task_system_task
-#include <yavsg/gl/error.hpp>               // summary_error
 
 #include <fmt/ostream.h>    // std::thread::id support
 
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
-#include <sstream>
 #include <thread>
 #include <vector>
 #include <list>
@@ -168,19 +166,6 @@ void JadeMatrix::yavsg::become_task_worker(
                 
                 // Dispose of task if it wasn't requeued
                 task = nullptr;
-            }
-            catch( const yavsg::gl::summary_error& e )
-            {
-                std::stringstream codes;
-                yavsg::gl::print_summary_error_codes( codes, e );
-                log_.error(
-                    "Worker thread {} exiting due to OpenGL error: {}; "
-                        "codes:{}"sv,
-                    std::this_thread::get_id(),
-                    e.what(),
-                    codes.str()
-                );
-                encountered_error = true;
             }
             catch( const std::exception& e )
             {

@@ -1,6 +1,6 @@
 #include <yavsg/gl_wrap.hpp>    // For GLEW initialization, if any
 
-#include <yavsg/gl/error.hpp>
+#include <yavsg/gl/error.hpp>   // gl::error
 #include <yavsg/sdl/utils.hpp>
 #include <yavsg/tasking/tasking.hpp>
 
@@ -19,7 +19,6 @@
 #include <cstddef>  // size_t
 #include <exception>
 #include <iostream> // clog
-#include <sstream>
 #include <string_view>
 
 
@@ -196,15 +195,9 @@ int main( int argc, char* argv[] )
         
         return 0;
     }
-    catch( yavsg::gl::summary_error const& e )
+    catch( yavsg::gl::error const& e )
     {
-        std::stringstream codes;
-        yavsg::gl::print_summary_error_codes( codes, e );
-        log_.error(
-            "Program exiting due to OpenGL error: {}; codes:{}"sv,
-            e.what(),
-            codes.str()
-        );
+        log_.error( "Program exiting due to OpenGL error: {}"sv, e.what() );
     }
     catch( std::exception const& e )
     {

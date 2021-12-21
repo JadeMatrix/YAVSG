@@ -5,7 +5,6 @@ SET( HEADERS
     "${CMAKE_CURRENT_BINARY_DIR}/include/yavsg/gl_wrap.hpp"
 )
 SET( SOURCES
-    "src/error.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/src/gl_wrap.cpp"
 )
 TARGET_SOURCES( gl_wrap PRIVATE ${HEADERS} ${SOURCES} )

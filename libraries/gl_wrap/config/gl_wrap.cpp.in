@@ -1,6 +1,7 @@
 // WARNING: This file is generated
 
 #include <yavsg/gl_wrap.hpp>
+#include <yavsg/gl/error.hpp>
 
 #include <yavsg/logging.hpp>
 

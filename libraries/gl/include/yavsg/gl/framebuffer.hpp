@@ -300,13 +300,10 @@ GLuint JadeMatrix::yavsg::gl::framebuffer<
         
         return gl_id_;
     }
-    catch( summary_error const& e )
+    catch( error const& e )
     {
         gl::DeleteFramebuffers( 1, &gl_id_ );
-        throw summary_error(
-            e.what() + " for yavsg::gl::framebuffer"s,
-            e.error_codes
-        );
+        throw error( "(for yavsg::gl::framebuffer) "s + e.what() );
     }
     catch( ... )
     {
@@ -361,11 +358,11 @@ typename JadeMatrix::yavsg::gl::framebuffer<
             ColorTargetTypes...
         >::init( width_, height_, gl_id_ );
     }
-    catch( summary_error const& e )
+    catch( error const& e )
     {
-        throw summary_error(
-            e.what() + " for yavsg::gl::framebuffer::framebuffer_init()"s,
-            e.error_codes
+        throw error(
+            "(for yavsg::gl::framebuffer::framebuffer_init()) "s
+            + e.what()
         );
     }
 }
