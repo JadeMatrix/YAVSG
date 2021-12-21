@@ -192,12 +192,12 @@ FOREACH( GL_FUNC IN ITEMS
     
     STRING( APPEND GL_WRAP_WRAPPER_DECLARATIONS
         "${GL_FUNC_RETURNTYPE} ${GL_FUNC_BASENAME}( "
-        "${GL_FUNC_ARGS_SIGNATURE}ext::source_location = "
+        "${GL_FUNC_ARGS_SIGNATURE}ext::source_location const& = "
         "ext::source_location::current() );\n"
     )
     STRING( APPEND GL_WRAP_WRAPPER_DEFINITIONS
         "${GL_FUNC_RETURNTYPE} JadeMatrix::yavsg::gl::${GL_FUNC_BASENAME}( "
-        "${GL_FUNC_ARGS_SIGNATURE}ext::source_location where_ )\n"
+        "${GL_FUNC_ARGS_SIGNATURE}ext::source_location const& where_ )\n"
         "{\n"
         "    "
     )
