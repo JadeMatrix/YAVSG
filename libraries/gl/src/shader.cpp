@@ -83,10 +83,12 @@ JadeMatrix::yavsg::gl::shader JadeMatrix::yavsg::gl::shader::from_file(
     std::filebuf source_file;
     source_file.open( filename, std::ios_base::in );
     if( !source_file.is_open() )
+    {
         throw std::runtime_error( fmt::format(
             "could not open shader source file {}"sv,
             filename
         ) );
+    }
     std::string source = std::string(
         std::istreambuf_iterator< char >( &source_file ),
         {}

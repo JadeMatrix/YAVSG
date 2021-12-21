@@ -4,15 +4,16 @@
 #include <yavsg/sdl/sdl.hpp>
 
 #include <fmt/format.h>         // format
+#include <fmt/ostream.h>        // std::filesystem::path support
+
 #include <doctest/doctest.h>    // REQUIRE
 
-#include <assert.h>
+#include <filesystem>
 #include <fstream>
-#include <iomanip>      // std::setw(), std::setfill()
-#include <limits>       // std::numeric_limits
-#include <mutex>        // std::call_once, std::once_flag
-#include <sstream>
-#include <stdexcept>    // std::runtime_error
+#include <iomanip>      // setw, setfill
+#include <limits>       // numeric_limits
+#include <mutex>        // call_once, once_flag
+#include <stdexcept>    // runtime_error
 #include <vector>
 
 
@@ -124,7 +125,7 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                 // up without disabling the warning for this code
                 throw std::logic_error(
                     "impossible blending state reached in "
-                    "yavsg::gl::base_framebuffer::alpha_blending()"
+                    "yavsg::gl::base_framebuffer::alpha_blending()"s
                 );
             case alpha_blend_mode::PREMULTIPLIED:
                 gl::BlendFuncSeparate(
@@ -198,8 +199,8 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
         const std::string& descriptive_name
     )
     {
-        assert( width_  <= std::numeric_limits< GLsizei >::max() );
-        assert( height_ <= std::numeric_limits< GLsizei >::max() );
+        REQUIRE( width_  <= std::numeric_limits< GLsizei >::max() );
+        REQUIRE( height_ <= std::numeric_limits< GLsizei >::max() );
         auto w = static_cast< GLsizei >( width_  );
         auto h = static_cast< GLsizei >( height_ );
         
@@ -229,35 +230,36 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
         );
         
         if( !surface )
-            throw std::runtime_error(
-                "couldn't create SDL surface from pixels for"
-                " yavsg::gl::base_framebuffer::dump_BMP(): "
-                + std::string( SDL_GetError() )
-            );
+        {
+            throw std::runtime_error( fmt::format(
+                "couldn't create SDL surface from pixels for "
+                    "yavsg::gl::base_framebuffer::dump_BMP(): {}"sv,
+                SDL_GetError()
+            ) );
+        }
         
         static std::size_t nth = 0;
         
-        std::stringstream filename;
-        filename
-            << std::setw( std::numeric_limits< std::size_t >::digits10 + 1 )
-            << std::setfill( '0' )
-            << nth
-            << " - "
-            << descriptive_name
-            << ".bmp"
-        ;
+        std::filesystem::path const filename = fmt::format(
+            "{:0{}} - {}.bmp"sv,
+            nth,
+            std::numeric_limits< std::size_t >::digits10 + 1,
+            descriptive_name
+        );
         
         ++nth;
         
-        auto save_error = SDL_SaveBMP( surface, filename.str().c_str() );
+        auto save_error = SDL_SaveBMP( surface, filename.c_str() );
         SDL_FreeSurface( surface );
         
         if( save_error )
-            throw std::runtime_error(
-                "couldn't open file `"
-                + filename.str()
-                + "` for yavsg::gl::base_framebuffer::dump_BMP(): "
-                + std::string( SDL_GetError() )
-            );
+        {
+            throw std::runtime_error( fmt::format(
+                "couldn't open file {} for "
+                    "yavsg::gl::base_framebuffer::dump_BMP(): {}"sv,
+                filename,
+                SDL_GetError()
+            ) );
+        }
     }
 }
