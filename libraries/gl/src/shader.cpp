@@ -12,7 +12,6 @@
 
 namespace
 {
-    using namespace std::string_literals;
     using namespace std::string_view_literals;
 }
 
@@ -23,18 +22,11 @@ JadeMatrix::yavsg::gl::shader::shader(
 )
 {
     id = gl::CreateShader( shader_type );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't create shader for yavsg::gl::shader"s
-    );
     
     try
     {
         auto source_c_string = source.c_str();
         gl::ShaderSource( id, 1, &source_c_string, nullptr );
-        YAVSG_GL_THROW_FOR_ERRORS( fmt::format(
-            "couldn't load source for shader {} for yavsg::gl::shader"sv,
-            id
-        ) );
         
         gl::CompileShader( id );
         

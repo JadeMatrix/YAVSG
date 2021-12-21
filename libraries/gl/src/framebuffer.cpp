@@ -38,10 +38,6 @@ namespace JadeMatrix::yavsg::gl
                     GL_MAX_COLOR_ATTACHMENTS,
                     &max_color_attachments
                 );
-                YAVSG_GL_THROW_FOR_ERRORS(
-                    "couldn't read GL_MAX_COLOR_ATTACHMENTS for "
-                    "yavsg::gl::color_attachment_name()"s
-                );
                 REQUIRE( max_color_attachments > 0 );
             }
         );
@@ -104,44 +100,20 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
     void write_only_framebuffer::bind()
     {
         gl::BindFramebuffer( GL_FRAMEBUFFER, gl_id_ );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't bind framebuffer "
-            + std::to_string( gl_id_ )
-            + std::string( gl_id_ == 0 ? " (default)" : "" )
-            + " for yavsg::gl::base_framebuffer::bind()"
-        );
         
         if( alpha_blending_ == alpha_blend_mode::DISABLED )
         {
             gl::Disablei( GL_BLEND, 0 );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't disable blending for framebuffer "
-                + std::to_string( gl_id_ )
-                + std::string( gl_id_ == 0 ? " (default)" : "" )
-                + " for yavsg::gl::base_framebuffer::alpha_blending()"
-            );
         }
         else
         {
             gl::Enablei( GL_BLEND, 0 );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't enable blending for framebuffer "
-                + std::to_string( gl_id_ )
-                + std::string( gl_id_ == 0 ? " (default)" : "" )
-                + " for yavsg::gl::base_framebuffer::alpha_blending()"
-            );
         }
         
         if( alpha_blending_ != alpha_blend_mode::DISABLED )
         {
             // TODO: gl::BlendEquationSeparatei( 0, GL_FUNC_ADD, GL_FUNC_ADD );
             gl::BlendEquationSeparate( GL_FUNC_ADD, GL_FUNC_ADD );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't set separate blending equations for framebuffer "
-                + std::to_string( gl_id_ )
-                + std::string( gl_id_ == 0 ? " (default)" : "" )
-                + " for yavsg::gl::base_framebuffer::alpha_blending()"
-            );
             
             // Use a switch to get warnings about possible unhandled cases in
             // the future
@@ -205,12 +177,6 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                 );
                 break;
             }
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't set separate blending functions for framebuffer "
-                + std::to_string( gl_id_ )
-                + std::string( gl_id_ == 0 ? " (default)" : "" )
-                + " for yavsg::gl::base_framebuffer::alpha_blending()"
-            );
         }
     }
     
@@ -248,10 +214,6 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
             GL_RGBA,
             GL_UNSIGNED_INT_8_8_8_8,
             pixels.data()
-        );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't read framebuffer pixels for"
-            " yavsg::gl::base_framebuffer::dump_BMP()"
         );
         
         auto surface = SDL_CreateRGBSurfaceFrom(

@@ -96,15 +96,7 @@ void JadeMatrix::yavsg::multi_postprocess_step::run(
         | GL_DEPTH_BUFFER_BIT
         | GL_STENCIL_BUFFER_BIT
     );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't clear buffer for yavsg::multi_postprocess_step::run()"s
-    );
-    
     gl::Disable( GL_DEPTH_TEST );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't disable depth testing for "
-        "yavsg::multi_postprocess_step::run()"s
-    );
     
     source.color_buffer< 0 >().bind_as< 0 >();
     multi_program.set_uniform(

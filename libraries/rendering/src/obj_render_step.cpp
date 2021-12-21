@@ -11,13 +11,11 @@
 #include <fmt/format.h>
 
 #include <array>
-#include <string>
 #include <string_view>
 
 
 namespace
 {
-    using namespace std::string_literals;
     using namespace std::string_view_literals;
 }
 
@@ -49,14 +47,7 @@ void JadeMatrix::yavsg::obj_render_step::run(
         | GL_DEPTH_BUFFER_BIT
         | GL_STENCIL_BUFFER_BIT
     );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't clear buffer for yavsg::obj_render_step::run()"s
-    );
-    
     gl::Enable( GL_DEPTH_TEST );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't enable depth testing for yavsg::obj_render_step::run()"s
-    );
     
     scene_program.set_uniform(
         shader_string_id::transform_view,

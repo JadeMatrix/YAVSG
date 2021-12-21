@@ -5,13 +5,11 @@
 #include <yavsg/rendering/shader_utils.hpp> // shaders_dir
 #include <yavsg/rendering/shader_variable_names.hpp>
 
-#include <string>
 #include <string_view>
 
 
 namespace
 {
-    using namespace std::string_literals;
     using namespace std::string_view_literals;
 }
 
@@ -64,15 +62,7 @@ void JadeMatrix::yavsg::basic_postprocess_step::run(
         | GL_DEPTH_BUFFER_BIT
         | GL_STENCIL_BUFFER_BIT
     );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't clear buffer for yavsg::basic_postprocess_step::run()"s
-    );
-    
     gl::Disable( GL_DEPTH_TEST );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't disable depth testing for "
-        "yavsg::basic_postprocess_step::run()"s
-    );
     
     source.color_buffer< 0 >().bind_as< 0 >();
     postprocess_program.set_uniform(

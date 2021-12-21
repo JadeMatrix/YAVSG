@@ -528,10 +528,6 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
     )
     {
         gl::BindTexture( GL_TEXTURE_2D, gl_id );
-        YAVSG_GL_THROW_FOR_ERRORS( fmt::format(
-            "couldn't bind texture {} for yavsg::gl::upload_texture_data()"sv,
-            gl_id
-        ) );
         
         REQUIRE( upload_data.width  <= std::numeric_limits< GLsizei >::max() );
         REQUIRE( upload_data.height <= std::numeric_limits< GLsizei >::max() );
@@ -549,14 +545,6 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
             upload_data.gl_incoming_type,   // Pixel type
             upload_data.data.get()          // Pixel data
         );
-        YAVSG_GL_THROW_FOR_ERRORS( fmt::format(
-            "couldn't allocate {}×{} texture {}{} for "
-                "yavsg::gl::upload_texture_data()"sv,
-            upload_data.width,
-            upload_data.height,
-            gl_id,
-            ( upload_data.data ? ""sv : " from null data"sv )
-        ) );
         
         set_bound_texture_filtering( settings );
     }
@@ -577,9 +565,6 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
         }
         
         gl::TexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't set mag filter for yavsg::gl::set_texture_filtering()"s
-        );
         
         switch( settings.minify )
         {
@@ -618,18 +603,10 @@ namespace JadeMatrix::yavsg::gl // Texture data processing implementation //////
         }
         
         gl::TexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't set min filter for texture for "
-            "yavsg::gl::set_texture_filtering()"s
-        );
         
         if( settings.mipmaps != mipmap_type::none )
         {
             gl::GenerateMipmap( GL_TEXTURE_2D );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't generate mipmaps for texture for "
-                "yavsg::gl::set_texture_filtering()"s
-            );
             
             if( anisotropic_filtering_supported() )
             {
