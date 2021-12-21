@@ -134,7 +134,9 @@ FOREACH( GL_FUNC IN ITEMS
     ENDIF()
     
     SET( GL_FUNC_ARGS_SIGNATURE )
-    SET( GL_FUNC_ARGS_FORWARD )
+    SET( GL_FUNC_ARGS_FORWARD   )
+    SET( GL_FUNC_ARGS_FORMAT    )
+    SET( GL_FUNC_ARGS_FMT_ARGS  )
     foreach( ARG IN LISTS GL_FUNC_ARGUMENTS )
         STRING( REGEX REPLACE [[ +]] ";" ARG "${ARG}" )
         
@@ -148,9 +150,28 @@ FOREACH( GL_FUNC IN ITEMS
         
         STRING( APPEND GL_FUNC_ARGS_SIGNATURE "${ARG_TYPE} ${ARG_NAME}, " )
         LIST  ( APPEND GL_FUNC_ARGS_FORWARD               "${ARG_NAME}"   )
+        
+        IF( ARG_TYPE STREQUAL "::GLenum" )
+            LIST( APPEND GL_FUNC_ARGS_FORMAT "(GLenum)0x{:X}" )
+        ELSE()
+            LIST( APPEND GL_FUNC_ARGS_FORMAT "{}" )
+        ENDIF()
+        
+        IF( ARG_TYPE MATCHES [[char const\*$]] )
+            STRING( APPEND GL_FUNC_ARGS_FMT_ARGS
+                ", std::quoted( ${ARG_NAME} )"
+            )
+        ELSEIF( ARG_TYPE MATCHES [[\*]] )
+            STRING( APPEND GL_FUNC_ARGS_FMT_ARGS
+                ", static_cast< void const* >( ${ARG_NAME} )"
+            )
+        ELSE()
+            STRING( APPEND GL_FUNC_ARGS_FMT_ARGS ", ${ARG_NAME}" )
+        ENDIF()
     endforeach()
     
     LIST( JOIN GL_FUNC_ARGS_FORWARD ", " GL_FUNC_ARGS_FORWARD )
+    LIST( JOIN GL_FUNC_ARGS_FORMAT  ", " GL_FUNC_ARGS_FORMAT  )
     
     STRING( APPEND GL_WRAP_WRAPPER_DECLARATIONS "    " )
     IF( NOT GL_FUNC_RETURNTYPE STREQUAL "void" )
@@ -168,11 +189,14 @@ FOREACH( GL_FUNC IN ITEMS
         "{\n"
         "    if( ::log_every_opengl_call )\n"
         "    {\n"
-        "        log_.verbose( {\n"
-        "            \"gl${GL_FUNC_BASENAME}\"sv,\n"
-        "            std::chrono::system_clock::now(),\n"
-        "            where_,\n"
-        "        } );\n"
+        "        log_.verbose(\n"
+        "            {\n"
+        "                \"gl${GL_FUNC_BASENAME}(${GL_FUNC_ARGS_FORMAT})\"sv,\n"
+        "                std::chrono::system_clock::now(),\n"
+        "                where_,\n"
+        "            }\n"
+        "            ${GL_FUNC_ARGS_FMT_ARGS}\n"
+        "        );\n"
         "    }\n"
         "    "
     )
@@ -193,7 +217,8 @@ FOREACH( GL_FUNC IN ITEMS
         "        if( auto summaries_ = pop_opengl_error_summaries(); summaries_ )\n"
         "        {\n"
         "            throw gl::error( fmt::format(\n"
-        "                \"gl${GL_FUNC_BASENAME} failed for {} ({}:{}): {}\"sv,\n"
+        "                \"gl${GL_FUNC_BASENAME}(${GL_FUNC_ARGS_FORMAT}) failed for {} ({}:{}): {}\"sv\n"
+        "                ${GL_FUNC_ARGS_FMT_ARGS},\n"
         "                where_.function_name,\n"
         "                where_.file_name,\n"
         "                where_.line,\n"

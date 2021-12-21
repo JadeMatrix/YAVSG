@@ -6,7 +6,9 @@
 #include <yavsg/logging.hpp>
 
 #include <fmt/format.h>
+#include <fmt/ostream.h>    // std::quoted support
 
+#include <iomanip>  // quoted
 #include <optional>
 #include <utility>  // move
 
