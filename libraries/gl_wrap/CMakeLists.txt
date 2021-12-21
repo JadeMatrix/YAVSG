@@ -29,6 +29,32 @@ TARGET_LINK_LIBRARIES( gl_wrap
 )
 
 
+FUNCTION( FORMAT_FOR_GL_TYPE TYPE NAME FORMAT_OUT FMT_ARG_OUT )
+    IF( TYPE STREQUAL "::GLenum" )
+        SET( "${FORMAT_OUT}" "(GLenum)0x{:X}" PARENT_SCOPE )
+    ELSE()
+        SET( "${FORMAT_OUT}" "{}" PARENT_SCOPE )
+    ENDIF()
+    
+    IF( TYPE MATCHES [[char const\*$]] )
+        SET( "${FMT_ARG_OUT}"
+            ", std::quoted( ${NAME} )"
+            PARENT_SCOPE
+        )
+    ELSEIF( TYPE MATCHES [[\*]] )
+        SET( "${FMT_ARG_OUT}"
+            ", static_cast< void const* >( ${NAME} )"
+            PARENT_SCOPE
+        )
+    ELSE()
+        SET( "${FMT_ARG_OUT}"
+            ", ${NAME}"
+            PARENT_SCOPE
+        )
+    ENDIF()
+ENDFUNCTION()
+
+
 SET( GL_WRAP_WRAPPER_DECLARATIONS "" )
 SET( GL_WRAP_WRAPPER_DEFINITIONS  "" )
 
@@ -151,23 +177,9 @@ FOREACH( GL_FUNC IN ITEMS
         STRING( APPEND GL_FUNC_ARGS_SIGNATURE "${ARG_TYPE} ${ARG_NAME}, " )
         LIST  ( APPEND GL_FUNC_ARGS_FORWARD               "${ARG_NAME}"   )
         
-        IF( ARG_TYPE STREQUAL "::GLenum" )
-            LIST( APPEND GL_FUNC_ARGS_FORMAT "(GLenum)0x{:X}" )
-        ELSE()
-            LIST( APPEND GL_FUNC_ARGS_FORMAT "{}" )
-        ENDIF()
-        
-        IF( ARG_TYPE MATCHES [[char const\*$]] )
-            STRING( APPEND GL_FUNC_ARGS_FMT_ARGS
-                ", std::quoted( ${ARG_NAME} )"
-            )
-        ELSEIF( ARG_TYPE MATCHES [[\*]] )
-            STRING( APPEND GL_FUNC_ARGS_FMT_ARGS
-                ", static_cast< void const* >( ${ARG_NAME} )"
-            )
-        ELSE()
-            STRING( APPEND GL_FUNC_ARGS_FMT_ARGS ", ${ARG_NAME}" )
-        ENDIF()
+        FORMAT_FOR_GL_TYPE( "${ARG_TYPE}" "${ARG_NAME}" ARG_FORMAT ARG_FMT_ARG )
+        LIST  ( APPEND GL_FUNC_ARGS_FORMAT   "${ARG_FORMAT}"  )
+        STRING( APPEND GL_FUNC_ARGS_FMT_ARGS "${ARG_FMT_ARG}" )
     ENDFOREACH()
     
     LIST( JOIN GL_FUNC_ARGS_FORWARD ", " GL_FUNC_ARGS_FORWARD )
@@ -187,25 +199,21 @@ FOREACH( GL_FUNC IN ITEMS
         "${GL_FUNC_RETURNTYPE} JadeMatrix::yavsg::gl::${GL_FUNC_BASENAME}( "
         "${GL_FUNC_ARGS_SIGNATURE}ext::source_location where_ )\n"
         "{\n"
-        "    if( ::log_every_opengl_call )\n"
-        "    {\n"
-        "        log_.verbose(\n"
-        "            {\n"
-        "                \"gl${GL_FUNC_BASENAME}(${GL_FUNC_ARGS_FORMAT})\"sv,\n"
-        "                std::chrono::system_clock::now(),\n"
-        "                where_,\n"
-        "            }\n"
-        "            ${GL_FUNC_ARGS_FMT_ARGS}\n"
-        "        );\n"
-        "    }\n"
         "    "
     )
+    
     IF( NOT GL_FUNC_RETURNTYPE STREQUAL "void" )
+        FORMAT_FOR_GL_TYPE( "${GL_FUNC_RETURNTYPE}" "return_value_"
+            RETVAL_FORMAT
+            RETVAL_FMT_ARG
+        )
         STRING( APPEND GL_WRAP_WRAPPER_DEFINITIONS
             "auto return_value_ = gl${GL_FUNC_BASENAME}( "
             "${GL_FUNC_ARGS_FORWARD} );"
         )
     ELSE()
+        UNSET( RETVAL_FORMAT  )
+        UNSET( RETVAL_FMT_ARG )
         STRING( APPEND GL_WRAP_WRAPPER_DEFINITIONS
             "gl${GL_FUNC_BASENAME}( ${GL_FUNC_ARGS_FORWARD} );"
         )
@@ -225,6 +233,29 @@ FOREACH( GL_FUNC IN ITEMS
         "                *summaries_\n"
         "            ) );\n"
         "        }\n"
+        "    }\n"
+        "    if( ::log_every_opengl_call )\n"
+        "    {\n"
+        "        log_.verbose(\n"
+        "            {\n"
+    )
+    IF( NOT GL_FUNC_RETURNTYPE STREQUAL "void" )
+        STRING( APPEND GL_WRAP_WRAPPER_DEFINITIONS
+            "                \"gl${GL_FUNC_BASENAME}("
+            "${GL_FUNC_ARGS_FORMAT}) => ${RETVAL_FORMAT}\"sv,\n"
+        )
+    ELSE()
+        STRING( APPEND GL_WRAP_WRAPPER_DEFINITIONS
+            "                \"gl${GL_FUNC_BASENAME}("
+            "${GL_FUNC_ARGS_FORMAT})\"sv,\n"
+        )
+    ENDIF()
+    STRING( APPEND GL_WRAP_WRAPPER_DEFINITIONS
+        "                std::chrono::system_clock::now(),\n"
+        "                where_,\n"
+        "            }\n"
+        "            ${GL_FUNC_ARGS_FMT_ARGS}${RETVAL_FMT_ARG}\n"
+        "        );\n"
         "    }\n"
     )
     IF( NOT GL_FUNC_RETURNTYPE STREQUAL "void" )
