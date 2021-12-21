@@ -6,6 +6,7 @@
 
 #include <fmt/format.h>
 
+#include <optional>
 #include <utility>  // move
 
 
@@ -17,6 +18,45 @@ namespace
     
     auto log_every_opengl_call = false;
     auto check_opengl_errors   = true;
+    
+    std::string_view pop_opengl_error_summaries_code_name( GLenum error )
+    {
+        switch( error )
+        {
+        case GL_INVALID_ENUM                 : return " (GL_INVALID_ENUM)"sv;
+        case GL_INVALID_VALUE                : return " (GL_INVALID_VALUE)"sv;
+        case GL_INVALID_OPERATION            : return " (GL_INVALID_OPERATION)"sv;
+        case GL_OUT_OF_MEMORY                : return " (GL_OUT_OF_MEMORY)"sv;
+        case GL_INVALID_FRAMEBUFFER_OPERATION: return " (GL_INVALID_FRAMEBUFFER_OPERATION)"sv;
+        default                              : return ""sv;
+        }
+    }
+    
+    std::optional< std::string > pop_opengl_error_summaries()
+    {
+        if( auto error = glGetError(); error != GL_NO_ERROR )
+        {
+            auto summaries = fmt::format(
+                "0x{:X}{}"sv,
+                error,
+                pop_opengl_error_summaries_code_name( error )
+            );;
+            
+            while( ( error = glGetError() ) != GL_NO_ERROR )
+            {
+                summaries = fmt::format(
+                    "{}, 0x{:X}{}"sv,
+                    summaries,
+                    error,
+                    pop_opengl_error_summaries_code_name( error )
+                );
+            }
+            
+            return summaries;
+        }
+        
+        return std::nullopt;
+    }
 }
 
 
