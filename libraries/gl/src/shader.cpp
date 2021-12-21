@@ -1,6 +1,7 @@
 #include <yavsg/gl/shader.hpp>
 
 #include <yavsg/gl/error.hpp>
+#include <yavsg/logging.hpp>
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>    // std::filesystem::path support
@@ -12,8 +13,9 @@
 
 namespace
 {
-    using namespace std::string_literals;
     using namespace std::string_view_literals;
+    
+    auto const log_ = JadeMatrix::yavsg::log_handle();
 }
 
 
@@ -22,63 +24,55 @@ JadeMatrix::yavsg::gl::shader::shader(
     std::string const& source
 )
 {
-    id = glCreateShader( shader_type );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't create shader for yavsg::gl::shader"s
-    );
+    id = gl::CreateShader( shader_type );
     
     try
     {
         auto source_c_string = source.c_str();
-        glShaderSource( id, 1, &source_c_string, nullptr );
-        YAVSG_GL_THROW_FOR_ERRORS( fmt::format(
-            "couldn't load source for shader {} for yavsg::gl::shader"sv,
-            id
-        ) );
+        gl::ShaderSource( id, 1, &source_c_string, nullptr );
         
-        glCompileShader( id );
+        gl::CompileShader( id );
+        
+        GLsizei log_length;
+        gl::GetShaderiv( id, GL_INFO_LOG_LENGTH, &log_length );
+        std::string compile_log(
+            (
+                log_length  < 0
+                ? 0ul
+                : static_cast< std::string::size_type >( log_length )
+            ),
+            '\0'
+        );
+        gl::GetShaderInfoLog( id, log_length, nullptr, compile_log.data() );
         
         GLint status;
-        glGetShaderiv( id, GL_COMPILE_STATUS, &status );
+        gl::GetShaderiv( id, GL_COMPILE_STATUS, &status );
         if( status != GL_TRUE )
         {
-            constexpr GLsizei log_buffer_length = 1024;
-            char log_buffer[ log_buffer_length ];
-            GLsizei got_buffer_length;
-            std::string log;
-            
-            while( true )
-            {
-                glGetShaderInfoLog(
-                    id,
-                    log_buffer_length,
-                    &got_buffer_length,
-                    log_buffer
-                );
-                if( got_buffer_length <= 0 )
-                    break;
-                log += std::string(
-                    log_buffer,
-                    static_cast< std::size_t >( got_buffer_length )
-                );
-            }
-            
-            throw std::runtime_error{ fmt::format(
+            throw error{ fmt::format(
                 "failed to compile shader:\n{}"sv,
-                log
+                compile_log
             ) };
+        }
+        else
+        {
+            log_.split_on_newlines_as(
+                ext::log::level::warning,
+                compile_log,
+                "OpenGL: {}"sv
+            );
         }
     }
     catch( ... )
     {
-        glDeleteShader( id );
+        gl::DeleteShader( id );
         throw;
     }
 }
 
 JadeMatrix::yavsg::gl::shader::~shader()
 {
-    glDeleteShader( id );
+    gl::DeleteShader( id );
 }
 
 JadeMatrix::yavsg::gl::shader JadeMatrix::yavsg::gl::shader::from_file(
@@ -89,10 +83,12 @@ JadeMatrix::yavsg::gl::shader JadeMatrix::yavsg::gl::shader::from_file(
     std::filebuf source_file;
     source_file.open( filename, std::ios_base::in );
     if( !source_file.is_open() )
+    {
         throw std::runtime_error( fmt::format(
             "could not open shader source file {}"sv,
             filename
         ) );
+    }
     std::string source = std::string(
         std::istreambuf_iterator< char >( &source_file ),
         {}

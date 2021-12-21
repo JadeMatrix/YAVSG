@@ -151,7 +151,7 @@ bool JadeMatrix::yavsg::frame_task::operator()()
             target_buffer->height()
             <= std::numeric_limits< GLsizei >::max()
         );
-        glViewport(
+        gl::Viewport(
             0,
             0,
             static_cast< GLsizei >( target_buffer->width()  ),
@@ -188,7 +188,7 @@ bool JadeMatrix::yavsg::frame_task::operator()()
             target_buffer->height()
             <= std::numeric_limits< GLsizei >::max()
         );
-        glViewport(
+        gl::Viewport(
             0,
             0,
             static_cast< GLsizei >( target_buffer->width()  ),

@@ -9,13 +9,11 @@
 #include <doctest/doctest.h>
 
 #include <limits>
-#include <string>
 #include <tuple>
 
 
 namespace
 {
-    using namespace std::string_literals;
     using namespace std::string_view_literals;
     
     using child_ptr = std::unique_ptr<
@@ -52,21 +50,13 @@ void JadeMatrix::yavsg::debug_4up_postprocess_step::run(
     gl::write_only_framebuffer& target
 )
 {
-    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-    glClear(
+    gl::ClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+    gl::Clear(
           GL_COLOR_BUFFER_BIT
         | GL_DEPTH_BUFFER_BIT
         | GL_STENCIL_BUFFER_BIT
     );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't clear buffer for yavsg::debug_4up_postprocess_step::run()"s
-    );
-    
-    glDisable( GL_DEPTH_TEST );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't disable depth testing for "
-        "yavsg::debug_4up_postprocess_step::run()"s
-    );
+    gl::Disable( GL_DEPTH_TEST );
     
     for( auto [ step, x_offset_factor, y_offset_factor ] : {
         std::tuple
@@ -82,31 +72,19 @@ void JadeMatrix::yavsg::debug_4up_postprocess_step::run(
         REQUIRE( half_height <= std::numeric_limits< GLint >::max() );
         REQUIRE( half_width  <= std::numeric_limits< GLint >::max() );
         
-        glViewport(
+        gl::Viewport(
             static_cast< GLint >( x_offset_factor * half_width  ),
             static_cast< GLint >( y_offset_factor * half_height ),
             static_cast< GLint >(                   half_width  ),
             static_cast< GLint >(                   half_height )
         );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't set viewport for "
-            "yavsg::debug_4up_postprocess_step::run()"s
-        );
         
-        glEnable( GL_SCISSOR_TEST );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't enable scissor testing for "
-            "yavsg::debug_4up_postprocess_step::run()"s
-        );
-        
-        glScissor(
+        gl::Enable( GL_SCISSOR_TEST );
+        gl::Scissor(
             static_cast< GLint >( x_offset_factor * half_width  ),
             static_cast< GLint >( y_offset_factor * half_height ),
             static_cast< GLint >(                   half_width  ),
             static_cast< GLint >(                   half_height )
-        );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't set scissor for yavsg::debug_4up_postprocess_step::run()"s
         );
         
         if( step )
@@ -116,9 +94,5 @@ void JadeMatrix::yavsg::debug_4up_postprocess_step::run(
         }
     }
     
-    glDisable( GL_SCISSOR_TEST );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't disable scissor testing for "
-        "yavsg::debug_4up_postprocess_step::run()"s
-    );
+    gl::Disable( GL_SCISSOR_TEST );
 }

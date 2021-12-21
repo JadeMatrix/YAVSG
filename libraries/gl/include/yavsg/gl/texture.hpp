@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "error.hpp"
+#include <yavsg/gl/error.hpp>
 #include "texture_utilities.hpp"
 
 #include <array>
@@ -58,25 +58,8 @@ namespace JadeMatrix::yavsg::gl
             >
         > void bind_as() const
         {
-            using namespace std::string_literals;
-            
-            glActiveTexture( GL_TEXTURE0 + ActiveTexture );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't activate GL_TEXTURE"s
-                + std::to_string( ActiveTexture )
-                + " to bind texture "s
-                + std::to_string( gl_id_ )
-                + " for yavsg::gl::texture::bind_as<>()"s
-            );
-            
-            glBindTexture( GL_TEXTURE_2D, gl_id_ );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't bind texture "s
-                + std::to_string( gl_id_ )
-                + " as GL_TEXTURE"s
-                + std::to_string( ActiveTexture )
-                + " for yavsg::gl::texture::bind_as<>()"s
-            );
+            gl::ActiveTexture( GL_TEXTURE0 + ActiveTexture );
+            gl::BindTexture( GL_TEXTURE_2D, gl_id_ );
         }
         
     protected:
@@ -92,21 +75,8 @@ namespace JadeMatrix::yavsg::gl
         >
     > void unbind_texture()
     {
-        using namespace std::string_literals;
-        
-        glActiveTexture( GL_TEXTURE0 + ActiveTexture );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't activate GL_TEXTURE"s
-            + std::to_string( ActiveTexture )
-            + " to bind default texture for yavsg::gl::unbind_texture()"s
-        );
-        
-        glBindTexture( GL_TEXTURE_2D, 0 );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't bind default texture as GL_TEXTURE"s
-            + std::to_string( ActiveTexture )
-            + " for yavsg::gl::unbind_texture()"s
-        );
+        gl::ActiveTexture( GL_TEXTURE0 + ActiveTexture );
+        gl::BindTexture( GL_TEXTURE_2D, 0 );
     }
 }
 
@@ -116,12 +86,7 @@ namespace JadeMatrix::yavsg::gl
 template< typename DataType, std::size_t Channels >
 JadeMatrix::yavsg::gl::texture< DataType, Channels >::texture()
 {
-    using namespace std::string_literals;
-    
-    glGenTextures( 1, &gl_id_ );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't generate texture for yavsg::gl::texture"s
-    );
+    gl::GenTextures( 1, &gl_id_ );
 }
 
 template< typename DataType, std::size_t Channels >
@@ -129,7 +94,7 @@ JadeMatrix::yavsg::gl::texture< DataType, Channels >::~texture()
 {
     if( gl_id_ != default_texture_gl_id )
     {
-        glDeleteTextures( 1, &gl_id_ );
+        gl::DeleteTextures( 1, &gl_id_ );
     }
 }
 
@@ -188,14 +153,7 @@ void JadeMatrix::yavsg::gl::texture< DataType, Channels >::filtering(
     texture_filter_settings const& settings
 )
 {
-    using namespace std::string_literals;
-    
-    glBindTexture( GL_TEXTURE_2D, gl_id_ );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't bind texture "s
-        + std::to_string( gl_id_ )
-        + " for yavsg::gl::texture::filtering()"s
-    );
+    gl::BindTexture( GL_TEXTURE_2D, gl_id_ );
     
     set_bound_texture_filtering( settings );
 }

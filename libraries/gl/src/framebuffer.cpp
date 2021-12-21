@@ -4,15 +4,16 @@
 #include <yavsg/sdl/sdl.hpp>
 
 #include <fmt/format.h>         // format
+#include <fmt/ostream.h>        // std::filesystem::path support
+
 #include <doctest/doctest.h>    // REQUIRE
 
-#include <assert.h>
+#include <filesystem>
 #include <fstream>
-#include <iomanip>      // std::setw(), std::setfill()
-#include <limits>       // std::numeric_limits
-#include <mutex>        // std::call_once, std::once_flag
-#include <sstream>
-#include <stdexcept>    // std::runtime_error
+#include <iomanip>      // setw, setfill
+#include <limits>       // numeric_limits
+#include <mutex>        // call_once, once_flag
+#include <stdexcept>    // runtime_error
 #include <vector>
 
 
@@ -34,13 +35,9 @@ namespace JadeMatrix::yavsg::gl
         std::call_once(
             gl_max_got_flags,
             [](){
-                glGetIntegerv(
+                gl::GetIntegerv(
                     GL_MAX_COLOR_ATTACHMENTS,
                     &max_color_attachments
-                );
-                YAVSG_GL_THROW_FOR_ERRORS(
-                    "couldn't read GL_MAX_COLOR_ATTACHMENTS for "
-                    "yavsg::gl::color_attachment_name()"s
                 );
                 REQUIRE( max_color_attachments > 0 );
             }
@@ -103,45 +100,21 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
     
     void write_only_framebuffer::bind()
     {
-        glBindFramebuffer( GL_FRAMEBUFFER, gl_id_ );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't bind framebuffer "
-            + std::to_string( gl_id_ )
-            + std::string( gl_id_ == 0 ? " (default)" : "" )
-            + " for yavsg::gl::base_framebuffer::bind()"
-        );
+        gl::BindFramebuffer( GL_FRAMEBUFFER, gl_id_ );
         
         if( alpha_blending_ == alpha_blend_mode::DISABLED )
         {
-            glDisablei( GL_BLEND, 0 );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't disable blending for framebuffer "
-                + std::to_string( gl_id_ )
-                + std::string( gl_id_ == 0 ? " (default)" : "" )
-                + " for yavsg::gl::base_framebuffer::alpha_blending()"
-            );
+            gl::Disablei( GL_BLEND, 0 );
         }
         else
         {
-            glEnablei( GL_BLEND, 0 );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't enable blending for framebuffer "
-                + std::to_string( gl_id_ )
-                + std::string( gl_id_ == 0 ? " (default)" : "" )
-                + " for yavsg::gl::base_framebuffer::alpha_blending()"
-            );
+            gl::Enablei( GL_BLEND, 0 );
         }
         
         if( alpha_blending_ != alpha_blend_mode::DISABLED )
         {
-            // TODO: glBlendEquationSeparatei( 0, GL_FUNC_ADD, GL_FUNC_ADD );
-            glBlendEquationSeparate( GL_FUNC_ADD, GL_FUNC_ADD );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't set separate blending equations for framebuffer "
-                + std::to_string( gl_id_ )
-                + std::string( gl_id_ == 0 ? " (default)" : "" )
-                + " for yavsg::gl::base_framebuffer::alpha_blending()"
-            );
+            // TODO: gl::BlendEquationSeparatei( 0, GL_FUNC_ADD, GL_FUNC_ADD );
+            gl::BlendEquationSeparate( GL_FUNC_ADD, GL_FUNC_ADD );
             
             // Use a switch to get warnings about possible unhandled cases in
             // the future
@@ -152,11 +125,11 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                 // up without disabling the warning for this code
                 throw std::logic_error(
                     "impossible blending state reached in "
-                    "yavsg::gl::base_framebuffer::alpha_blending()"
+                    "yavsg::gl::base_framebuffer::alpha_blending()"s
                 );
             case alpha_blend_mode::PREMULTIPLIED:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
+                gl::BlendFuncSeparate(
+                // TODO: gl::BlendFuncSeparatei(
                 //     0,
                     GL_ONE,
                     GL_ONE_MINUS_SRC_ALPHA,
@@ -165,8 +138,8 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                 );
                 break;
             case alpha_blend_mode::PREMULTIPLIED_DROP_ALPHA:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
+                gl::BlendFuncSeparate(
+                // TODO: gl::BlendFuncSeparatei(
                 //     0,
                     GL_ONE,
                     GL_ONE_MINUS_SRC_ALPHA,
@@ -175,8 +148,8 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                 );
                 break;
             case alpha_blend_mode::BASIC:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
+                gl::BlendFuncSeparate(
+                // TODO: gl::BlendFuncSeparatei(
                 //     0,
                     GL_SRC_ALPHA,
                     GL_ONE_MINUS_SRC_ALPHA,
@@ -185,8 +158,8 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                 );
                 break;
             case alpha_blend_mode::PASSTHROUGH:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
+                gl::BlendFuncSeparate(
+                // TODO: gl::BlendFuncSeparatei(
                 //     0,
                     GL_SRC_ALPHA,
                     GL_ONE_MINUS_SRC_ALPHA,
@@ -195,8 +168,8 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                 );
                 break;
             case alpha_blend_mode::DROP_ALPHA:
-                glBlendFuncSeparate(
-                // TODO: glBlendFuncSeparatei(
+                gl::BlendFuncSeparate(
+                // TODO: gl::BlendFuncSeparatei(
                 //     0,
                     GL_SRC_ALPHA,
                     GL_ONE_MINUS_SRC_ALPHA,
@@ -205,12 +178,6 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
                 );
                 break;
             }
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't set separate blending functions for framebuffer "
-                + std::to_string( gl_id_ )
-                + std::string( gl_id_ == 0 ? " (default)" : "" )
-                + " for yavsg::gl::base_framebuffer::alpha_blending()"
-            );
         }
     }
     
@@ -232,15 +199,15 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
         const std::string& descriptive_name
     )
     {
-        assert( width_  <= std::numeric_limits< GLsizei >::max() );
-        assert( height_ <= std::numeric_limits< GLsizei >::max() );
+        REQUIRE( width_  <= std::numeric_limits< GLsizei >::max() );
+        REQUIRE( height_ <= std::numeric_limits< GLsizei >::max() );
         auto w = static_cast< GLsizei >( width_  );
         auto h = static_cast< GLsizei >( height_ );
         
         // TODO: make class member & only realloc when buffer size increases
         std::vector< char > pixels( width_ * height_ * 4 );
         
-        glReadPixels(
+        gl::ReadPixels(
             0,
             0,
             w,
@@ -248,10 +215,6 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
             GL_RGBA,
             GL_UNSIGNED_INT_8_8_8_8,
             pixels.data()
-        );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't read framebuffer pixels for"
-            " yavsg::gl::base_framebuffer::dump_BMP()"
         );
         
         auto surface = SDL_CreateRGBSurfaceFrom(
@@ -267,35 +230,36 @@ namespace JadeMatrix::yavsg::gl // Write-only framebuffer implementation ///////
         );
         
         if( !surface )
-            throw std::runtime_error(
-                "couldn't create SDL surface from pixels for"
-                " yavsg::gl::base_framebuffer::dump_BMP(): "
-                + std::string( SDL_GetError() )
-            );
+        {
+            throw std::runtime_error( fmt::format(
+                "couldn't create SDL surface from pixels for "
+                    "yavsg::gl::base_framebuffer::dump_BMP(): {}"sv,
+                SDL_GetError()
+            ) );
+        }
         
         static std::size_t nth = 0;
         
-        std::stringstream filename;
-        filename
-            << std::setw( std::numeric_limits< std::size_t >::digits10 + 1 )
-            << std::setfill( '0' )
-            << nth
-            << " - "
-            << descriptive_name
-            << ".bmp"
-        ;
+        std::filesystem::path const filename = fmt::format(
+            "{:0{}} - {}.bmp"sv,
+            nth,
+            std::numeric_limits< std::size_t >::digits10 + 1,
+            descriptive_name
+        );
         
         ++nth;
         
-        auto save_error = SDL_SaveBMP( surface, filename.str().c_str() );
+        auto save_error = SDL_SaveBMP( surface, filename.c_str() );
         SDL_FreeSurface( surface );
         
         if( save_error )
-            throw std::runtime_error(
-                "couldn't open file `"
-                + filename.str()
-                + "` for yavsg::gl::base_framebuffer::dump_BMP(): "
-                + std::string( SDL_GetError() )
-            );
+        {
+            throw std::runtime_error( fmt::format(
+                "couldn't open file {} for "
+                    "yavsg::gl::base_framebuffer::dump_BMP(): {}"sv,
+                filename,
+                SDL_GetError()
+            ) );
+        }
     }
 }

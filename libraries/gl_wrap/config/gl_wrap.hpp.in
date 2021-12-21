@@ -1,5 +1,7 @@
 #pragma once
 
+// WARNING: This file is generated
+
 
 // As including OpenGL can be finnicky (order-dependent, breaks on multiple-
 // include, platform specific, etc.), this header ensures OpenGL is included
@@ -13,3 +15,14 @@
 #else
     #include <GL/glew.h>
 #endif
+
+#include <ext/source_location.hpp>
+
+
+namespace JadeMatrix::yavsg::gl
+{
+    void log_every_opengl_call( bool );
+    void check_opengl_errors( bool );
+    
+@GL_WRAP_WRAPPER_DECLARATIONS@
+}

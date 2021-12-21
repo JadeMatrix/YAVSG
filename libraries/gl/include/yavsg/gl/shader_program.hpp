@@ -3,7 +3,7 @@
 
 #include <yavsg/gl_wrap.hpp>
 
-#include "error.hpp"
+#include <yavsg/gl/error.hpp>
 #include "attribute_buffer.hpp"
 // #include "../rendering/shader_variable_names.hpp"
 
@@ -153,14 +153,7 @@ void JadeMatrix::yavsg::gl::shader_program<
     Framebuffer
 >::use_program()
 {
-    using namespace std::string_literals;
-    
-    glUseProgram( gl_program_id_ );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't use program "s
-        + std::to_string( gl_program_id_ )
-        + " for yavsg::gl::shader_program::use_program()"s
-    );
+    gl::UseProgram( gl_program_id_ );
 }
 
 template< class AttributeBuffer, class Framebuffer >
@@ -169,16 +162,7 @@ void JadeMatrix::yavsg::gl::shader_program<
     Framebuffer
 >::bind_vao()
 {
-    using namespace std::string_literals;
-    
-    glBindVertexArray( gl_vao_id_ );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't bind vertex array "s
-        + std::to_string( gl_vao_id_ )
-        + " for program "s
-        + std::to_string( gl_program_id_ )
-        + " for yavsg::gl::shader_program::bind_vao()"s
-    );
+    gl::BindVertexArray( gl_vao_id_ );
 }
 
 template< class AttributeBuffer, class Framebuffer >
@@ -189,45 +173,23 @@ JadeMatrix::yavsg::gl::shader_program<
     std::vector< GLuint > const& shaders
 )
 {
-    using namespace std::string_literals;
+    gl::GenVertexArrays( 1, &gl_vao_id_ );
+    gl::BindVertexArray( gl_vao_id_ );
     
-    glGenVertexArrays( 1, &gl_vao_id_ );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't generate vertex array for yavsg::gl::shader_program"s
-    );
-    glBindVertexArray( gl_vao_id_ );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't bind vertex array for yavsg::gl::shader_program"s
-    );
-    
-    gl_program_id_ = glCreateProgram();
-    /* if( gl_program_id_ == 0 ) */ YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't create program for yavsg::gl::shader_program"s
-    );
+    gl_program_id_ = gl::CreateProgram();
+    REQUIRE( gl_program_id_ );
     
     try
     {
         for( auto& shader_id : shaders )
         {
-            glAttachShader( gl_program_id_, shader_id );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't attach shader "s
-                + std::to_string( shader_id )
-                + " to program "s
-                + std::to_string( gl_program_id_ )
-                + " for yavsg::gl::shader_program"s
-            );
+            gl::AttachShader( gl_program_id_, shader_id );
         }
         
-        glLinkProgram( gl_program_id_ );
-        YAVSG_GL_THROW_FOR_ERRORS(
-            "couldn't link program "s
-            + std::to_string( gl_program_id_ )
-            + " for yavsg::gl::shader_program"s
-        );
+        gl::LinkProgram( gl_program_id_ );
         
         GLint link_status;
-        glGetProgramiv( gl_program_id_, GL_LINK_STATUS, &link_status );
+        gl::GetProgramiv( gl_program_id_, GL_LINK_STATUS, &link_status );
         if( link_status != GL_TRUE )
         {
             constexpr GLsizei log_buffer_length = 1024;
@@ -237,7 +199,7 @@ JadeMatrix::yavsg::gl::shader_program<
             
             while( true )
             {
-                glGetProgramInfoLog(
+                gl::GetProgramInfoLog(
                     gl_program_id_,
                     log_buffer_length,
                     &got_buffer_length,
@@ -253,6 +215,7 @@ JadeMatrix::yavsg::gl::shader_program<
                 );
             }
             
+            using namespace std::string_literals;
             throw std::runtime_error{
                 "failed to link shader program:\n"s + log
             };
@@ -260,7 +223,7 @@ JadeMatrix::yavsg::gl::shader_program<
     }
     catch( ... )
     {
-        glDeleteProgram( gl_program_id_ );
+        gl::DeleteProgram( gl_program_id_ );
         throw;
     }
 }
@@ -271,8 +234,8 @@ JadeMatrix::yavsg::gl::shader_program<
     Framebuffer
 >::~shader_program()
 {
-    glDeleteProgram( gl_program_id_ );
-    glDeleteVertexArrays( 1, &gl_vao_id_ );
+    gl::DeleteProgram( gl_program_id_ );
+    gl::DeleteVertexArrays( 1, &gl_vao_id_ );
 }
 
 template< class AttributeBuffer, class Framebuffer >
@@ -296,8 +259,6 @@ void JadeMatrix::yavsg::gl::shader_program<
     std::size_t                  count
 )
 {
-    using namespace std::string_literals;
-    
     use_program();
     bind_vao();
     
@@ -306,14 +267,7 @@ void JadeMatrix::yavsg::gl::shader_program<
     attribute_buffer_type const& buffer_ref =
         const_cast< attribute_buffer_type& >(  buffer );
     
-    glBindBuffer( GL_ARRAY_BUFFER, buffer_ref.gl_buffer_id() );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't bind vertex array buffer "s
-        + std::to_string( buffer_ref.gl_buffer_id() )
-        + " for program "s
-        + std::to_string( gl_program_id_ )
-        + " for yavsg::gl::shader_program::run()"s
-    );
+    gl::BindBuffer( GL_ARRAY_BUFFER, buffer_ref.gl_buffer_id() );
     
     if( count + start > buffer.size() )
     {
@@ -321,14 +275,7 @@ void JadeMatrix::yavsg::gl::shader_program<
     }
     
     // TODO: other primitive types
-    glDrawArrays( GL_TRIANGLES, start, count );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't draw triangles from vertex array buffer "s
-        + std::to_string( buffer_ref.gl_buffer_id() )
-        + " for program "s
-        + std::to_string( gl_program_id_ )
-        + " for yavsg::gl::shader_program::run()"s
-    );
+    gl::DrawArrays( GL_TRIANGLES, start, count );
 }
 
 template< class AttributeBuffer, class Framebuffer >
@@ -354,8 +301,6 @@ void JadeMatrix::yavsg::gl::shader_program<
     std::size_t                  count
 )
 {
-    using namespace std::string_literals;
-    
     use_program();
     bind_vao();
     
@@ -364,23 +309,9 @@ void JadeMatrix::yavsg::gl::shader_program<
     attribute_buffer_type&  buffer_ref = const_cast< attribute_buffer_type& >(  buffer );
     index_buffer         & indices_ref = const_cast< index_buffer         & >( indices );
     
-    glBindBuffer( GL_ARRAY_BUFFER, buffer_ref.gl_buffer_id() );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't bind vertex array buffer "s
-        + std::to_string( buffer_ref.gl_buffer_id() )
-        + " for program "s
-        + std::to_string( gl_program_id_ )
-        + " for yavsg::gl::shader_program::run()"s
-    );
+    gl::BindBuffer( GL_ARRAY_BUFFER, buffer_ref.gl_buffer_id() );
     
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indices_ref.gl_buffer_id() );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't bind element array buffer "s
-        + std::to_string( indices_ref.gl_buffer_id() )
-        + " for program "s
-        + std::to_string( gl_program_id_ )
-        + " for yavsg::gl::shader_program::run()"s
-    );
+    gl::BindBuffer( GL_ELEMENT_ARRAY_BUFFER, indices_ref.gl_buffer_id() );
     
     if( count + start > indices.size() )
     {
@@ -388,20 +319,11 @@ void JadeMatrix::yavsg::gl::shader_program<
     }
     REQUIRE( count <= std::numeric_limits< GLsizei >::max() );
     
-    glDrawElements(
+    gl::DrawElements(
         GL_TRIANGLES, // TODO: other primitive types
         static_cast< GLsizei >( count ),
         GL_UNSIGNED_INT,
         reinterpret_cast< void* >( start * sizeof( GLuint ) )
-    );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't draw triangles from vertex array buffer "
-        + std::to_string( buffer_ref.gl_buffer_id() )
-        + " with element array buffer "
-        + std::to_string( indices_ref.gl_buffer_id() )
-        + " for program "
-        + std::to_string( gl_program_id_ )
-        + " for yavsg::gl::shader_program::run()"
     );
 }
 
@@ -428,15 +350,7 @@ bool JadeMatrix::yavsg::gl::shader_program<
 {
     using namespace std::string_literals;
     
-    GLint result = glGetAttribLocation( gl_program_id_, name.c_str() );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't get attribute \""s
-        + name
-        + "\" of program "s
-        + std::to_string( gl_program_id_ )
-        + " for yavsg::gl::shader_program::has_attribute()"s
-    );
-    
+    auto const result = gl::GetAttribLocation( gl_program_id_, name.c_str() );
     if( result == -1 )
     {
         return false;
@@ -469,17 +383,7 @@ bool JadeMatrix::yavsg::gl::shader_program<
     GLint            & location
 )
 {
-    using namespace std::string_literals;
-    
-    GLint result = glGetUniformLocation( gl_program_id_, name.c_str() );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't get uniform \""s
-        + name
-        + "\" of program "s
-        + std::to_string( gl_program_id_ )
-        + " for yavsg::gl::shader_program::has_uniform()"s
-    );
-    
+    auto const result = gl::GetUniformLocation( gl_program_id_, name.c_str() );
     if( result == -1 )
     {
         return false;
@@ -501,8 +405,6 @@ bool JadeMatrix::yavsg::gl::shader_program<
     attribute_buffer_type const& dummy_attributes
 )
 {
-    using namespace std::string_literals;
-    
     GLuint attribute_location;
     if( !has_attribute( attribute_name, attribute_location ) )
     {
@@ -514,16 +416,9 @@ bool JadeMatrix::yavsg::gl::shader_program<
     attribute_buffer_type& buffer_ref = const_cast<
         attribute_buffer_type&
     >( dummy_attributes );
-    glBindBuffer( GL_ARRAY_BUFFER, buffer_ref.gl_buffer_id() );
+    gl::BindBuffer( GL_ARRAY_BUFFER, buffer_ref.gl_buffer_id() );
     
-    glEnableVertexAttribArray( attribute_location );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't enable attribute \""s
-        + attribute_name
-        + "\" of program "s
-        + std::to_string( gl_program_id_ )
-        + " for yavsg::gl::shader_program::link_attribute()"s
-    );
+    gl::EnableVertexAttribArray( attribute_location );
     
     using attribute_type = typename std::tuple_element< Nth, tuple_type >::type;
     
@@ -536,7 +431,7 @@ bool JadeMatrix::yavsg::gl::shader_program<
         - reinterpret_cast< const char* >( &fake_tuple                    )
     );
     
-    glVertexAttribPointer(
+    gl::VertexAttribPointer(
         attribute_location,
         attribute_traits< attribute_type >::components_per_element,
         attribute_traits< attribute_type >::component_type,
@@ -544,13 +439,7 @@ bool JadeMatrix::yavsg::gl::shader_program<
         sizeof( tuple_type ),
         reinterpret_cast< const void* >( offset_of_attribute )
     );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't link attribute \""s
-        + attribute_name
-        + "\" of program "s
-        + std::to_string( gl_program_id_ )
-        + " for yavsg::gl::shader_program::link_attribute()"s
-    );
+    
     return true;
 }
 
@@ -618,16 +507,7 @@ void JadeMatrix::yavsg::gl::shader_program<
     Framebuffer
 >::bind_target( const std::string& target_name )
 {
-    using namespace std::string_literals;
-    
-    glBindFragDataLocation( gl_program_id_, Nth, target_name.c_str() );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't bind fragment target \""s
-        + target_name
-        + "\" of program "s
-        + std::to_string( gl_program_id_ )
-        + " for yavsg::gl::shader_program::bind_target()"s
-    );
+    gl::BindFragDataLocation( gl_program_id_, Nth, target_name.c_str() );
 }
 
 template< class AttributeBuffer, class Framebuffer >
@@ -655,36 +535,29 @@ void JadeMatrix::yavsg::gl::shader_program<
     JadeMatrix::yavsg::gl::set_current_program_uniform< TYPE >( \
         GLint              uniform_location, \
         TYPE        const& uniform_value, \
-        std::string const& uniform_name, \
-        GLuint           & gl_program_id \
+        std::string const& /* uniform_name */, \
+        GLuint           & /* gl_program_id */ \
     ) \
     { \
-        using namespace std::string_literals; \
         OPERATION; \
-        YAVSG_GL_THROW_FOR_ERRORS( \
-            "unable to set " #TYPE " uniform \""s \
-            + uniform_name \
-            + "\" of program "s \
-            + std::to_string( gl_program_id ) \
-        ); \
     }
 
 DEFINE_BASIC_SHADER_PROGRAM_UNIFORM_SPECIALIZATION(
     GLfloat,
-    glUniform1f( uniform_location, uniform_value )
+    gl::Uniform1f( uniform_location, uniform_value )
 )
 DEFINE_BASIC_SHADER_PROGRAM_UNIFORM_SPECIALIZATION(
     GLint,
-    glUniform1i( uniform_location, uniform_value )
+    gl::Uniform1i( uniform_location, uniform_value )
 )
 DEFINE_BASIC_SHADER_PROGRAM_UNIFORM_SPECIALIZATION(
     GLuint,
-    glUniform1ui( uniform_location, uniform_value )
+    gl::Uniform1ui( uniform_location, uniform_value )
 )
 // There is no glUniform1b, so just use glUniform1ui()
 DEFINE_BASIC_SHADER_PROGRAM_UNIFORM_SPECIALIZATION(
     GLboolean,
-    glUniform1ui( uniform_location, uniform_value )
+    gl::Uniform1ui( uniform_location, uniform_value )
 )
 
 #undef DEFINE_BASIC_SHADER_PROGRAM_UNIFORM_SPECIALIZATION
@@ -700,22 +573,14 @@ DEFINE_BASIC_SHADER_PROGRAM_UNIFORM_SPECIALIZATION(
     >( \
         GLint                                    uniform_location, \
         yavsg::vector< TYPE, DIMENSIONS > const& uniform_value, \
-        std::string                       const& uniform_name, \
-        GLuint                                 & gl_program_id \
+        std::string                       const& /* uniform_name */, \
+        GLuint                                 & /* gl_program_id */ \
     ) \
     { \
-        using namespace std::string_literals; \
-        glUniform##DIMENSIONS##TYPECHAR##v( \
+        gl::Uniform##DIMENSIONS##TYPECHAR##v( \
             uniform_location, \
             1, \
             uniform_value.data() \
-        ); \
-        YAVSG_GL_THROW_FOR_ERRORS( \
-            "unable to set yavsg::vector<" #TYPE "," #DIMENSIONS \
-                "> uniform \""s \
-            + uniform_name \
-            + "\" of program "s \
-            + std::to_string( gl_program_id ) \
         ); \
     }
 
@@ -747,23 +612,15 @@ DEFINE_SHADER_PROGRAM_UNIFORM_VECTOR_SPECIALIZATION( 4, GLuint, ui )
     >( \
         GLint                                           uniform_location, \
         yavsg::square_matrix< TYPE, DIMENSIONS > const& uniform_value, \
-        std::string                              const& uniform_name, \
-        GLuint                                        & gl_program_id \
+        std::string                              const& /* uniform_name */, \
+        GLuint                                        & /* gl_program_id */ \
     ) \
     { \
-        using namespace std::string_literals; \
-        glUniformMatrix##DIMENSIONS##TYPECHAR##v( \
+        gl::UniformMatrix##DIMENSIONS##TYPECHAR##v( \
             uniform_location, \
             1, \
             false, \
             uniform_value.data() \
-        ); \
-        YAVSG_GL_THROW_FOR_ERRORS( \
-            "unable to set yavsg::matrix<" #TYPE "," #DIMENSIONS "," \
-                #DIMENSIONS "> uniform \""s \
-            + uniform_name \
-            + "\" of program "s \
-            + std::to_string( gl_program_id ) \
         ); \
     }
 
@@ -785,23 +642,15 @@ DEFINE_SHADER_PROGRAM_UNIFORM_SQUARE_MATRIX_SPECIALIZATION( 4, GLfloat, f )
     >( \
         GLint                                    uniform_location, \
         yavsg::matrix< TYPE, ROWS, COLS > const& uniform_value, \
-        std::string                       const& uniform_name, \
-        GLuint                                 & gl_program_id \
+        std::string                       const& /* uniform_name */, \
+        GLuint                                 & /* gl_program_id */ \
     ) \
     { \
-        using namespace std::string_literals; \
-        glUniformMatrix##ROWS##x##COLS##TYPECHAR##v( \
+        gl::UniformMatrix##ROWS##x##COLS##TYPECHAR##v( \
             uniform_location, \
             1, \
             false, \
             uniform_value.data() \
-        ); \
-        YAVSG_GL_THROW_FOR_ERRORS( \
-            "unable to set yavsg::matrix<" #TYPE "," #ROWS "," #COLS \
-                "> uniform \""s \
-            + uniform_name \
-            + "\" of program "s \
-            + std::to_string( gl_program_id ) \
         ); \
     }
 

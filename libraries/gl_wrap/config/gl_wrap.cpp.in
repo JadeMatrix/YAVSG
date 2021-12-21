@@ -1,0 +1,76 @@
+// WARNING: This file is generated
+
+#include <yavsg/gl_wrap.hpp>
+#include <yavsg/gl/error.hpp>
+
+#include <yavsg/logging.hpp>
+
+#include <fmt/format.h>
+#include <fmt/ostream.h>    // std::quoted support
+
+#include <iomanip>  // quoted
+#include <optional>
+#include <utility>  // move
+
+
+namespace
+{
+    using namespace std::string_view_literals;
+    
+    auto const log_ = JadeMatrix::yavsg::log_handle();
+    
+    auto log_every_opengl_call = false;
+    auto check_opengl_errors   = true;
+    
+    std::string_view pop_opengl_error_summaries_code_name( GLenum error )
+    {
+        switch( error )
+        {
+        case GL_INVALID_ENUM                 : return " (GL_INVALID_ENUM)"sv;
+        case GL_INVALID_VALUE                : return " (GL_INVALID_VALUE)"sv;
+        case GL_INVALID_OPERATION            : return " (GL_INVALID_OPERATION)"sv;
+        case GL_OUT_OF_MEMORY                : return " (GL_OUT_OF_MEMORY)"sv;
+        case GL_INVALID_FRAMEBUFFER_OPERATION: return " (GL_INVALID_FRAMEBUFFER_OPERATION)"sv;
+        default                              : return ""sv;
+        }
+    }
+    
+    std::optional< std::string > pop_opengl_error_summaries()
+    {
+        if( auto error = glGetError(); error != GL_NO_ERROR )
+        {
+            auto summaries = fmt::format(
+                "0x{:X}{}"sv,
+                error,
+                pop_opengl_error_summaries_code_name( error )
+            );;
+            
+            while( ( error = glGetError() ) != GL_NO_ERROR )
+            {
+                summaries = fmt::format(
+                    "{}, 0x{:X}{}"sv,
+                    summaries,
+                    error,
+                    pop_opengl_error_summaries_code_name( error )
+                );
+            }
+            
+            return summaries;
+        }
+        
+        return std::nullopt;
+    }
+}
+
+
+void JadeMatrix::yavsg::gl::log_every_opengl_call( bool enabled )
+{
+    ::log_every_opengl_call = enabled;
+}
+
+void JadeMatrix::yavsg::gl::check_opengl_errors( bool enabled )
+{
+    ::check_opengl_errors = enabled;
+}
+
+@GL_WRAP_WRAPPER_DEFINITIONS@

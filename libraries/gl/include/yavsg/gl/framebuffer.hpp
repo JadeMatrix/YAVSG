@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "error.hpp"
+#include <yavsg/gl/error.hpp>
 #include "texture.hpp"
 
 #include <cstddef>      // size_t
@@ -200,12 +200,10 @@ namespace JadeMatrix::yavsg::gl // Framebuffer color target init ///////////////
         static std::tuple< FirstColorTargetType, ColorTargetTypes... > init(
             std::size_t width,
             std::size_t height,
-            GLuint      gl_framebuffer_id,
+            GLuint      /* TODO: Use for logging: gl_framebuffer_id */,
             std::size_t nth = 0
         )
         {
-            using namespace std::string_literals;
-            
             std::tuple< FirstColorTargetType > first_target( {
                 FirstColorTargetType{
                     width,
@@ -222,21 +220,12 @@ namespace JadeMatrix::yavsg::gl // Framebuffer color target init ///////////////
             
             FirstColorTargetType const& t = std::get< 0 >( first_target );
             
-            glFramebufferTexture2D(
+            gl::FramebufferTexture2D(
                 GL_FRAMEBUFFER,
                 color_attachment_name( nth ),
                 GL_TEXTURE_2D,
                 t.gl_texture_id(),
                 0   // Mipmap level (unused for now)
-            );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't attach texture "s
-                + std::to_string( t.gl_texture_id() )
-                + " as color buffer "s
-                + std::to_string( nth )
-                + " to framebuffer "s
-                + std::to_string( gl_framebuffer_id )
-                + " for yavsg::gl::framebuffer_color_target_initializer::init()"s
             );
             
             return std::tuple_cat(
@@ -254,12 +243,10 @@ namespace JadeMatrix::yavsg::gl // Framebuffer color target init ///////////////
         static std::tuple< LastColorTargetType > init(
             std::size_t width,
             std::size_t height,
-            GLuint      gl_framebuffer_id,
+            GLuint      /* TODO: Use for logging: gl_framebuffer_id */,
             std::size_t nth = 0
         )
         {
-            using namespace std::string_literals;
-            
             std::tuple< LastColorTargetType > last_target( {
                 LastColorTargetType{
                     width,
@@ -276,21 +263,12 @@ namespace JadeMatrix::yavsg::gl // Framebuffer color target init ///////////////
             
             LastColorTargetType const& t = std::get< 0 >( last_target );
             
-            glFramebufferTexture2D(
+            gl::FramebufferTexture2D(
                 GL_FRAMEBUFFER,
                 color_attachment_name( nth ),
                 GL_TEXTURE_2D,
                 t.gl_texture_id(),
                 0   // Mipmap level (unused for now)
-            );
-            YAVSG_GL_THROW_FOR_ERRORS(
-                "couldn't attach texture "s
-                + std::to_string( t.gl_texture_id() )
-                + " as color buffer "s
-                + std::to_string( nth )
-                + " to framebuffer "s
-                + std::to_string( gl_framebuffer_id )
-                + " for yavsg::gl::framebuffer_color_target_initializer::init()"s
             );
             
             return last_target;
@@ -311,11 +289,7 @@ GLuint JadeMatrix::yavsg::gl::framebuffer<
     // Even though this returns the framebuffer ID, we still need to set it
     // before `framebuffer_init()` returns so we can call the `bind()`
     // below
-    glGenFramebuffers( 1, &gl_id_ );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't generate framebuffer for "
-        "yavsg::gl::framebuffer::framebuffer_init()"s
-    );
+    gl::GenFramebuffers( 1, &gl_id_ );
     
     try
     {
@@ -326,17 +300,14 @@ GLuint JadeMatrix::yavsg::gl::framebuffer<
         
         return gl_id_;
     }
-    catch( summary_error const& e )
+    catch( error const& e )
     {
-        glDeleteFramebuffers( 1, &gl_id_ );
-        throw summary_error(
-            e.what() + " for yavsg::gl::framebuffer"s,
-            e.error_codes
-        );
+        gl::DeleteFramebuffers( 1, &gl_id_ );
+        throw error( "(for yavsg::gl::framebuffer) "s + e.what() );
     }
     catch( ... )
     {
-        glDeleteFramebuffers( 1, &gl_id_ );
+        gl::DeleteFramebuffers( 1, &gl_id_ );
         throw;
     }
 }
@@ -349,8 +320,6 @@ JadeMatrix::yavsg::gl::texture<
     ColorTargetTypes...
 >::depth_stencil_buffer_init()
 {
-    using namespace std::string_literals;
-    
     auto t = depth_stencil_type(
         width_,
         height_,
@@ -363,19 +332,12 @@ JadeMatrix::yavsg::gl::texture<
         texture_flag::allocate_only
     );
     
-    glFramebufferTexture2D(
+    gl::FramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_DEPTH_STENCIL_ATTACHMENT,
         GL_TEXTURE_2D,
         t.gl_texture_id(),
         0   // Mipmap level (not useful)
-    );
-    YAVSG_GL_THROW_FOR_ERRORS(
-        "couldn't attach depth/stencil buffer texture "s
-        + std::to_string( t.gl_texture_id() )
-        + " to framebuffer "s
-        + std::to_string( gl_id_ )
-        + " for yavsg::gl::framebuffer::depth_stencil_buffer_init()"s
     );
     
     return t;
@@ -396,11 +358,11 @@ typename JadeMatrix::yavsg::gl::framebuffer<
             ColorTargetTypes...
         >::init( width_, height_, gl_id_ );
     }
-    catch( summary_error const& e )
+    catch( error const& e )
     {
-        throw summary_error(
-            e.what() + " for yavsg::gl::framebuffer::framebuffer_init()"s,
-            e.error_codes
+        throw error(
+            "(for yavsg::gl::framebuffer::framebuffer_init()) "s
+            + e.what()
         );
     }
 }
@@ -412,7 +374,7 @@ void JadeMatrix::yavsg::gl::framebuffer<
 {
     using namespace std::string_literals;
     
-    auto const status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
+    auto const status = gl::CheckFramebufferStatus( GL_FRAMEBUFFER );
     
     if( status != GL_FRAMEBUFFER_COMPLETE )
     {
@@ -481,7 +443,7 @@ JadeMatrix::yavsg::gl::framebuffer< ColorTargetTypes... >::framebuffer(
 template< class... ColorTargetTypes >
 JadeMatrix::yavsg::gl::framebuffer< ColorTargetTypes... >::~framebuffer()
 {
-    glDeleteFramebuffers( 1, &gl_id_ );
+    gl::DeleteFramebuffers( 1, &gl_id_ );
 }
 
 template< class... ColorTargetTypes >

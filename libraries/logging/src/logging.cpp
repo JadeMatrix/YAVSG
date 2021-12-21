@@ -40,3 +40,33 @@ JadeMatrix::yavsg::log_handle::log_handle() : ext::log::handle( {
     }
 } )
 {}
+
+void JadeMatrix::yavsg::log_handle::split_on_newlines_as(
+    ext::log::level                   lvl,
+    std::string_view                  messages,
+    ext::log::internal::format const& with_format
+) const
+{
+    std::size_t start = 0ul;
+    while( true )
+    {
+        auto const newline = messages.find( '\n', start );
+        auto const size = (
+            newline == std::string::npos
+            ? messages.size()
+            : newline
+        ) - start;
+        if( size == 0 )
+        {
+            break;
+        }
+        
+        as( lvl, with_format, messages.substr( start, size ) );
+        
+        start += size + 1;
+        if( start >= messages.size() )
+        {
+            break;
+        }
+    }
+}
