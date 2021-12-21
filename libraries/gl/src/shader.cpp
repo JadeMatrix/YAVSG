@@ -1,6 +1,7 @@
 #include <yavsg/gl/shader.hpp>
 
 #include <yavsg/gl/error.hpp>
+#include <yavsg/logging.hpp>
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>    // std::filesystem::path support
@@ -13,6 +14,8 @@
 namespace
 {
     using namespace std::string_view_literals;
+    
+    auto const log_ = JadeMatrix::yavsg::log_handle();
 }
 
 
@@ -30,35 +33,34 @@ JadeMatrix::yavsg::gl::shader::shader(
         
         gl::CompileShader( id );
         
+        GLsizei log_length;
+        gl::GetShaderiv( id, GL_INFO_LOG_LENGTH, &log_length );
+        std::string compile_log(
+            (
+                log_length  < 0
+                ? 0ul
+                : static_cast< std::string::size_type >( log_length )
+            ),
+            '\0'
+        );
+        gl::GetShaderInfoLog( id, log_length, nullptr, compile_log.data() );
+        
         GLint status;
         gl::GetShaderiv( id, GL_COMPILE_STATUS, &status );
         if( status != GL_TRUE )
         {
-            constexpr GLsizei log_buffer_length = 1024;
-            char log_buffer[ log_buffer_length ];
-            GLsizei got_buffer_length;
-            std::string log;
-            
-            while( true )
-            {
-                gl::GetShaderInfoLog(
-                    id,
-                    log_buffer_length,
-                    &got_buffer_length,
-                    log_buffer
-                );
-                if( got_buffer_length <= 0 )
-                    break;
-                log += std::string(
-                    log_buffer,
-                    static_cast< std::size_t >( got_buffer_length )
-                );
-            }
-            
-            throw std::runtime_error{ fmt::format(
+            throw error{ fmt::format(
                 "failed to compile shader:\n{}"sv,
-                log
+                compile_log
             ) };
+        }
+        else
+        {
+            log_.split_on_newlines_as(
+                ext::log::level::warning,
+                compile_log,
+                "OpenGL: {}"sv
+            );
         }
     }
     catch( ... )

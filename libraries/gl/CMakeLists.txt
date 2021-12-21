@@ -31,5 +31,6 @@ TARGET_LINK_LIBRARIES( gl
         # TODO: Remove this public dependency
         sdl
     PRIVATE
+        logging
         fmt::fmt
 )
