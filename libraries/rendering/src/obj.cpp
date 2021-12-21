@@ -55,23 +55,11 @@ bool JadeMatrix::yavsg::load_obj_task::operator()()
         }
         else if( !tinyobj_error.empty() )
         {
-            std::size_t start = 0ul;
-            while( true )
-            {
-                auto const newline = tinyobj_error.find( '\n', start );
-                auto const size = (
-                    newline == std::string::npos
-                    ? tinyobj_error.size()
-                    : newline
-                ) - start;
-                if( size == 0 ) break;
-                log_.warning(
-                    "tinyobj: {}"sv,
-                    std::string_view( tinyobj_error.c_str() + start, size )
-                );
-                start += size + 1;
-                if( start >= tinyobj_error.size() ) break;
-            }
+            log_.split_on_newlines_as(
+                ext::log::level::warning,
+                tinyobj_error,
+                "tinyobj: {}"sv
+            );
         }
         
         // Load textures
