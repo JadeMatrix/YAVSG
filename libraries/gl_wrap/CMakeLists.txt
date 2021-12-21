@@ -72,7 +72,6 @@ FOREACH( GL_FUNC IN ITEMS
     "GenVertexArrays,void,::GLsizei n,::GLuint* arrays"
     "GenerateMipmap,void,::GLenum target"
     "GetAttribLocation,::GLint,::GLuint program,::GLchar const* name"
-    "GetError,::GLenum"
     "GetFloatv,void,::GLenum pname,::GLfloat* data"
     "GetIntegerv,void,::GLenum pname,::GLint* data"
     "GetProgramInfoLog,void,::GLuint program,::GLsizei maxLength,::GLsizei* length,::GLchar* infoLog"
@@ -128,6 +127,10 @@ FOREACH( GL_FUNC IN ITEMS
         LIST( SUBLIST GL_FUNC 2 -1 GL_FUNC_ARGUMENTS )
     ELSE()
         SET( GL_FUNC_ARGUMENTS )
+    ENDIF()
+    
+    IF( GL_FUNC_BASENAME STREQUAL "GetError" )
+        MESSAGE( FATAL_ERROR "glGetError must not be wrapped" )
     ENDIF()
     
     SET( GL_FUNC_ARGS_SIGNATURE )
